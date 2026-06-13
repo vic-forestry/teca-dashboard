@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Teca Tempate — Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@300;400;500;600&display=swap');
+
+:root {
+  --teca:    #2C5F2E;
+  --teca-lt: #4A8A4D;
+  --teca-xlt:#EAF3EB;
+  --gold:    #C8921A;
+  --gold-lt: #F5E6C3;
+  --amber:   #D97706;
+  --soil:    #6B4226;
+  --sky:     #1A5276;
+  --export:  #6B21A8;
+  --nac:     #C05020;
+  --bg:      #F8F7F4;
+  --surface: #FFFFFF;
+  --border:  #E5E2DC;
+  --text:    #1C1C1A;
+  --muted:   #7A776E;
+  --mono:    'DM Mono', monospace;
+  --sans:    'Inter', sans-serif;
+  --r:       8px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--sans); background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; }
+
+/* ─── Layout ──────────────────────────────────────────────────────────── */
+.app { display: grid; grid-template-columns: 300px 1fr; min-height: 100vh; }
+.sidebar { background: var(--teca); color: #fff; padding: 0; position: sticky; top: 0; height: 100vh; overflow-y: auto; display: flex; flex-direction: column; }
+.main { padding: 2rem; overflow-x: hidden; }
+
+/* ─── Sidebar ─────────────────────────────────────────────────────────── */
+.sidebar-header { padding: 1.5rem 1.5rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.12); }
+.sidebar-logo { font-size: 11px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 6px; }
+.sidebar-title { font-size: 19px; font-weight: 600; line-height: 1.25; }
+.sidebar-sub { font-size: 12px; color: rgba(255,255,255,0.55); margin-top: 4px; }
+
+.ctrl-section { padding: 1rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.10); }
+.ctrl-section-label { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.45); margin-bottom: 10px; }
+
+.ctrl-row { margin-bottom: 12px; }
+.ctrl-label { font-size: 12px; color: rgba(255,255,255,0.75); margin-bottom: 4px; display: flex; justify-content: space-between; align-items: baseline; }
+.ctrl-val { font-family: var(--mono); font-size: 12px; color: var(--gold-lt); font-weight: 500; }
+
+input[type=range] {
+  -webkit-appearance: none; width: 100%; height: 4px;
+  background: rgba(255,255,255,0.2); border-radius: 2px; outline: none; cursor: pointer;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%;
+  background: var(--gold-lt); cursor: pointer; border: 2px solid var(--teca);
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.3);
+}
+
+.ctrl-select {
+  width: 100%; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+  color: #fff; border-radius: 5px; padding: 6px 8px; font-size: 12px; cursor: pointer;
+  font-family: var(--sans); appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='rgba(255,255,255,0.4)'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 8px center;
+}
+.ctrl-select:focus { outline: none; border-color: var(--gold-lt); }
+.ctrl-select option { background: #1e4620; }
+
+.ctrl-toggle { display: flex; gap: 4px; }
+.ctrl-toggle button {
+  flex: 1; padding: 5px 4px; font-size: 11px; border-radius: 4px; cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.6); font-family: var(--sans); transition: all .15s;
+}
+.ctrl-toggle button.active { background: var(--gold); border-color: var(--gold); color: #fff; font-weight: 600; }
+
+.sidebar-footer { margin-top: auto; padding: 1rem 1.5rem; font-size: 11px; color: rgba(255,255,255,0.3); border-top: 1px solid rgba(255,255,255,0.08); line-height: 1.6; }
+
+/* ─── Main ────────────────────────────────────────────────────────────── */
+.page-header { margin-bottom: 1.5rem; }
+.page-title { font-size: 22px; font-weight: 600; color: var(--teca); }
+.page-sub { font-size: 13px; color: var(--muted); margin-top: 2px; }
+
+.kpi-strip { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 1.5rem; }
+.kpi { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 1rem 1.1rem; }
+.kpi-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 4px; }
+.kpi-val { font-size: 22px; font-weight: 600; font-family: var(--mono); color: var(--teca); }
+.kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.kpi.highlight { border-color: var(--teca); background: var(--teca-xlt); }
+.kpi.highlight .kpi-val { color: var(--teca); }
+
+.chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 1.5rem; }
+.chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 1.2rem; }
+.chart-card.wide { grid-column: 1/-1; }
+.card-title { font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+.card-sub { font-size: 11px; color: var(--muted); margin-bottom: 14px; }
+.chart-wrap { position: relative; }
+
+.fin-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; margin-bottom: 1.5rem; }
+.fin-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 1rem 1.1rem; }
+.fin-card.active { border-color: var(--teca); box-shadow: 0 0 0 2px rgba(44,95,46,0.12); }
+.fin-esc { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 20px; margin-bottom: 8px; }
+.fin-esc.C { background: #E6F1FB; color: #0C447C; }
+.fin-esc.O { background: var(--teca-xlt); color: var(--teca); }
+.fin-esc.export { background: #F3E8FF; color: #6B21A8; }
+.fin-esc.nac    { background: #FFF0E8; color: #C05020; }
+.fin-row { display: flex; justify-content: space-between; align-items: baseline; padding: 4px 0; border-bottom: 1px solid var(--border); font-size: 12px; gap: 6px; }
+.fin-row:last-child { border: none; }
+.fin-k { color: var(--muted); line-height: 1.3; }
+.fin-sub { font-size: 10px; color: #bbb; display: block; }
+.fin-v { font-weight: 600; color: var(--text); white-space: nowrap; font-family: var(--mono); font-size: 12px; }
+.fin-tot { display: flex; justify-content: space-between; padding: 8px 0 0; margin-top: 6px; border-top: 1.5px solid var(--border); align-items: baseline; }
+.fin-tot-k { font-size: 13px; font-weight: 600; }
+.fin-tot-v { font-size: 20px; font-weight: 700; font-family: var(--mono); color: var(--teca); }
+
+/* Casa */
+.casa-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 1.2rem; margin-bottom: 1.5rem; }
+.casa-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.casa-label { width: 160px; font-size: 12px; color: var(--muted); flex-shrink: 0; line-height: 1.3; }
+.casa-bar-bg { flex: 1; background: var(--bg); border-radius: 4px; height: 22px; position: relative; overflow: visible; }
+.casa-bar-fill { height: 100%; border-radius: 4px; display: flex; align-items: center; padding-left: 8px; transition: width .3s; }
+.casa-bar-fill span { font-size: 11px; font-weight: 600; color: #fff; }
+.casa-bar-num { font-size: 11px; color: var(--muted); width: 64px; text-align: right; flex-shrink: 0; font-family: var(--mono); }
+.thresh-mark { position: absolute; top: -4px; bottom: -4px; width: 2px; border-radius: 1px; z-index: 2; }
+
+/* Utility */
+.section-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+.section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.badge { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 20px; }
+.note { font-size: 11px; color: var(--muted); background: var(--bg); border-radius: 6px; padding: 8px 12px; margin-top: 10px; line-height: 1.6; }
+.tag { display: inline-block; font-size: 10px; padding: 1px 6px; border-radius: 3px; font-family: var(--mono); }
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- ═══ SIDEBAR ════════════════════════════════════════════════════════════ -->
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">Plantación · Costa Rica</div>
+    <div class="sidebar-title">Teca Tempate</div>
+    <div class="sidebar-sub">2.24 ha · Base año 5 · Muestreo 2025</div>
+  </div>
+
+  <!-- Volumen base -->
+  <div class="ctrl-section">
+    <div class="ctrl-section-label">Parámetros de crecimiento</div>
+    <div class="ctrl-row">
+      <div class="ctrl-label">Escenario de volumen <span class="ctrl-val" id="v-esc-lbl">—</span></div>
+      <div class="ctrl-toggle" id="esc-toggle">
+        <button onclick="setEsc('C')" id="btn-C" class="active">Conservador</button>
+        <button onclick="setEsc('O')" id="btn-O">Optimista</button>
+      </div>
+    </div>
+    <div class="ctrl-row">
+      <div class="ctrl-label">Año del 1er raleo <span class="ctrl-val" id="r1y-lbl">Año 7</span></div>
+      <input type="range" id="r1y" min="6" max="9" step="1" value="7" oninput="update()">
+    </div>
+    <div class="ctrl-row">
+      <div class="ctrl-label">Año del 2do raleo <span class="ctrl-val" id="r2y-lbl">Año 10</span></div>
+      <input type="range" id="r2y" min="8" max="12" step="1" value="10" oninput="update()">
+    </div>
+    <div class="ctrl-row">
+      <div class="ctrl-label">Intensidad de raleo <span class="ctrl-val" id="rpct-lbl">25%</span></div>
+      <input type="range" id="rpct" min="15" max="40" step="5" value="25" oninput="update()">
+    </div>
+    <div class="ctrl-row">
+      <div class="ctrl-label">Boost post-raleo <span class="ctrl-val" id="boost-lbl">+20%</span></div>
+      <input type="range" id="boost" min="0" max="40" step="5" value="20" oninput="update()">
+    </div>
+  </div>
+
+  <!-- Precios -->
+  <div class="ctrl-section">
+    <div class="ctrl-section-label">Precios de mercado</div>
+    <div class="ctrl-row">
+      <div class="ctrl-label">Mercado cosecha <span class="ctrl-val" id="mkt-lbl">—</span></div>
+      <div class="ctrl-toggle" id="mkt-toggle">
+        <button onclick="setMkt('export')" id="btn-export" class="active">Exportación</button>
+        <button onclick="setMkt('nac')" id="btn-nac">Nacional</button>
+      </div>
+    </div>
+    <div id="ctrl-export">
+      <div class="ctrl-row">
+        <div class="ctrl-label">Precio exportación <span class="ctrl-val" id="pexp-lbl">$300/m³</span></div>
+        <input type="range" id="pexp" min="150" max="600" step="25" value="300" oninput="update()">
+      </div>
+    </div>
+    <div id="ctrl-nac" style="display:none">
+      <div class="ctrl-row">
+        <div class="ctrl-label">Precio nacional cosecha <span class="ctrl-val" id="pnac-lbl">200 CRC/PMT</span></div>
+        <input type="range" id="pnac" min="80" max="400" step="10" value="200" oninput="update()">
+      </div>
+      <div class="ctrl-row">
+        <div class="ctrl-label">Tipo de cambio <span class="ctrl-val" id="tc-lbl">520 ₡/$</span></div>
+        <input type="range" id="tc" min="480" max="600" step="5" value="520" oninput="update()">
+      </div>
+    </div>
+    <div class="ctrl-row">
+      <div class="ctrl-label">Precio raleo <span class="ctrl-val" id="pral-lbl">150 CRC/PMT</span></div>
+      <input type="range" id="pral" min="50" max="300" step="10" value="150" oninput="update()">
+    </div>
+  </div>
+
+  <!-- Casa -->
+  <div class="ctrl-section">
+    <div class="ctrl-section-label">Casa con madera del raleo</div>
+    <div class="ctrl-row">
+      <div class="ctrl-label">Tamaño de la casa <span class="ctrl-val" id="casa-lbl">40 m²</span></div>
+      <input type="range" id="casa-area" min="20" max="150" step="5" value="40" oninput="update()">
+    </div>
+    <div class="ctrl-row">
+      <div class="ctrl-label">Grosor de tablas <span class="ctrl-val" id="grosor-lbl">1.0"</span></div>
+      <div class="ctrl-toggle" id="grosor-toggle">
+        <button onclick="setGrosor(1.0)" id="btn-g1" class="active">1"</button>
+        <button onclick="setGrosor(1.25)" id="btn-g125">1¼"</button>
+        <button onclick="setGrosor(1.5)" id="btn-g15">1½"</button>
+      </div>
+    </div>
+    <div class="ctrl-row">
+      <div class="ctrl-label">Altura paredes <span class="ctrl-val" id="alto-lbl">2.5 m</span></div>
+      <input type="range" id="alto" min="2.2" max="3.5" step="0.1" value="2.5" oninput="update()">
+    </div>
+  </div>
+
+  <div class="sidebar-footer">
+    Ecuación alométrica: Fallas (2017)<br>
+    IMA sigmoidal + liberación post-raleo<br>
+    1 PMT = 0.002360 m³ · 423.78 PMT/m³
+  </div>
+</aside>
+
+<!-- ═══ MAIN ════════════════════════════════════════════════════════════════ -->
+<main class="main">
+  <div class="page-header">
+    <div class="page-title">Dashboard de proyecciones</div>
+    <div class="page-sub">Modifica los parámetros en el panel izquierdo — todos los gráficos y números se actualizan en tiempo real</div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpi-strip">
+    <div class="kpi"><div class="kpi-label">Volumen año 5 (base)</div><div class="kpi-val">91.1 m³/ha</div><div class="kpi-sub">Muestreo marzo 2025</div></div>
+    <div class="kpi"><div class="kpi-label">Cosecha año 15 (ha)</div><div class="kpi-val" id="kpi-cf-ha">—</div><div class="kpi-sub" id="kpi-cf-ha-sub">—</div></div>
+    <div class="kpi highlight"><div class="kpi-label">Ingreso total (2.24 ha)</div><div class="kpi-val" id="kpi-tot">—</div><div class="kpi-sub" id="kpi-tot-sub">—</div></div>
+    <div class="kpi"><div class="kpi-label">Casa — % del raleo usado</div><div class="kpi-val" id="kpi-casa-pct">—</div><div class="kpi-sub" id="kpi-casa-sub">—</div></div>
+  </div>
+
+  <!-- Gráfico proyección -->
+  <div class="section-label">Proyección de volumen en pie</div>
+  <div class="chart-card wide" style="margin-bottom:1.5rem">
+    <div class="card-title">m³/ha en pie · años 5 a 15</div>
+    <div class="card-sub" id="chart-vol-sub">Con efecto de liberación post-raleo</div>
+    <div class="chart-wrap" style="height:240px"><canvas id="volChart"></canvas></div>
+  </div>
+
+  <!-- Gráfico ingresos + tabla financiera -->
+  <div class="section-label">Escenarios financieros</div>
+  <div class="chart-grid" style="margin-bottom:1.5rem">
+    <div class="chart-card">
+      <div class="card-title">Ingreso bruto por evento (USD · 2.24 ha)</div>
+      <div class="card-sub" id="fin-chart-sub">Raleo 1 · Raleo 2 · Cosecha final</div>
+      <div class="chart-wrap" style="height:200px"><canvas id="finChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="card-title">Distribución del ingreso</div>
+      <div class="card-sub">% por evento de cosecha</div>
+      <div class="chart-wrap" style="height:200px"><canvas id="pieChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Tarjetas financieras detalladas -->
+  <div class="fin-grid" id="fin-cards"></div>
+
+  <!-- Casa -->
+  <div class="section-label">Madera del raleo para la casa</div>
+  <div class="casa-section">
+    <div class="card-title" id="casa-title">Casa de 40 m² — tablas 1"</div>
+    <div class="card-sub" id="casa-sub-text">Pisos + paredes · factor aserradero 50%</div>
+    <div id="casa-bars" style="margin-top:12px"></div>
+    <div class="note" id="casa-note">—</div>
+  </div>
+
+  <div class="note" style="margin-bottom:1.5rem">
+    <strong>Supuestos fijos:</strong> Plantación 2.24 ha · densidad año 5: 512 árb/ha · IMA DAP: 3.27 cm/año · mortalidad residual 1%/año · parcelas pisos + paredes (20% descuento aberturas)
+  </div>
+</main>
+</div>
+
+<script>
+// ── Constantes ──────────────────────────────────────────────────────────────
+const HA = 2.24;
+const PMT_M3 = 0.3048 * 0.3048 * 0.0254;  // 0.002360
+
+// IMA base por escenario (ICA por año, sobre el rodal)
+const IMA_BASE = {
+  C: {6:19,7:22,8:21,9:18,10:15,11:12,12:11,13:10,14:10,15:10},
+  O: {6:30,7:34,8:32,9:28,10:22,11:17,12:14,13:13,14:13,15:13},
+};
+
+// ── Estado ──────────────────────────────────────────────────────────────────
+let state = {
+  esc: 'C', mkt: 'export', grosor: 1.0,
+  r1y:7, r2y:10, rpct:25, boost:20,
+  pexp:300, pnac:200, tc:520, pral:150,
+  casaArea:40, alto:2.5,
+};
+
+// ── Chart instances ─────────────────────────────────────────────────────────
+let volChart, finChart, pieChart;
+
+// ── Model ───────────────────────────────────────────────────────────────────
+function buildProjection(esc, r1y, r2y, rpct, boost) {
+  const imaFn = IMA_BASE[esc];
+  const boostFactor = 1 + boost/100;
+  let vol = 91.1, boostRem = 0;
+  const rows = [];
+  for (let y = 5; y <= 15; y++) {
+    const icaBase = y > 5 ? (imaFn[y] || 10) : 0;
+    const ica = (boostRem > 0 && y > 5) ? icaBase * boostFactor : icaBase;
+    if (boostRem > 0 && y > 5) boostRem--;
+    const vb = Math.round((vol + ica) * 10) / 10;
+    let ex = 0, label = '';
+    if (y === r1y)      { ex = Math.round(vb * rpct/100 * 10)/10; boostRem = 3; label = 'R1'; }
+    else if (y === r2y) { ex = Math.round(vb * rpct/100 * 10)/10; boostRem = 3; label = 'R2'; }
+    else if (y === 15)  { ex = vb; label = 'CF'; }
+    const va = Math.round((vb - ex) * 10) / 10;
+    vol = va;
+    rows.push({y, ica: Math.round(ica*10)/10, vb, ex, label, va});
+  }
+  return rows;
+}
+
+function calcFinancials(rows, pralCrc, pcfCrc, tc) {
+  const r1 = rows.find(r => r.label === 'R1');
+  const r2 = rows.find(r => r.label === 'R2');
+  const cf = rows.find(r => r.label === 'CF');
+  const r1tot = r1 ? r1.ex * HA : 0;
+  const r2tot = r2 ? r2.ex * HA : 0;
+  const cftot = cf ? cf.ex * HA : 0;
+  const r1crc = r1tot * pralCrc, r2crc = r2tot * pralCrc, cfcrc = cftot * pcfCrc;
+  const totcrc = r1crc + r2crc + cfcrc;
+  return {
+    r1tot, r2tot, cftot,
+    r1usd: r1crc/tc, r2usd: r2crc/tc, cfusd: cfcrc/tc, totusd: totcrc/tc,
+    r1crc, r2crc, cfcrc, totcrc,
+  };
+}
+
+function calcCasa(area, alto, grosor, porcAbertura=0.20) {
+  // dimensiones proporcionales
+  const ratio = Math.sqrt(area / 40); // escala
+  const lado1 = 8 * ratio, lado2 = 5 * ratio;
+  const perim = 2*(lado1+lado2);
+  const paredBruta = perim * alto;
+  const paredNeta  = paredBruta * (1 - porcAbertura);
+  const areaTotal  = area + paredNeta;
+  const gm = grosor * 0.0254;
+  const volUtil = areaTotal * gm;
+  const volProc = volUtil * 1.15;
+  const volTroza = volProc / 0.50;
+  return { areaTotal: Math.round(areaTotal), volUtil, volProc, volTroza };
+}
+
+// ── Helpers de formato ──────────────────────────────────────────────────────
+const fmtM = v => v >= 1e6 ? `${(v/1e6).toFixed(1)}M` : v >= 1000 ? `${(v/1000).toFixed(0)}k` : v.toFixed(0);
+const fmtCRC = v => `₡${fmtM(v)}`;
+const fmtUSD = v => `$${fmtM(v)}`;
+const fmtN   = (v,d=1) => v.toFixed(d);
+
+// ── Colores ─────────────────────────────────────────────────────────────────
+const C_TECA='#2C5F2E', C_GOLD='#C8921A', C_AMBER='#D97706', C_SOIL='#6B4226';
+const C_EXPORT='#6B21A8', C_NAC='#C05020', C_SKY='#1A5276';
+const C_BORDER='#E5E2DC', C_MUTED='#7A776E';
+
+// ── Main update ─────────────────────────────────────────────────────────────
+function update() {
+  // Leer controles
+  state.r1y = +document.getElementById('r1y').value;
+  state.r2y = +document.getElementById('r2y').value;
+  if (state.r2y <= state.r1y) { state.r2y = state.r1y + 1; document.getElementById('r2y').value = state.r2y; }
+  state.rpct  = +document.getElementById('rpct').value;
+  state.boost = +document.getElementById('boost').value;
+  state.pexp  = +document.getElementById('pexp').value;
+  state.pnac  = +document.getElementById('pnac').value;
+  state.tc    = +document.getElementById('tc').value;
+  state.pral  = +document.getElementById('pral').value;
+  state.casaArea = +document.getElementById('casa-area').value;
+  state.alto  = +document.getElementById('alto').value;
+
+  // Labels de controles
+  document.getElementById('r1y-lbl').textContent   = `Año ${state.r1y}`;
+  document.getElementById('r2y-lbl').textContent   = `Año ${state.r2y}`;
+  document.getElementById('rpct-lbl').textContent  = `${state.rpct}%`;
+  document.getElementById('boost-lbl').textContent = `+${state.boost}%`;
+  document.getElementById('pexp-lbl').textContent  = `$${state.pexp}/m³`;
+  document.getElementById('pnac-lbl').textContent  = `${state.pnac} CRC/PMT`;
+  document.getElementById('tc-lbl').textContent    = `${state.tc} ₡/$`;
+  document.getElementById('pral-lbl').textContent  = `${state.pral} CRC/PMT`;
+  document.getElementById('casa-lbl').textContent  = `${state.casaArea} m²`;
+  document.getElementById('grosor-lbl').textContent= `${state.grosor}"`;
+  document.getElementById('alto-lbl').textContent  = `${state.alto.toFixed(1)} m`;
+  document.getElementById('v-esc-lbl').textContent = state.esc === 'C' ? 'Conserv.' : 'Optimista';
+  document.getElementById('mkt-lbl').textContent   = state.mkt === 'export' ? 'Export.' : 'Nacional';
+
+  // Toggle nat/export panel
+  document.getElementById('ctrl-export').style.display = state.mkt==='export' ? '' : 'none';
+  document.getElementById('ctrl-nac').style.display    = state.mkt==='nac'    ? '' : 'none';
+
+  // Calcular proyección
+  const rows = buildProjection(state.esc, state.r1y, state.r2y, state.rpct, state.boost);
+  const vbArr = rows.map(r => r.vb);
+  const yrs   = rows.map(r => r.y);
+  const cfRow = rows.find(r => r.label === 'CF');
+  const cfHa  = cfRow ? cfRow.ex : 0;
+
+  // Precios en CRC/m³
+  const pralCrc = state.pral / PMT_M3;
+  const pcfCrc  = state.mkt === 'export'
+    ? state.pexp * state.tc
+    : state.pnac / PMT_M3;
+  const tc = state.tc;
+
+  // Financiero
+  const fin = calcFinancials(rows, pralCrc, pcfCrc, tc);
+
+  // Casa
+  const casa = calcCasa(state.casaArea, state.alto, state.grosor);
+  const r1Row = rows.find(r=>r.label==='R1');
+  const trozaDisp = r1Row ? r1Row.ex * HA : 0;
+  const pctCasa   = trozaDisp > 0 ? (casa.volTroza/trozaDisp*100) : 0;
+
+  // ── KPIs ────────────────────────────────────────────────────────────────
+  document.getElementById('kpi-cf-ha').textContent    = `${fmtN(cfHa)} m³/ha`;
+  document.getElementById('kpi-cf-ha-sub').textContent= `Total 2.24 ha: ${fmtN(cfHa*HA,0)} m³`;
+  const totLabel = state.mkt==='export' ? `Exportación $${state.pexp}/m³` : `Nacional ${state.pnac} CRC/PMT`;
+  document.getElementById('kpi-tot').textContent      = fmtUSD(fin.totusd);
+  document.getElementById('kpi-tot-sub').textContent  = totLabel;
+  document.getElementById('kpi-casa-pct').textContent = `${pctCasa.toFixed(1)}%`;
+  document.getElementById('kpi-casa-sub').textContent = `${fmtN(casa.volTroza,1)} m³ de ${fmtN(trozaDisp,1)} m³ disp.`;
+
+  // ── Chart: proyección ────────────────────────────────────────────────────
+  const ptColors = yrs.map(y =>
+    y===15 ? '#3B6D11' : y===state.r1y||y===state.r2y ? C_AMBER : C_TECA);
+  const ptRadius = yrs.map(y =>
+    y===15||y===state.r1y||y===state.r2y ? 7 : 3);
+  const ptStyle  = yrs.map(y =>
+    y===15 ? 'star' : y===state.r1y||y===state.r2y ? 'triangle' : 'circle');
+
+  if (!volChart) {
+    volChart = new Chart(document.getElementById('volChart'), {
+      type: 'line',
+      data: { labels: yrs, datasets: [{
+        label: 'Volumen en pie', data: vbArr,
+        borderColor: C_TECA, backgroundColor: 'rgba(44,95,46,0.07)',
+        fill: true, tension: 0.35, borderWidth: 2,
+        pointRadius: ptRadius, pointStyle: ptStyle, pointBackgroundColor: ptColors
+      }]},
+      options: {
+        responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{display:false},
+          tooltip:{callbacks:{label:c=>`${c.parsed.y.toFixed(1)} m³/ha`}}},
+        scales:{
+          x:{ticks:{autoSkip:false,maxRotation:0,font:{size:10}},
+             title:{display:true,text:'Año',font:{size:10}},
+             grid:{color:'rgba(0,0,0,0.04)'}},
+          y:{title:{display:true,text:'m³/ha en pie',font:{size:10}},
+             ticks:{font:{size:10},callback:v=>v+' m³'},
+             grid:{color:'rgba(0,0,0,0.04)'},min:50}
+        }
+      }
+    });
+  } else {
+    volChart.data.labels = yrs;
+    volChart.data.datasets[0].data = vbArr;
+    volChart.data.datasets[0].pointRadius = ptRadius;
+    volChart.data.datasets[0].pointStyle  = ptStyle;
+    volChart.data.datasets[0].pointBackgroundColor = ptColors;
+    volChart.update('none');
+  }
+
+  // ── Chart: financiero barras ─────────────────────────────────────────────
+  const cfColor = state.mkt==='export' ? C_EXPORT : C_NAC;
+  const finLabels=['Raleo 1','Raleo 2','Cosecha final'];
+  const finVals  =[fin.r1usd, fin.r2usd, fin.cfusd];
+  const finColors=[C_AMBER, C_SOIL, cfColor];
+
+  if (!finChart) {
+    finChart = new Chart(document.getElementById('finChart'), {
+      type:'bar',
+      data:{ labels:finLabels,
+        datasets:[{data:finVals, backgroundColor:finColors, borderRadius:4, borderSkipped:false}]},
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},
+          tooltip:{callbacks:{label:c=>`$${c.parsed.y.toLocaleString('es-CR',{maximumFractionDigits:0})}`}}},
+        scales:{
+          x:{ticks:{font:{size:10}},grid:{display:false}},
+          y:{ticks:{font:{size:10},callback:v=>`$${(v/1000).toFixed(0)}k`},grid:{color:'rgba(0,0,0,0.04)'}}
+        }
+      }
+    });
+  } else {
+    finChart.data.datasets[0].data = finVals;
+    finChart.data.datasets[0].backgroundColor = finColors;
+    finChart.update('none');
+  }
+
+  // ── Chart: pie distribución ──────────────────────────────────────────────
+  if (!pieChart) {
+    pieChart = new Chart(document.getElementById('pieChart'), {
+      type:'doughnut',
+      data:{
+        labels:['Raleo 1','Raleo 2','Cosecha final'],
+        datasets:[{data:finVals,
+          backgroundColor:[C_AMBER+'CC',C_SOIL+'CC',cfColor+'DD'],
+          borderColor:'#fff',borderWidth:3,hoverOffset:4}]
+      },
+      options:{
+        responsive:true,maintainAspectRatio:false,cutout:'62%',
+        plugins:{legend:{position:'bottom',labels:{font:{size:10},boxWidth:12,padding:10}},
+          tooltip:{callbacks:{label:c=>{
+            const total=c.dataset.data.reduce((a,b)=>a+b,0);
+            const pct=(c.parsed/total*100).toFixed(1);
+            return `${c.label}: ${pct}%`;
+          }}}}
+      }
+    });
+  } else {
+    pieChart.data.datasets[0].data = finVals;
+    pieChart.data.datasets[0].backgroundColor = [C_AMBER+'CC',C_SOIL+'CC',cfColor+'DD'];
+    pieChart.update('none');
+  }
+
+  // ── Tarjetas financieras ─────────────────────────────────────────────────
+  const pralUsd = pralCrc/tc;
+  const pcfUsd  = pcfCrc/tc;
+  const pralPmt = state.pral;
+  const cfDesc  = state.mkt==='export'
+    ? `$${state.pexp}/m³ exportación`
+    : `${state.pnac} CRC/PMT ≈ $${pcfUsd.toFixed(0)}/m³`;
+  const ralDesc = `${pralPmt} CRC/PMT ≈ $${pralUsd.toFixed(0)}/m³`;
+
+  const r1Row2 = rows.find(r=>r.label==='R1');
+  const r2Row2 = rows.find(r=>r.label==='R2');
+  const r1HA = r1Row2 ? r1Row2.ex : 0;
+  const r2HA = r2Row2 ? r2Row2.ex : 0;
+
+  const cards = [
+    { title:'Raleo 1', year:state.r1y, vol:fin.r1tot, vha:r1HA, usd:fin.r1usd, crc:fin.r1crc, priceDesc:ralDesc, color:C_AMBER },
+    { title:'Raleo 2', year:state.r2y, vol:fin.r2tot, vha:r2HA, usd:fin.r2usd, crc:fin.r2crc, priceDesc:ralDesc, color:C_SOIL  },
+    { title:'Cosecha final', year:15,  vol:fin.cftot, vha:cfHa,  usd:fin.cfusd, crc:fin.cfcrc, priceDesc:cfDesc,  color:cfColor },
+  ];
+  const fg = document.getElementById('fin-cards');
+  fg.innerHTML = '';
+  cards.forEach(c => {
+    const d = document.createElement('div');
+    d.className = 'fin-card' + (c.title==='Cosecha final'?' active':'');
+    d.innerHTML = `
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${c.color};flex-shrink:0"></span>
+        <span style="font-size:13px;font-weight:600">${c.title} — año ${c.year}</span>
+      </div>
+      <div class="fin-row"><span class="fin-k">Volumen total (2.24 ha)</span><span class="fin-v">${fmtN(c.vol,1)} m³</span></div>
+      <div class="fin-row"><span class="fin-k">Por hectárea</span><span class="fin-v">${fmtN(c.vha,1)} m³/ha</span></div>
+      <div class="fin-row"><span class="fin-k">Precio<span class="fin-sub">${c.priceDesc}</span></span><span class="fin-v">—</span></div>
+      <div class="fin-row"><span class="fin-k">Ingreso (CRC)</span><span class="fin-v">${fmtCRC(c.crc)}</span></div>
+      <div class="fin-tot"><span class="fin-tot-k">Ingreso (USD)</span><span class="fin-tot-v" style="color:${c.color}">${fmtUSD(c.usd)}</span></div>`;
+    fg.appendChild(d);
+  });
+  // Total
+  const dt = document.createElement('div');
+  dt.className='fin-card active';
+  dt.style.gridColumn='1/-1';
+  dt.style.background='#F8F7F4';
+  dt.innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:2px">Total bruto · 2.24 ha · años 5–15</div>
+        <div style="font-size:11px;color:var(--muted)">${fmtCRC(fin.totcrc)} CRC · tipo de cambio ${tc} ₡/$</div>
+      </div>
+      <div style="font-size:28px;font-weight:700;font-family:var(--mono);color:var(--teca)">${fmtUSD(fin.totusd)}</div>
+    </div>`;
+  fg.appendChild(dt);
+
+  // ── Casita ───────────────────────────────────────────────────────────────
+  document.getElementById('casa-title').textContent =
+    `Casa de ${state.casaArea} m² — tablas ${state.grosor}"`;
+  document.getElementById('casa-sub-text').textContent =
+    `Pisos + paredes (${casa.areaTotal} m² total) · factor aserradero 50% · paredes ${state.alto.toFixed(1)} m alto`;
+
+  const maxBar = Math.max(trozaDisp * 1.1, casa.volTroza * 1.5, 20);
+  const bars = [
+    { lbl:`Disponible raleo ${state.r1y}\n(2.24 ha, ${state.esc==='C'?'conserv.':'optimista'})`,
+      v:trozaDisp, color:'#B4B2A9', isDisp:true },
+    { lbl:`Casa ${state.casaArea} m² (troza\nnecesaria)`, v:casa.volTroza, color:C_TECA, isDisp:false },
+  ];
+  const barsEl = document.getElementById('casa-bars');
+  barsEl.innerHTML = '';
+  bars.forEach(b => {
+    const pct = Math.min(b.v/maxBar*100, 100);
+    const threshPct = (casa.volTroza/maxBar*100).toFixed(1);
+    const div = document.createElement('div');
+    div.className='casa-row';
+    const lblHtml = b.lbl.replace('\n','<br>');
+    const threshHtml = b.isDisp
+      ? `<div class="thresh-mark" style="left:${threshPct}%;background:${C_TECA};opacity:.5"></div>`:'';
+    div.innerHTML=`
+      <div class="casa-label">${lblHtml}</div>
+      <div class="casa-bar-bg">
+        <div class="casa-bar-fill" style="width:${pct.toFixed(1)}%;background:${b.color}">
+          <span>${fmtN(b.v,1)} m³</span>
+        </div>
+        ${threshHtml}
+      </div>
+      <div class="casa-bar-num">${(b.v/maxBar*100).toFixed(0)}%</div>`;
+    barsEl.appendChild(div);
+  });
+
+  const sobranteTroza = trozaDisp - casa.volTroza;
+  const sobrante50 = sobranteTroza * 0.50;
+  const ok = sobranteTroza >= 0;
+  document.getElementById('casa-note').innerHTML = ok
+    ? `✓ La casa usa <strong>${fmtN(casa.volTroza,1)} m³</strong> en troza (${pctCasa.toFixed(1)}% del raleo disponible). `
+      +`Quedan <strong>${fmtN(sobranteTroza,1)} m³</strong> en troza para venta → `
+      +`<strong>${fmtN(sobrante50,1)} m³ de madera procesada</strong> disponibles.`
+    : `⚠ La casa necesita <strong>${fmtN(casa.volTroza,1)} m³</strong> pero el raleo disponible es `
+      +`<strong>${fmtN(trozaDisp,1)} m³</strong>. Faltan ${fmtN(-sobranteTroza,1)} m³. `
+      +`Solución: aumentar área raleada o esperar al siguiente raleo.`;
+}
+
+// ── Setters de toggle ────────────────────────────────────────────────────────
+function setEsc(e) {
+  state.esc = e;
+  document.getElementById('btn-C').classList.toggle('active', e==='C');
+  document.getElementById('btn-O').classList.toggle('active', e==='O');
+  update();
+}
+function setMkt(m) {
+  state.mkt = m;
+  document.getElementById('btn-export').classList.toggle('active', m==='export');
+  document.getElementById('btn-nac').classList.toggle('active', m==='nac');
+  update();
+}
+function setGrosor(g) {
+  state.grosor = g;
+  ['1','125','15'].forEach(k => {
+    const el = document.getElementById(`btn-g${k}`);
+    if(el) el.classList.remove('active');
+  });
+  const keyMap = {1:'1', 1.25:'125', 1.5:'15'};
+  const el = document.getElementById(`btn-g${keyMap[g]}`);
+  if(el) el.classList.add('active');
+  update();
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────
+update();
+</script>
+</body>
+</html>
