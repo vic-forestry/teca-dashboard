@@ -40,7 +40,8 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
 
 /* Sidebar */
 .sidebar{width:255px;background:var(--teca);color:#fff;display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
-.s-tabs{display:flex;border-bottom:1px solid rgba(255,255,255,.12);flex-shrink:0}
+.s-tabs{display:flex;border-bottom:1px solid rgba(255,255,255,.12);flex-shrink:0;position:relative}
+.sb-toggle-btn{display:none;position:absolute;right:8px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:4px;padding:2px 8px;cursor:pointer;font-size:12px;z-index:10}
 .stab{flex:1;padding:.45rem .15rem;font-size:9px;font-weight:600;text-align:center;cursor:pointer;color:rgba(255,255,255,.4);border:none;background:none;border-bottom:2px solid transparent;transition:all .15s;letter-spacing:.03em;text-transform:uppercase}
 .stab.active{color:#fff;border-bottom-color:var(--gold)}
 .sp{display:none;padding:.8rem .9rem;overflow-y:auto;flex:1}
@@ -156,8 +157,15 @@ tbody tr:hover{background:var(--teca-lt)}
 
 @media(max-width:768px){
   .body-row{flex-direction:column-reverse}
-  .sidebar{width:100%;max-height:40vh;border-top:1px solid rgba(255,255,255,.1)}
+  .sidebar{width:100%;transition:max-height .3s ease;border-top:1px solid rgba(255,255,255,.1)}
+  .sidebar.sb-open{max-height:60vh;overflow-y:auto}
+  .sidebar.sb-closed{max-height:44px;overflow:hidden}
   .g2,.g3,.fg,.fg.c3{grid-template-columns:1fr}
+  .sb-toggle-btn{display:flex!important}
+}
+@media(min-width:769px){
+  .sb-toggle-btn{display:none!important}
+  .sidebar{max-height:none!important;overflow-y:auto}
 }
 </style>
 </head>
@@ -303,7 +311,7 @@ tbody tr:hover{background:var(--teca-lt)}
           <div style="font-size:11px;font-weight:500;color:var(--muted);margin-bottom:6px">Método de ingreso de datos</div>
           <div class="tog" style="max-width:320px">
             <button id="btn-metodo-res" class="active" onclick="setMetodo('resumen')" style="border:1.5px solid #c8a87a">Resumen estadístico</button>
-            <button id="btn-metodo-arb" onclick="setMetodo('arboles')" style="border:1.5px solid #c8a87a">Árbol por árbol</button>
+            <button id="btn-metodo-arb" onclick="setMetodo('arboles')" style="border:1.5px solid #c8a87a;color:#2C5F2E;background:#fff">Árbol por árbol</button>
           </div>
         </div>
 
@@ -376,6 +384,7 @@ tbody tr:hover{background:var(--teca-lt)}
     <button class="stab" onclick="sTab(1)">💰 Precios</button>
     <button class="stab" onclick="sTab(2)">📋 Gastos</button>
     <button class="stab" onclick="sTab(3)">🏠 Casas</button>
+    <button class="sb-toggle-btn" id="sb-toggle" onclick="toggleSidebar()">▲</button>
   </div>
 
   <!-- s0: Silvicultura -->
@@ -1146,8 +1155,15 @@ function renderChips() {
 // ═══════════════════════════════════════════════════
 function setMetodo(m) {
   S.metodo = m;
-  document.getElementById('btn-metodo-res').classList.toggle('active', m==='resumen');
-  document.getElementById('btn-metodo-arb').classList.toggle('active', m==='arboles');
+  var btnRes = document.getElementById('btn-metodo-res');
+  var btnArb = document.getElementById('btn-metodo-arb');
+  btnRes.classList.toggle('active', m==='resumen');
+  btnArb.classList.toggle('active', m==='arboles');
+  // Keep non-active button text visible
+  btnRes.style.color = m==='resumen' ? '' : '#2C5F2E';
+  btnRes.style.background = m==='resumen' ? '' : '#fff';
+  btnArb.style.color = m==='arboles' ? '' : '#2C5F2E';
+  btnArb.style.background = m==='arboles' ? '' : '#fff';
   document.getElementById('panel-resumen').style.display = m==='resumen' ? '' : 'none';
   document.getElementById('panel-arboles').style.display = m==='arboles' ? '' : 'none';
   if (m==='arboles') buildTreeTable();
@@ -1442,6 +1458,30 @@ function renderCurrentTab() {
 // ═══════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════
+function toggleSidebar() {
+  var sb = document.querySelector('.sidebar');
+  var btn = document.getElementById('sb-toggle');
+  if (!sb) return;
+  if (sb.classList.contains('sb-closed')) {
+    sb.classList.remove('sb-closed');
+    sb.classList.add('sb-open');
+    if (btn) btn.textContent = '▲';
+  } else {
+    sb.classList.remove('sb-open');
+    sb.classList.add('sb-closed');
+    if (btn) btn.textContent = '▼ Parámetros';
+  }
+}
+
+function initSidebarState() {
+  if (window.innerWidth <= 768) {
+    var sb = document.querySelector('.sidebar');
+    if (sb) { sb.classList.add('sb-closed'); }
+    var btn = document.getElementById('sb-toggle');
+    if (btn) btn.textContent = '▼ Parámetros';
+  }
+}
+
 (function init() {
   var fd = document.getElementById('ni-fecha');
   if (fd) fd.value = new Date().toISOString().slice(0,10);
@@ -1452,6 +1492,7 @@ function renderCurrentTab() {
   renderCasasSb();
   renderChips();
   updateFilters();
+  initSidebarState();
   update();
   loadFromGitHub();
 })();
