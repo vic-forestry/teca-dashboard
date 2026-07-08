@@ -231,7 +231,7 @@ tbody tr:hover{background:var(--teca-lt)}
       <div class="card"><div class="ctitle">¿Qué % extraer? — análisis por intensidad</div>
         <div class="csub">Basado en densidad objetivo a cosecha 250–350 árb/ha (Murillo & Badilla 2004)</div>
         <div class="tw" style="margin-top:8px"><table class="rtbl" id="ral-compare"></table></div>
-        <div class="note info" style="margin-top:10px">Para un <b>raleo único en teca clonal</b>, se recomienda <b>33–38%</b>. Todos los árboles son de buena forma (clones), por lo que no hay selección por calidad — solo por espacio. Extraer menos del 30% en un único raleo deja demasiados árboles; el área basal volverá a saturar antes de la cosecha.</div>
+        <div class="note info" style="margin-top:10px"><b>Dist. entre árb.:</b> distancia equivalente entre árboles asumiendo distribución cuadrada (√(10000/N)). A mayor espaciamiento, más luz y agua por árbol.<br><br>Para un <b>raleo único en teca clonal</b>, se recomienda <b>33–38%</b>. Todos los árboles son de buena forma (clones), por lo que no hay selección por calidad — solo por espacio. Extraer menos del 30% en un único raleo deja demasiados árboles; el área basal volverá a saturar antes de la cosecha.</div>
       </div>
     </div>
 
@@ -634,26 +634,28 @@ function calcGastos() {
 // ═══════════════════════════════════════════════════
 // CHART HELPER — completamente reescrito
 // ═══════════════════════════════════════════════════
-function mkChart(id, type, data, scales, legend) {
+function mkChart(id, type, data, scales, legend, extraOpts) {
   var el = document.getElementById(id);
   if (!el) return;
   if (charts[id]) {
     try { charts[id].destroy(); } catch(e) {}
     charts[id] = null;
   }
-  charts[id] = new Chart(el, {
-    type: type,
-    data: data,
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      animation: { duration: 150 },
-      plugins: {
-        legend: { display: legend===true }
-      },
-      scales: scales || {}
-    }
-  });
+  var opts = {
+    responsive: true,
+    maintainAspectRatio: false,
+    animation: { duration: 150 },
+    plugins: {
+      legend: { display: legend===true }
+    },
+    scales: scales || {}
+  };
+  if (extraOpts && extraOpts.plugins) {
+    Object.keys(extraOpts.plugins).forEach(function(k) {
+      opts.plugins[k] = extraOpts.plugins[k];
+    });
+  }
+  charts[id] = new Chart(el, { type: type, data: data, options: opts });
 }
 
 // ═══════════════════════════════════════════════════
@@ -864,9 +866,10 @@ function renderRaleosTab() {
 
   mkChart('ch-dens-t','line',Object.assign({labels:yrs},lineDs(densArr,'#2C5F2E')),Object.assign({x:xScale,y:Object.assign({title:{display:true,text:'árb/ha',font:{size:9}}},yTiny)}),false);
   mkChart('ch-ab-t','line',{labels:yrs,datasets:[
-    {data:abArr,borderColor:'#D97706',backgroundColor:'#D9770611',fill:true,tension:.35,borderWidth:2,pointRadius:ptR,pointBackgroundColor:ptC},
-    {data:yrs.map(function(){return 16;}),borderColor:'#D97706',borderWidth:1,borderDash:[5,3],pointRadius:0,label:'Umbral 16 m²'}
-  ]},Object.assign({x:xScale,y:Object.assign({title:{display:true,text:'m²/ha',font:{size:9}}},yTiny)}),true);
+    {data:abArr,label:'Área basal (m²/ha)',borderColor:'#D97706',backgroundColor:'#D9770611',fill:true,tension:.35,borderWidth:2,pointRadius:ptR,pointBackgroundColor:ptC},
+    {data:yrs.map(function(){return 16;}),label:'Umbral 16 m²',borderColor:'#D97706',borderWidth:1.5,borderDash:[5,3],pointRadius:0,backgroundColor:'transparent',fill:false}
+  ]},{x:xScale,y:Object.assign({title:{display:true,text:'m²/ha',font:{size:9}}},yTiny),},true,
+  {plugins:{legend:{display:true,labels:{usePointStyle:true,pointStyle:'line',boxWidth:30,font:{size:10}}}}});
   mkChart('ch-dap-t','line',Object.assign({labels:yrs},lineDs(dapArr,'#6B21A8')),Object.assign({x:xScale,y:Object.assign({title:{display:true,text:'DAP cm',font:{size:9}}},yTiny)}),false);
   mkChart('ch-vol-t','line',Object.assign({labels:yrs},lineDs(volArr,'#2C5F2E')),Object.assign({x:xScale,y:Object.assign({title:{display:true,text:'m³/ha',font:{size:9}}},yTiny)}),false);
 
@@ -874,13 +877,13 @@ function renderRaleosTab() {
   var pcts = [20,25,30,35,40,45,50];
   var tblEl = document.getElementById('ral-compare');
   if (!tblEl) return;
-  var html = '<thead><tr><th style="text-align:left">Intens.</th><th>Extr./ha</th><th>Rem./ha</th><th>Vol. raleo/ha m³</th><th>Rem. cosecha</th><th>Espac.</th><th>Rango</th></tr></thead><tbody>';
+  var html = '<thead><tr><th style="text-align:left">Intens.</th><th>Extr./ha</th><th>Rem./ha</th><th>Vol. raleo/ha m³</th><th>Rem. cosecha</th><th>Dist. entre árb.</th><th>Rango</th></tr></thead><tbody>';
   pcts.forEach(function(pct) {
     var ext = Math.round(densBase*pct/100);
     var rem = densBase-ext;
     var rcos = Math.round(rem*Math.pow(1-mort,8));
     var vol2 = fN(volF(st.mean)*ext,1);
-    var esp  = fN(1/Math.sqrt(rem),2);
+    var esp  = fN(Math.sqrt(10000/rem),1);  // metros entre árboles (distancia equiv.)
     var ok   = rcos>=250 && rcos<=380;
     var isRec = pct>=33 && pct<=38;
     html += '<tr'+(isRec?' style="background:var(--teca-lt);font-weight:600"':'')+'>'+
