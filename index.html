@@ -272,7 +272,7 @@ tbody tr:hover{background:var(--teca-lt)}
 
     <!-- ═══ TAB 4: CAMPO ═════════════════════════════════════════ -->
     <div class="tp" id="tp4">
-      <div class="sl">Inventarios guardados <button onclick="clearLocalSession()" style="font-size:10px;padding:2px 8px;border:1px solid var(--border);border-radius:4px;background:var(--surface);color:var(--muted);cursor:pointer;font-weight:400;margin-left:8px;float:right" title="Quita de esta sesión los inventarios que no están en GitHub">Limpiar sesión</button></div>
+      <div class="sl">Inventarios guardados</div>
       <div id="inv-list"></div>
       <div class="sl">Nuevo inventario</div>
       <div class="card">
@@ -1147,22 +1147,6 @@ function renderCasaTab() {
 // ═══════════════════════════════════════════════════
 // TAB 4: CAMPO
 // ═══════════════════════════════════════════════════
-function clearLocalSession() {
-  // Mantener solo Inventario 1 (hardcodeado) y los que vienen de GitHub
-  var ghIds = JSON.parse(localStorage.getItem("gh-inv-ids") || "[]");
-  inventarios = inventarios.filter(function(inv) {
-    return inv.id === "inv1" || ghIds.indexOf(inv.id) >= 0 || inv._ghPath;
-  });
-  // Limpiar activeInvs que ya no existen
-  activeInvs.forEach(function(id) {
-    if (!inventarios.filter(function(inv){ return inv.id===id; }).length) activeInvs.delete(id);
-  });
-  if (!activeInvs.size) activeInvs.add("inv1");
-  renderChips();
-  renderCampoTab();
-  update();
-  alert("Sesion limpiada. Solo quedan inventarios de GitHub.");
-}
 
 function renderCampoTab() {
   // Auto-fill densidad del inventario activo más reciente
@@ -1274,7 +1258,7 @@ async function deleteInv(id) {
     if (borrados > 0) {
       if (stEl) { stEl.className="gh-st ok"; stEl.textContent="✓ Borrado de GitHub: "+inv.name; }
     } else {
-      if (stEl) { stEl.className="gh-st err"; stEl.textContent="No existe en GitHub (quizas no se guardo). Usa 'Limpiar sesion' para quitarlo de la vista."; }
+      if (stEl) { stEl.className="gh-st err"; stEl.textContent="Archivo no encontrado en GitHub: "+inv.name; }
     }
   } catch(e) {
     if (stEl) { stEl.className="gh-st err"; stEl.textContent="Error: "+e.message; }
