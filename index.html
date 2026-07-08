@@ -1198,41 +1198,54 @@ function toggleInv(id) {
   update();
 }
 async function deleteInv(id) {
-  // Buscar el inventario para encontrar su archivo en GitHub
   var inv = inventarios.filter(function(i){ return i.id===id; })[0];
-  // Borrar de la lista local primero
   inventarios = inventarios.filter(function(i){ return i.id!==id; });
   activeInvs.delete(id);
   renderChips();
   renderCampoTab();
   update();
-  // Borrar de GitHub si tenemos token
   if (!inv) return;
   var user  = localStorage.getItem('gh-user') || 'vic-forestry';
   var repo  = localStorage.getItem('gh-repo') || 'teca-dashboard';
   var token = localStorage.getItem('gh-token');
   if (!token) return;
+  // Mostrar estado en el tab campo
+  var stEl = document.getElementById('gh-status');
+  if (stEl) { stEl.style.display='block'; stEl.className='gh-st loading'; stEl.textContent='Borrando de GitHub...'; }
   try {
-    // Listar archivos en inventarios/ para encontrar el SHA del archivo
     var r = await fetch('https://api.github.com/repos/'+user+'/'+repo+'/contents/inventarios',
       {headers:{Authorization:'Bearer '+token}});
-    if (!r.ok) return;
-    var files = await r.json();
-    // Buscar archivo que contenga el id del inventario
-    var target = null;
-    for (var i=0; i<files.length; i++) {
-      if (files[i].name.indexOf(inv.id) >= 0) { target = files[i]; break; }
+    if (!r.ok) {
+      var err = await r.json();
+      if (stEl) { stEl.className='gh-st err'; stEl.textContent='Error al listar archivos: '+(err.message||r.status); }
+      return;
     }
-    if (!target) return;
-    // Borrar el archivo usando su SHA
-    await fetch('https://api.github.com/repos/'+user+'/'+repo+'/contents/'+target.path, {
-      method: 'DELETE',
-      headers: {Authorization:'Bearer '+token, 'Content-Type':'application/json'},
-      body: JSON.stringify({message:'Eliminar inventario: '+inv.name, sha: target.sha})
-    });
-  } catch(e) {}
+    var files = await r.json();
+    // Borrar TODOS los archivos que contengan el id de este inventario
+    var borrados = 0;
+    for (var i=0; i<files.length; i++) {
+      if (files[i].name.indexOf(inv.id) < 0) continue;
+      var del = await fetch('https://api.github.com/repos/'+user+'/'+repo+'/contents/'+files[i].path, {
+        method: 'DELETE',
+        headers: {Authorization:'Bearer '+token, 'Content-Type':'application/json'},
+        body: JSON.stringify({message:'Borrar: '+inv.name, sha: files[i].sha})
+      });
+      if (del.ok) borrados++;
+      else {
+        var derr = await del.json();
+        if (stEl) { stEl.className='gh-st err'; stEl.textContent='Error al borrar: '+(derr.message||del.status); }
+        return;
+      }
+    }
+    if (borrados > 0) {
+      if (stEl) { stEl.className='gh-st ok'; stEl.textContent='Borrado de GitHub: '+inv.name; }
+    } else {
+      if (stEl) { stEl.className='gh-st err'; stEl.textContent='Archivo no encontrado en GitHub para: '+inv.name+' (id: '+inv.id+')'; }
+    }
+  } catch(e) {
+    if (stEl) { stEl.className='gh-st err'; stEl.textContent='Error: '+e.message; }
+  }
 }
-
 // ═══════════════════════════════════════════════════
 // CHIPS TOPBAR
 // ═══════════════════════════════════════════════════
