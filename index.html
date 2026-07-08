@@ -294,7 +294,7 @@ tbody tr:hover{background:var(--teca-lt)}
         </div>
         <div class="fg c3">
           <div class="fl"><label>Edad plantación (años)</label><input id="ni-edad" type="number" step="0.1" placeholder="6.93"></div>
-          <div class="fl"><label>Densidad observada (árb/ha)</label><input id="ni-dens" type="number" placeholder="512"></div>
+          <div class="fl"><label>Densidad estimada (árb/ha) <span style="font-size:10px;color:var(--muted);font-weight:400">— calculada del inventario activo</span></label><input id="ni-dens" type="text" readonly style="background:#f5f5f3;color:var(--muted);cursor:not-allowed" placeholder="—"></div>
           <div class="fl"><label>Área total plantación (ha)</label><input id="ni-ha" type="number" step="0.01" value="2.24"></div>
         </div>
 
@@ -302,8 +302,8 @@ tbody tr:hover{background:var(--teca-lt)}
         <div style="margin-bottom:10px">
           <div style="font-size:11px;font-weight:500;color:var(--muted);margin-bottom:6px">Método de ingreso de datos</div>
           <div class="tog" style="max-width:320px">
-            <button id="btn-metodo-res" class="active" onclick="setMetodo('resumen')">Resumen estadístico</button>
-            <button id="btn-metodo-arb" onclick="setMetodo('arboles')">Árbol por árbol</button>
+            <button id="btn-metodo-res" class="active" onclick="setMetodo('resumen')" style="border:1.5px solid #c8a87a">Resumen estadístico</button>
+            <button id="btn-metodo-arb" onclick="setMetodo('arboles')" style="border:1.5px solid #c8a87a">Árbol por árbol</button>
           </div>
         </div>
 
@@ -835,14 +835,17 @@ function renderRaleosTab() {
   }
 
   var r1Row = projRows.filter(function(r){ return r.lbl==='R1'; })[0];
+  var r2Row = projRows.filter(function(r){ return r.lbl==='R2'; })[0];
   var r1VolTot = r1Row ? r1Row.ex*HA : 0;
-  var densPost = S.r1on ? Math.round(densBase*(1-S.ri1/100)) : Math.round(densBase);
+  var r2VolTot = r2Row ? r2Row.ex*HA : 0;
+  var densPost1 = S.r1on ? Math.round(densBase*(1-S.ri1/100)) : Math.round(densBase);
+  var densPost2 = S.r1on && S.r2on ? Math.round(densPost1*(1-S.ri2/100)) : densPost1;
 
   var rkEl = document.getElementById('ral-kpis');
   if (rkEl) rkEl.innerHTML =
     '<div class="kpi"><div class="kl">Densidad actual</div><div class="kv">'+Math.round(densBase)+'</div><div class="ks2">árb/ha</div></div>' +
-    '<div class="kpi hi"><div class="kl">'+(S.r1on?'Post raleo 1':'Sin raleo')+'</div><div class="kv">'+densPost+'</div><div class="ks2">árb/ha remanentes</div></div>' +
-    '<div class="kpi"><div class="kl">Vol. raleo 1</div><div class="kv">'+(r1VolTot>0?fN(r1VolTot,1):'—')+' m³</div><div class="ks2">total '+HA+' ha</div></div>' +
+    '<div class="kpi hi"><div class="kl">'+(S.r1on?'Post raleo 1':'Sin raleo')+'</div><div class="kv">'+densPost1+'</div><div class="ks2">árb/ha · vol: '+(r1VolTot>0?fN(r1VolTot,1):'—')+' m³</div></div>' +
+    (S.r2on ? '<div class="kpi hi"><div class="kl">Post raleo 2</div><div class="kv">'+densPost2+'</div><div class="ks2">árb/ha · vol: '+(r2VolTot>0?fN(r2VolTot,1):'—')+' m³</div></div>' : '') +
     '<div class="kpi"><div class="kl">Densidad cosecha</div><div class="kv">'+densArr[densArr.length-1]+'</div><div class="ks2">árb/ha año 15</div></div>';
 
   var evtSet = {};
@@ -1076,6 +1079,21 @@ function renderCasaTab() {
 // TAB 4: CAMPO
 // ═══════════════════════════════════════════════════
 function renderCampoTab() {
+  // Auto-fill densidad del inventario activo más reciente
+  var activeInvList = inventarios.filter(function(i){ return activeInvs.has(i.id); });
+  var lastInv = activeInvList[activeInvList.length-1];
+  if (lastInv) {
+    var st = invStats(lastInv);
+    var densEl = document.getElementById('ni-dens');
+    if (densEl) densEl.value = Math.round(st.densHa);
+    var haEl = document.getElementById('ni-ha');
+    if (haEl && !haEl.dataset.userModified) haEl.value = HA;
+    var edadEl = document.getElementById('ni-edad');
+    if (edadEl && !edadEl.dataset.userModified) {
+      var ageDays = (new Date() - new Date(lastInv.date)) / (365.25*86400000);
+      edadEl.value = (lastInv.age + ageDays).toFixed(2);
+    }
+  }
   var el = document.getElementById('inv-list');
   if (!el) return;
   el.innerHTML = '';
