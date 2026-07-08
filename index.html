@@ -408,21 +408,17 @@ tbody tr:hover{background:var(--teca-lt)}
 
         <!-- Mortalidad -->
         <div style="margin-top:12px;padding:12px 14px;background:var(--bg);border-radius:8px;border:1px solid var(--border)">
-          <div style="font-size:12px;font-weight:600;margin-bottom:10px;color:var(--text)">🌿 Mortalidad observada</div>
-          <div class="fg" style="grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px">
+          <div class="fg" style="grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
             <div class="fl">
-              <label>Árboles muertos (total plantación)</label>
+              <label>Árboles muertos (total en la plantación)</label>
               <input id="ni-muertos" type="number" min="0" placeholder="ej: 45" oninput="updateMortalidad()">
-            </div>
-            <div class="fl">
-              <label>Total árboles plantados originalmente</label>
-              <input id="ni-total-orig" type="number" placeholder="ej: 1400" oninput="updateMortalidad()">
             </div>
             <div class="fl">
               <label>% Mortalidad acumulada</label>
               <input id="ni-mort-pct" type="text" readonly style="background:#f5f5f3;color:var(--muted);cursor:not-allowed" placeholder="calculado">
             </div>
           </div>
+          <input id="ni-total-orig" type="hidden" value="1400">
           <div id="mort-preview" style="font-size:11px;color:var(--muted)"></div>
         </div>
 
