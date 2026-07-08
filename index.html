@@ -2,483 +2,556 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Teca Tempate — Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Teca Tempate</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
-:root {
-  --teca:#2C5F2E; --teca2:#4A8A4D; --teca-lt:#EAF3EB;
-  --gold:#C8921A; --gold-lt:#F5E6C3; --amber:#D97706;
-  --soil:#6B4226; --export:#6B21A8; --nac:#C05020;
-  --danger:#B91C1C; --info:#1A5276;
-  --bg:#F8F7F4; --surface:#fff; --border:#E5E2DC;
-  --text:#1C1C1A; --muted:#7A776E;
-  --r:8px; --sans:'Inter',system-ui,sans-serif; --mono:'DM Mono',monospace;
+:root{
+  --teca:#2C5F2E;--teca2:#4A8A4D;--teca-lt:#EAF3EB;
+  --gold:#C8921A;--gold-lt:#F5E6C3;--amber:#D97706;
+  --soil:#6B4226;--export:#6B21A8;--nac:#C05020;
+  --bg:#F8F7F4;--surface:#fff;--border:#E5E2DC;
+  --text:#1C1C1A;--muted:#7A776E;--danger:#B91C1C;
+  --r:8px;--sans:system-ui,sans-serif;--mono:'DM Mono',monospace;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14px;line-height:1.5}
+html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14px;line-height:1.5}
+.app{display:flex;flex-direction:column;height:100vh;overflow:hidden}
 
-/* ── Mobile-first layout ─────────────────────────────────────── */
-.app{display:flex;flex-direction:column;min-height:100vh}
-.topbar{background:var(--teca);color:#fff;padding:.9rem 1.1rem;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100}
-.topbar-title{font-size:15px;font-weight:600}
-.topbar-sub{font-size:11px;color:rgba(255,255,255,.55);margin-top:1px}
-.menu-btn{background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:6px;padding:6px 10px;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:5px}
+/* Topbar */
+.topbar{background:var(--teca);color:#fff;padding:.55rem 1rem;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.tb-brand{font-size:14px;font-weight:600}
+.tb-sub{font-size:10px;color:rgba(255,255,255,.5)}
+.tb-invs{margin-left:auto;display:flex;gap:5px;align-items:center}
+.inv-chip{display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:2px 9px;cursor:pointer;font-size:11px;color:rgba(255,255,255,.7);transition:all .15s}
+.inv-chip.on{background:var(--gold);border-color:var(--gold);color:#fff;font-weight:600}
+.inv-chip:hover:not(.on){background:rgba(255,255,255,.2)}
 
-.drawer{background:var(--teca);color:#fff;width:100%;max-height:0;overflow:hidden;transition:max-height .35s ease}
-.drawer.open{max-height:2000px}
+.body-row{display:flex;flex:1;overflow:hidden}
 
-.main{padding:1rem;flex:1}
+/* Main area */
+.main-area{display:flex;flex-direction:column;flex:1;overflow:hidden;min-width:0}
+.main-tabs{display:flex;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto}
+.mtab{padding:.6rem 1rem;font-size:12px;font-weight:500;border:none;background:none;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;white-space:nowrap;transition:all .15s}
+.mtab.active{color:var(--teca);border-bottom-color:var(--teca);font-weight:600}
+.tc{flex:1;overflow-y:auto}
+.tp{display:none;padding:1.1rem}
+.tp.active{display:block}
 
-@media(min-width:768px){
-  .app{flex-direction:row}
-  .topbar{display:none}
-  .sidebar{width:300px;min-height:100vh;position:sticky;top:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column;flex-shrink:0}
-  .sidebar-header{display:block!important}
-  .drawer{max-height:none!important;overflow:visible}
-  .main{padding:1.5rem;overflow-x:hidden}
-  .menu-btn{display:none}
-}
-
-/* ── Sidebar inner ───────────────────────────────────────────── */
-.sidebar{background:var(--teca);color:#fff;display:flex;flex-direction:column}
-.sidebar-header{padding:1.4rem 1.4rem .9rem;border-bottom:1px solid rgba(255,255,255,.1);display:none}
-@media(min-width:768px){.sidebar-header{display:block}}
-.s-logo{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:5px}
-.s-title{font-size:17px;font-weight:600}
-.s-sub{font-size:11px;color:rgba(255,255,255,.5);margin-top:3px}
-
-.tabs{display:flex;border-bottom:1px solid rgba(255,255,255,.1);flex-shrink:0}
-.tab{flex:1;padding:.6rem .3rem;font-size:11px;font-weight:500;text-align:center;cursor:pointer;color:rgba(255,255,255,.5);border:none;background:none;transition:all .15s;border-bottom:2px solid transparent}
-.tab.active{color:#fff;border-bottom-color:var(--gold)}
-
-.tab-panel{display:none;padding:.9rem 1.2rem;overflow-y:auto}
-.tab-panel.active{display:block}
-
-/* ── Controls ────────────────────────────────────────────────── */
-.ctrl{margin-bottom:11px}
-.clbl{font-size:11px;color:rgba(255,255,255,.7);margin-bottom:4px;display:flex;justify-content:space-between}
+/* Sidebar */
+.sidebar{width:255px;background:var(--teca);color:#fff;display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
+.s-tabs{display:flex;border-bottom:1px solid rgba(255,255,255,.12);flex-shrink:0}
+.stab{flex:1;padding:.45rem .15rem;font-size:9px;font-weight:600;text-align:center;cursor:pointer;color:rgba(255,255,255,.4);border:none;background:none;border-bottom:2px solid transparent;transition:all .15s;letter-spacing:.03em;text-transform:uppercase}
+.stab.active{color:#fff;border-bottom-color:var(--gold)}
+.sp{display:none;padding:.8rem .9rem;overflow-y:auto;flex:1}
+.sp.active{display:block}
+.csec{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.35);margin:10px 0 6px;padding-bottom:3px;border-bottom:1px solid rgba(255,255,255,.08)}
+.ctrl{margin-bottom:9px}
+.clbl{font-size:11px;color:rgba(255,255,255,.7);margin-bottom:3px;display:flex;justify-content:space-between}
 .cval{font-size:11px;color:var(--gold-lt);font-weight:600;font-family:var(--mono)}
-.csec{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.4);margin:10px 0 7px;padding-bottom:4px;border-bottom:1px solid rgba(255,255,255,.08)}
-.ctip{font-size:10px;color:rgba(255,255,255,.45);line-height:1.5;background:rgba(0,0,0,.15);border-radius:5px;padding:7px 9px;margin-bottom:10px}
-.ctip b{color:rgba(255,255,255,.7)}
-
+.ctip{font-size:10px;color:rgba(255,255,255,.38);line-height:1.5;background:rgba(0,0,0,.15);border-radius:5px;padding:6px 8px;margin-bottom:8px}
+.ctip b{color:rgba(255,255,255,.6)}
 input[type=range]{-webkit-appearance:none;width:100%;height:4px;background:rgba(255,255,255,.2);border-radius:2px;outline:none;cursor:pointer}
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--gold-lt);cursor:pointer;border:2px solid var(--teca)}
-input[type=number],input[type=text],.csel{width:100%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:#fff;border-radius:5px;padding:5px 8px;font-size:12px;font-family:var(--sans);appearance:none}
-input[type=number]:focus,input[type=text]:focus,.csel:focus{outline:none;border-color:var(--gold-lt)}
-.csel option{background:#1e4620}
-.csel{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='rgba(255,255,255,.4)'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;background-color:rgba(255,255,255,.08)}
-
+.ipt{width:100%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:#fff;border-radius:5px;padding:5px 8px;font-size:12px;font-family:var(--sans)}
+.ipt:focus{outline:none;border-color:var(--gold-lt)}
+.sel{width:100%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:#fff;border-radius:5px;padding:5px 8px;font-size:12px;font-family:var(--sans);appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='rgba(255,255,255,.4)'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center}
+.sel option{background:#1e4620}
 .tog{display:flex;gap:3px}
-.tog button{flex:1;padding:5px 3px;font-size:11px;border-radius:4px;cursor:pointer;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);color:rgba(255,255,255,.55);font-family:var(--sans);transition:all .15s;white-space:nowrap}
+.tog button{flex:1;padding:5px 3px;font-size:11px;border-radius:4px;cursor:pointer;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);color:rgba(255,255,255,.55);font-family:var(--sans);transition:all .15s}
 .tog button.active{background:var(--gold);border-color:var(--gold);color:#fff;font-weight:600}
+.chk-row{display:flex;align-items:center;gap:7px;margin-bottom:7px}
+.chk-row input[type=checkbox]{width:13px;height:13px;accent-color:var(--gold);flex-shrink:0}
+.chk-row label{font-size:11px;color:rgba(255,255,255,.7);cursor:pointer}
+.s-footer{padding:.65rem .9rem;font-size:10px;color:rgba(255,255,255,.22);border-top:1px solid rgba(255,255,255,.08);line-height:1.6;flex-shrink:0}
 
-.chk-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-.chk-row input[type=checkbox]{width:15px;height:15px;accent-color:var(--gold);flex-shrink:0}
-.chk-row label{font-size:12px;color:rgba(255,255,255,.75);cursor:pointer}
-
-.add-btn{width:100%;padding:7px;background:rgba(255,255,255,.1);border:1px dashed rgba(255,255,255,.3);color:rgba(255,255,255,.7);border-radius:6px;cursor:pointer;font-size:12px;font-family:var(--sans);margin-top:6px;transition:all .15s}
-.add-btn:hover{background:rgba(255,255,255,.18);color:#fff}
-.rm-btn{background:rgba(220,50,50,.3);border:none;color:#fca5a5;border-radius:4px;padding:2px 7px;font-size:11px;cursor:pointer;float:right}
-
-.casa-block{background:rgba(0,0,0,.15);border-radius:7px;padding:9px 10px;margin-bottom:8px;position:relative}
-.casa-block-title{font-size:11px;font-weight:600;color:rgba(255,255,255,.6);margin-bottom:7px}
-
-/* ── Main content ────────────────────────────────────────────── */
-.sec-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin:1.2rem 0 .6rem;display:flex;align-items:center;gap:8px}
-.sec-lbl::after{content:'';flex:1;height:1px;background:var(--border)}
-
-.kpi-strip{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:1rem}
-@media(min-width:600px){.kpi-strip{grid-template-columns:repeat(4,1fr)}}
-.kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:.85rem 1rem}
+/* Cards */
+.ks{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-bottom:1rem}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:.75rem .9rem}
 .kpi.hi{border-color:var(--teca);background:var(--teca-lt)}
-.kpi-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
-.kpi-val{font-size:19px;font-weight:700;font-family:var(--mono);color:var(--teca)}
-.kpi-sub{font-size:10px;color:var(--muted);margin-top:2px}
-
-.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1.1rem;margin-bottom:1rem}
+.kl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
+.kv{font-size:17px;font-weight:700;font-family:var(--mono);color:var(--teca)}
+.ks2{font-size:10px;color:var(--muted);margin-top:1px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:.9rem}
 .card.hi{border-color:var(--teca)}
-.ctitle{font-size:13px;font-weight:600;margin-bottom:2px}
-.csub-txt{font-size:11px;color:var(--muted);margin-bottom:12px}
-
-.grid2{display:grid;grid-template-columns:1fr;gap:10px}
-@media(min-width:600px){.grid2{grid-template-columns:1fr 1fr}}
-
-.fin-row{display:flex;justify-content:space-between;align-items:baseline;padding:4px 0;border-bottom:1px solid var(--border);font-size:12px;gap:6px}
-.fin-row:last-child{border:none}
-.fin-k{color:var(--muted);line-height:1.35}
-.fin-ksub{font-size:10px;color:#ccc;display:block}
-.fin-v{font-weight:600;color:var(--text);font-family:var(--mono);font-size:12px;white-space:nowrap}
-.fin-tot{display:flex;justify-content:space-between;padding:8px 0 0;margin-top:5px;border-top:1.5px solid var(--border);align-items:baseline}
-.fin-tot-lbl{font-size:13px;font-weight:600}
-.fin-tot-val{font-size:21px;font-weight:700;font-family:var(--mono);color:var(--teca)}
-
-.note{font-size:11px;color:var(--muted);background:var(--bg);border-radius:6px;padding:8px 12px;margin-top:8px;line-height:1.6}
-.note.warn{background:#FFF8EC;color:#854F0B;border-left:3px solid var(--amber)}
+.ctitle{font-size:12px;font-weight:600;margin-bottom:2px}
+.csub{font-size:11px;color:var(--muted);margin-bottom:10px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:.9rem}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:.9rem}
+.note{font-size:11px;color:var(--muted);background:var(--bg);border-radius:6px;padding:7px 11px;line-height:1.6;margin-top:8px}
 .note.ok{background:var(--teca-lt);color:#27500A;border-left:3px solid var(--teca)}
-.note.info{background:#EFF6FF;color:#1A5276;border-left:3px solid var(--info)}
+.note.warn{background:#FFF8EC;color:#854F0B;border-left:3px solid var(--amber)}
+.note.info{background:#EFF6FF;color:#1A5276;border-left:3px solid #1A5276}
+.sl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin:.9rem 0 .5rem;display:flex;align-items:center;gap:8px}
+.sl::after{content:'';flex:1;height:1px;background:var(--border)}
 
-.tag{display:inline-block;font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px}
-.tag.C{background:#E6F1FB;color:#0C447C}
-.tag.O{background:var(--teca-lt);color:var(--teca)}
-.tag.exp{background:#F3E8FF;color:#6B21A8}
-.tag.nac{background:#FFF0E8;color:#C05020}
+/* Table */
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead th{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;padding:5px 7px;border-bottom:1px solid var(--border);text-align:right;white-space:nowrap;cursor:pointer;background:var(--bg)}
+thead th:first-child{text-align:left}
+thead th:hover{color:var(--teca)}
+tbody td{padding:4px 7px;border-bottom:1px solid var(--border);text-align:right}
+tbody td:first-child{text-align:left}
+tbody tr:hover{background:var(--teca-lt)}
+.tf{display:flex;gap:7px;margin-bottom:.7rem;flex-wrap:wrap;align-items:center}
+.tf input,.tf select{padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;background:var(--surface);color:var(--text)}
+.tf input:focus,.tf select:focus{outline:none;border-color:var(--teca)}
+.tag{display:inline-block;font-size:10px;font-weight:600;padding:1px 6px;border-radius:20px}
+.tg1{background:#E6F1FB;color:#0C447C}
+.tg2{background:var(--teca-lt);color:var(--teca)}
+.tg3{background:#FFF0E8;color:#C05020}
 
-.bar-row{display:flex;align-items:center;gap:8px;margin-bottom:7px}
-.bar-lbl{width:140px;font-size:11px;color:var(--muted);flex-shrink:0;line-height:1.3}
-.bar-bg{flex:1;background:var(--bg);border-radius:4px;height:20px;position:relative;overflow:visible}
-.bar-fill{height:100%;border-radius:4px;display:flex;align-items:center;padding-left:7px;transition:width .3s}
-.bar-fill span{font-size:10px;font-weight:600;color:#fff}
-.bar-num{font-size:10px;color:var(--muted);width:55px;text-align:right;flex-shrink:0;font-family:var(--mono)}
-.bar-mark{position:absolute;top:-4px;bottom:-4px;width:2px;border-radius:1px;z-index:2}
+/* Buttons */
+.btn{padding:6px 13px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;border:none;font-family:var(--sans);transition:all .15s}
+.btn-p{background:var(--teca);color:#fff}.btn-p:hover{background:var(--teca2)}
+.btn-s{background:var(--surface);color:var(--text);border:1px solid var(--border)}.btn-s:hover{border-color:var(--teca);color:var(--teca)}
+.btn-d{background:#FEF2F2;color:var(--danger);border:1px solid #FECACA}.btn-d:hover{background:var(--danger);color:#fff}
+.btn-sm{padding:3px 9px;font-size:11px}
 
-.gasto-row{display:flex;justify-content:space-between;padding:4px 0;font-size:12px;border-bottom:1px solid var(--border)}
-.gasto-row:last-child{border:none}
+/* Campo/inventario */
+.inv-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:.8rem .9rem;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:all .15s}
+.inv-item:hover{border-color:var(--teca)}
+.inv-item.cur{border-color:var(--teca);background:var(--teca-lt)}
+.inv-name{font-size:13px;font-weight:600}
+.inv-meta{font-size:11px;color:var(--muted)}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:.8rem}
+.fg.c3{grid-template-columns:1fr 1fr 1fr}
+.fg.c1{grid-template-columns:1fr}
+.fl label{display:block;font-size:11px;font-weight:500;color:var(--muted);margin-bottom:3px}
+.fl input,.fl select,.fl textarea{width:100%;padding:6px 9px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:var(--sans);background:var(--surface);color:var(--text)}
+.fl input:focus,.fl select:focus,.fl textarea:focus{outline:none;border-color:var(--teca);box-shadow:0 0 0 2px rgba(44,95,46,.08)}
+.gh-st{font-size:11px;padding:6px 10px;border-radius:6px;margin-top:8px}
+.gh-st.ok{background:var(--teca-lt);color:#27500A}
+.gh-st.err{background:#FEF2F2;color:#991B1B}
+.gh-st.loading{background:#EFF6FF;color:#1A5276}
 
-.sidebar-footer{margin-top:auto;padding:.9rem 1.2rem;font-size:10px;color:rgba(255,255,255,.3);border-top:1px solid rgba(255,255,255,.08);line-height:1.6}
+/* Bar */
+.brow{display:flex;align-items:center;gap:7px;margin-bottom:5px}
+.blbl{width:90px;font-size:10px;color:var(--muted);flex-shrink:0}
+.bbg{flex:1;background:var(--bg);border-radius:3px;height:16px;position:relative}
+.bfill{height:100%;border-radius:3px;display:flex;align-items:center;padding-left:5px}
+.bfill span{font-size:9px;font-weight:600;color:#fff;white-space:nowrap}
+.bnum{font-size:10px;color:var(--muted);width:50px;text-align:right;flex-shrink:0;font-family:var(--mono)}
+.bmark{position:absolute;top:-3px;bottom:-3px;width:2px;border-radius:1px;z-index:2}
+
+/* Raleo compare table */
+.rtbl{width:100%;border-collapse:collapse;font-size:11px}
+.rtbl th{padding:5px 7px;font-size:10px;font-weight:600;background:var(--bg);border-bottom:1px solid var(--border);text-align:right;color:var(--muted)}
+.rtbl th:first-child{text-align:left}
+.rtbl td{padding:4px 7px;border-bottom:1px solid var(--border);text-align:right}
+.rtbl td:first-child{text-align:left;font-weight:600}
+.rtbl tr.rec td{background:var(--teca-lt);color:var(--teca)}
+.rtbl tr.rec td:first-child::after{content:' ★';color:var(--teca)}
+
+/* Fin */
+.frow{display:flex;justify-content:space-between;align-items:baseline;padding:4px 0;border-bottom:1px solid var(--border);font-size:12px}
+.frow:last-child{border:none}
+.fk{color:var(--muted)}.fksub{font-size:10px;color:#bbb;display:block}
+.fv{font-weight:600;color:var(--text);font-family:var(--mono);font-size:12px;white-space:nowrap}
+.ftot{display:flex;justify-content:space-between;padding:7px 0 0;margin-top:4px;border-top:1.5px solid var(--border);align-items:baseline}
+.ftv{font-size:19px;font-weight:700;font-family:var(--mono);color:var(--teca)}
+.gasto-r{display:flex;justify-content:space-between;padding:4px 0;font-size:12px;border-bottom:1px solid var(--border)}
+.gasto-r:last-child{border:none}
+
+@media(max-width:768px){
+  .body-row{flex-direction:column-reverse}
+  .sidebar{width:100%;max-height:40vh;border-top:1px solid rgba(255,255,255,.1)}
+  .g2,.g3,.fg,.fg.c3{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
 <div class="app">
 
-<!-- ══ TOPBAR (mobile) ═══════════════════════════════════════════════════ -->
+<!-- TOPBAR -->
 <div class="topbar">
-  <div>
-    <div class="topbar-title">🌳 Teca Tempate</div>
-    <div class="topbar-sub">2.24 ha · Base año 5</div>
-  </div>
-  <button class="menu-btn" onclick="toggleDrawer()">⚙ Parámetros</button>
+  <div><div class="tb-brand">🌳 Teca Tempate</div><div class="tb-sub">2.24 ha · Guanacaste</div></div>
+  <div class="tb-invs" id="inv-chips"></div>
 </div>
 
-<!-- ══ SIDEBAR / DRAWER ══════════════════════════════════════════════════ -->
+<div class="body-row">
+
+<!-- MAIN -->
+<div class="main-area">
+  <div class="main-tabs" id="main-tabs">
+    <button class="mtab active" onclick="goTab(0)">📋 Inventario</button>
+    <button class="mtab" onclick="goTab(1)">✂️ Raleos</button>
+    <button class="mtab" onclick="goTab(2)">💰 Financiero</button>
+    <button class="mtab" onclick="goTab(3)">🏠 Construcción</button>
+    <button class="mtab" onclick="goTab(4)">📍 Campo</button>
+  </div>
+  <div class="tc">
+
+    <!-- ═══ TAB 0: INVENTARIO ═════════════════════════════════════ -->
+    <div class="tp active" id="tp0">
+      <div class="ks" id="inv-kpis"></div>
+      <div class="g2">
+        <div class="card"><div class="ctitle">Distribución de DAP (cm)</div><div class="csub">Histograma por parcelas activas</div><div style="height:180px"><canvas id="ch-dap"></canvas></div></div>
+        <div class="card"><div class="ctitle">Volumen por árbol (m³)</div><div class="csub">Ecuación Fallas (2017)</div><div style="height:180px"><canvas id="ch-vol"></canvas></div></div>
+      </div>
+      <div class="g2">
+        <div class="card"><div class="ctitle">Área basal por parcela (m²/ha)</div><div class="csub">Extrapolada a hectárea</div><div style="height:180px"><canvas id="ch-ab"></canvas></div></div>
+        <div class="card"><div class="ctitle">Densidad estimada (árb/ha)</div><div class="csub">Por inventario activo</div><div style="height:180px"><canvas id="ch-dens"></canvas></div></div>
+      </div>
+      <div class="sl">Tabla de datos</div>
+      <div class="tf">
+        <select id="f-parc" onchange="renderTable()"><option value="">Todas las parcelas</option></select>
+        <input type="number" id="f-dap-min" placeholder="DAP min (cm)" style="width:120px" oninput="renderTable()">
+        <input type="number" id="f-dap-max" placeholder="DAP max (cm)" style="width:120px" oninput="renderTable()">
+        <select id="f-inv" onchange="renderTable()"><option value="">Todos los inventarios</option></select>
+        <span id="tbl-count" style="font-size:11px;color:var(--muted);margin-left:4px"></span>
+      </div>
+      <div class="tw"><table id="inv-table">
+        <thead><tr>
+          <th onclick="sortTbl(0)">Inv.</th>
+          <th onclick="sortTbl(1)">Parcela</th>
+          <th onclick="sortTbl(2)">Árbol #</th>
+          <th onclick="sortTbl(3)">DAP (cm) ↕</th>
+          <th onclick="sortTbl(4)">Altura (m)</th>
+          <th onclick="sortTbl(5)">Vol (m³)</th>
+          <th onclick="sortTbl(6)">AB (m²)</th>
+        </tr></thead>
+        <tbody id="tbl-body"></tbody>
+      </table></div>
+    </div>
+
+    <!-- ═══ TAB 1: RALEOS ════════════════════════════════════════ -->
+    <div class="tp" id="tp1">
+      <div class="ks" id="ral-kpis"></div>
+      <div class="g2">
+        <div class="card"><div class="ctitle">Densidad árb/ha a lo largo del tiempo</div><div class="csub">Con raleos aplicados</div><div style="height:190px"><canvas id="ch-dens-t"></canvas></div></div>
+        <div class="card"><div class="ctitle">Área basal proyectada vs umbral</div><div class="csub">Umbral técnico 16 m²/ha (línea roja)</div><div style="height:190px"><canvas id="ch-ab-t"></canvas></div></div>
+      </div>
+      <div class="g2">
+        <div class="card"><div class="ctitle">DAP promedio proyectado (cm)</div><div class="csub">Crecimiento con IMA sigmoidal</div><div style="height:190px"><canvas id="ch-dap-t"></canvas></div></div>
+        <div class="card"><div class="ctitle">Volumen en pie (m³/ha)</div><div class="csub">Con efecto post-raleo</div><div style="height:190px"><canvas id="ch-vol-t"></canvas></div></div>
+      </div>
+      <div class="sl">Comparativo de intensidades de raleo</div>
+      <div class="card"><div class="ctitle">¿Qué % extraer? — análisis por intensidad</div>
+        <div class="csub">Basado en densidad objetivo a cosecha 250–350 árb/ha (Murillo & Badilla 2004)</div>
+        <div class="tw" style="margin-top:8px"><table class="rtbl" id="ral-compare"></table></div>
+        <div class="note info" style="margin-top:10px">Para un <b>raleo único en teca clonal</b>, se recomienda <b>33–38%</b>. Todos los árboles son de buena forma (clones), por lo que no hay selección por calidad — solo por espacio. Extraer menos del 30% en un único raleo deja demasiados árboles; el área basal volverá a saturar antes de la cosecha.</div>
+      </div>
+    </div>
+
+    <!-- ═══ TAB 2: FINANCIERO ════════════════════════════════════ -->
+    <div class="tp" id="tp2">
+      <div class="ks" id="fin-kpis"></div>
+      <div class="g2">
+        <div class="card"><div class="ctitle">Volumen en pie (m³/ha)</div><div class="csub" id="vol-sub-fin">Años 5–15</div><div style="height:190px"><canvas id="ch-vol-f"></canvas></div></div>
+        <div class="card"><div class="ctitle">Ingreso bruto por evento (USD)</div><div class="csub">2.24 ha totales</div><div style="height:190px"><canvas id="ch-fin-f"></canvas></div></div>
+      </div>
+      <div class="sl">Detalle financiero</div>
+      <div class="g2" id="fin-cards"></div>
+      <div class="sl">VPN — Flujo descontado</div>
+      <div class="card hi"><div class="ctitle">Análisis año a año</div><div id="vpn-tbl"></div></div>
+      <div class="sl">Gastos operativos</div>
+      <div class="card" id="gastos-card"></div>
+    </div>
+
+    <!-- ═══ TAB 3: CONSTRUCCIÓN ══════════════════════════════════ -->
+    <div class="tp" id="tp3">
+      <div class="ks" id="casa-kpis"></div>
+      <div class="card" id="casa-bars-card">
+        <div class="ctitle">Madera del raleo 1 vs necesidades</div>
+        <div class="csub">Volumen en troza · factor aserradero 50%</div>
+        <div id="casa-bars" style="margin-top:10px"></div>
+        <div id="casa-note" class="note ok" style="margin-top:8px"></div>
+      </div>
+      <div class="sl">Costos de construcción</div>
+      <div class="g2" id="casa-cost-cards"></div>
+    </div>
+
+    <!-- ═══ TAB 4: CAMPO ═════════════════════════════════════════ -->
+    <div class="tp" id="tp4">
+      <div class="sl">Inventarios guardados</div>
+      <div id="inv-list"></div>
+      <div class="sl">Nuevo inventario</div>
+      <div class="card">
+        <div class="ctitle">Registrar medición de campo</div>
+        <div class="csub">Los datos se guardan en tu repositorio GitHub automáticamente</div>
+
+        <!-- Config GitHub -->
+        <div id="gh-config-block" style="margin-bottom:12px">
+          <div style="background:#FFF8EC;border:1px solid #FDE68A;border-radius:6px;padding:8px 12px;font-size:11px;color:#854F0B;margin-bottom:8px">
+            ⚙ Configura tu token de GitHub una vez para habilitar el guardado automático.
+            <a href="https://github.com/settings/tokens/new?scopes=repo&description=TecaDashboard" target="_blank" style="color:var(--teca);font-weight:600;margin-left:4px">Generar token →</a>
+          </div>
+          <div class="fg c3">
+            <div class="fl"><label>GitHub usuario</label><input id="gh-user" class="ipt" placeholder="vic-forestry" value="vic-forestry"></div>
+            <div class="fl"><label>Repositorio</label><input id="gh-repo" class="ipt" placeholder="teca-dashboard" value="teca-dashboard"></div>
+            <div class="fl"><label>Token de acceso (PAT)</label><input id="gh-token" type="password" class="ipt" placeholder="ghp_..."></div>
+          </div>
+          <button class="btn btn-s btn-sm" onclick="saveGHConfig()">Guardar configuración</button>
+          <span id="gh-config-st" style="font-size:11px;color:var(--muted);margin-left:8px"></span>
+        </div>
+
+        <!-- Datos básicos -->
+        <div class="fg">
+          <div class="fl"><label>Nombre del inventario</label><input id="ni-nombre" placeholder="Ej: Inventario 2 — Julio 2026"></div>
+          <div class="fl"><label>Fecha de medición</label><input id="ni-fecha" type="date"></div>
+        </div>
+        <div class="fg c3">
+          <div class="fl"><label>Edad plantación (años)</label><input id="ni-edad" type="number" step="0.1" placeholder="6.93"></div>
+          <div class="fl"><label>Densidad observada (árb/ha)</label><input id="ni-dens" type="number" placeholder="512"></div>
+          <div class="fl"><label>Área total plantación (ha)</label><input id="ni-ha" type="number" step="0.01" value="2.24"></div>
+        </div>
+
+        <!-- Método de ingreso -->
+        <div style="margin-bottom:10px">
+          <div style="font-size:11px;font-weight:500;color:var(--muted);margin-bottom:6px">Método de ingreso de datos</div>
+          <div class="tog" style="max-width:320px">
+            <button id="btn-metodo-res" class="active" onclick="setMetodo('resumen')">Resumen estadístico</button>
+            <button id="btn-metodo-arb" onclick="setMetodo('arboles')">Árbol por árbol</button>
+          </div>
+        </div>
+
+        <!-- Resumen -->
+        <div id="panel-resumen">
+          <div class="fg c3">
+            <div class="fl"><label>N° parcelas</label><input id="ni-nparcelas" type="number" value="3" min="1" oninput="updateResumenUI()"></div>
+            <div class="fl"><label>Área c/parcela (m²)</label><input id="ni-area-parcela" type="number" value="200" oninput="updateResumenUI()"></div>
+            <div class="fl"><label>N° árboles medidos</label><input id="ni-narboles" type="number" placeholder="34" oninput="updateResumenUI()"></div>
+          </div>
+          <div class="fg c3">
+            <div class="fl"><label>DAP promedio (cm)</label><input id="ni-dap-mean" type="number" step="0.01" placeholder="16.37" oninput="updateResumenUI()"></div>
+            <div class="fl"><label>DAP desv. estándar (cm)</label><input id="ni-dap-sd" type="number" step="0.01" placeholder="2.13"></div>
+            <div class="fl"><label>Altura promedio (m)</label><input id="ni-altura" type="number" step="0.1" placeholder="12.0"></div>
+          </div>
+          <div id="resumen-preview" class="note info" style="margin-bottom:10px"></div>
+        </div>
+
+        <!-- Árbol por árbol -->
+        <div id="panel-arboles" style="display:none">
+          <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap">
+            <div class="fl" style="flex:0 0 auto">
+              <label>N° parcelas</label>
+              <input id="ni-nparcelas-arb" type="number" value="3" min="1" max="10" style="width:70px;padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px" oninput="buildTreeTable()">
+            </div>
+            <div class="fl" style="flex:0 0 auto">
+              <label>Área c/parcela (m²)</label>
+              <input id="ni-area-arb" type="number" value="200" style="width:80px;padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px">
+            </div>
+            <button class="btn btn-s btn-sm" onclick="addTreeRow()" style="margin-top:16px">+ Árbol</button>
+            <button class="btn btn-s btn-sm" onclick="clearTreeTable()" style="margin-top:16px">Limpiar</button>
+          </div>
+          <div class="tw">
+            <table id="tree-input-table" style="font-size:12px">
+              <thead><tr>
+                <th style="text-align:left;background:var(--bg);padding:5px 6px;border-bottom:1px solid var(--border)">Parcela</th>
+                <th style="text-align:left;background:var(--bg);padding:5px 6px;border-bottom:1px solid var(--border)">Árbol #</th>
+                <th style="text-align:right;background:var(--bg);padding:5px 6px;border-bottom:1px solid var(--border)">DAP (cm)</th>
+                <th style="text-align:right;background:var(--bg);padding:5px 6px;border-bottom:1px solid var(--border)">Altura (m)</th>
+                <th style="background:var(--bg);padding:5px 6px;border-bottom:1px solid var(--border)"></th>
+              </tr></thead>
+              <tbody id="tree-rows"></tbody>
+            </table>
+          </div>
+          <div id="arb-preview" class="note info" style="margin-top:8px;margin-bottom:10px"></div>
+        </div>
+
+        <!-- Notas -->
+        <div class="fg c1" style="margin-top:8px">
+          <div class="fl"><label>Notas de campo (opcional)</label><textarea id="ni-notas" rows="2" placeholder="Observaciones, condiciones del sitio, etc."></textarea></div>
+        </div>
+
+        <!-- Acciones -->
+        <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;align-items:center">
+          <button class="btn btn-s" onclick="previewInventario()">👁 Preview</button>
+          <button class="btn btn-p" onclick="guardarInventario()">💾 Guardar en GitHub</button>
+          <button class="btn btn-s" onclick="guardarLocal()">📥 Guardar local</button>
+        </div>
+        <div id="gh-status" class="gh-st" style="display:none"></div>
+      </div>
+    </div>
+
+  </div><!-- tc -->
+</div><!-- main-area -->
+
+<!-- SIDEBAR -->
 <aside class="sidebar">
-  <div class="sidebar-header">
-    <div class="s-logo">Plantación · Costa Rica</div>
-    <div class="s-title">Teca Tempate</div>
-    <div class="s-sub">2.24 ha · Base año 5 · Muestreo 2025</div>
+  <div class="s-tabs">
+    <button class="stab active" onclick="sTab(0)">🌱 Silvic.</button>
+    <button class="stab" onclick="sTab(1)">💰 Precios</button>
+    <button class="stab" onclick="sTab(2)">📋 Gastos</button>
+    <button class="stab" onclick="sTab(3)">🏠 Casas</button>
   </div>
 
-  <div class="drawer" id="drawer">
-    <!-- Tabs -->
-    <div class="tabs">
-      <button class="tab active" onclick="showTab(0)">🌱 Silvic.</button>
-      <button class="tab" onclick="showTab(1)">💰 Precios</button>
-      <button class="tab" onclick="showTab(2)">📋 Gastos</button>
-      <button class="tab" onclick="showTab(3)">🏠 Casas</button>
+  <!-- s0: Silvicultura -->
+  <div class="sp active" id="sp0">
+    <div class="csec">Modelo base</div>
+    <div class="ctrl">
+      <div class="clbl">Crecimiento</div>
+      <div class="tog"><button id="btn-C" class="active" onclick="ss('esc','C')">Conserv.</button><button id="btn-O" onclick="ss('esc','O')">Optimista</button></div>
     </div>
-
-    <!-- ─ Tab 0: Silvicultura ─────────────────────────────────── -->
-    <div class="tab-panel active" id="tab0">
-      <div class="csec">Escenario base</div>
-      <div class="ctrl">
-        <div class="clbl">Modelo de crecimiento</div>
-        <div class="tog">
-          <button id="btn-C" class="active" onclick="set('esc','C')">Conservador</button>
-          <button id="btn-O" onclick="set('esc','O')">Optimista</button>
-        </div>
-      </div>
-
-      <div class="csec">Raleo 1</div>
-      <div class="chk-row">
-        <input type="checkbox" id="chk-r1" checked onchange="update()">
-        <label for="chk-r1">Hacer raleo 1</label>
-      </div>
-      <div id="r1-block">
-        <div class="ctrl">
-          <div class="clbl">Año del raleo 1 <span class="cval" id="r1y-lbl">Año 7</span></div>
-          <input type="range" id="r1y" min="5" max="10" step="1" value="7" oninput="update()">
-        </div>
-        <div class="ctrl">
-          <div class="clbl">Intensidad <span class="cval" id="rpct1-lbl">25%</span></div>
-          <input type="range" id="rpct1" min="10" max="40" step="5" value="25" oninput="update()">
-        </div>
-      </div>
-
-      <div class="csec">Raleo 2</div>
-      <div class="chk-row">
-        <input type="checkbox" id="chk-r2" checked onchange="update()">
-        <label for="chk-r2">Hacer raleo 2</label>
-      </div>
-      <div id="r2-block">
-        <div class="ctrl">
-          <div class="clbl">Año del raleo 2 <span class="cval" id="r2y-lbl">Año 10</span></div>
-          <input type="range" id="r2y" min="6" max="13" step="1" value="10" oninput="update()">
-        </div>
-        <div class="ctrl">
-          <div class="clbl">Intensidad <span class="cval" id="rpct2-lbl">25%</span></div>
-          <input type="range" id="rpct2" min="10" max="40" step="5" value="25" oninput="update()">
-        </div>
-      </div>
-
-      <div class="csec">Efecto post-raleo</div>
-      <div class="ctrl">
-        <div class="clbl">Boost ICA post-raleo <span class="cval" id="boost-lbl">+20%</span></div>
-        <input type="range" id="boost" min="0" max="50" step="5" value="20" oninput="update()">
-      </div>
-      <div class="ctip">
-        <b>Intensidad recomendada (Pérez & Kanninen 2005):</b> En teca clonal 20–30% de árboles por raleo
-        es el rango estándar. Menos del 15% no libera competencia suficiente; más del 40% puede
-        inestabilizar el rodal.<br><br>
-        <b>Boost post-raleo:</b> Al eliminar árboles competidores, los remanentes aceleran su crecimiento
-        por mayor acceso a luz, agua y nutrientes. Estudios en teca clonal en Costa Rica reportan
-        incrementos de ICA de <b>15–30%</b> durante 2–4 años post-raleo
-        (Murillo & Badilla 2004; Fonseca 2004). Un valor de 20% es conservador y razonable.
-      </div>
-
-      <div class="csec">Análisis financiero</div>
-      <div class="ctrl">
-        <div class="clbl">Tasa de descuento (VPN) <span class="cval" id="tasa-lbl">8%</span></div>
-        <input type="range" id="tasa" min="3" max="20" step="1" value="8" oninput="update()">
-      </div>
-      <div class="ctrl">
-        <div class="clbl">Inflación dólar anual <span class="cval" id="infldol-lbl">2%</span></div>
-        <input type="range" id="infldol" min="0" max="8" step="0.5" value="2" oninput="update()">
-      </div>
-      <div class="ctip">
-        <b>Tasa de descuento:</b> Refleja el costo del dinero en el tiempo. A mayor tasa,
-        los ingresos futuros valen menos hoy. 8% es típico para inversiones forestales en CR
-        (CATIE 2006). La <b>inflación del dólar</b> ajusta el precio de la madera hacia arriba
-        en años futuros (el precio real sube con la inflación).
-      </div>
+    <div class="csec">Raleo 1</div>
+    <div class="chk-row"><input type="checkbox" id="chk-r1" checked onchange="update()"><label for="chk-r1">Hacer raleo 1</label></div>
+    <div id="r1b">
+      <div class="ctrl"><div class="clbl">Año <span class="cval" id="r1y-l">7</span></div><input type="range" id="r1y" min="5" max="10" value="7" oninput="update()"></div>
+      <div class="ctrl"><div class="clbl">Intensidad <span class="cval" id="ri1-l">35%</span></div><input type="range" id="ri1" min="10" max="50" step="5" value="35" oninput="update()"></div>
     </div>
-
-    <!-- ─ Tab 1: Precios ─────────────────────────────────────── -->
-    <div class="tab-panel" id="tab1">
-      <div class="csec">Mercado objetivo</div>
-      <div class="ctrl">
-        <div class="tog">
-          <button id="btn-mkt-exp" class="active" onclick="set('mkt','export')">Exportación</button>
-          <button id="btn-mkt-nac" onclick="set('mkt','nac')">Mercado nacional</button>
-        </div>
-      </div>
-
-      <!-- Exportación -->
-      <div id="panel-export">
-        <div class="csec">Cosecha final (exportación)</div>
-        <div class="ctrl">
-          <div class="clbl">Modalidad venta</div>
-          <div class="tog">
-            <button id="btn-mod-pie" class="active" onclick="set('modalidad','pie')">En pie</button>
-            <button id="btn-mod-rollo" onclick="set('modalidad','rollo')">Rollo en patio</button>
-          </div>
-        </div>
-        <div class="ctrl">
-          <div class="clbl">Precio exportación <span class="cval" id="pexp-lbl">$300/m³</span></div>
-          <input type="range" id="pexp" min="100" max="600" step="25" value="300" oninput="update()">
-        </div>
-        <div class="ctrl">
-          <div class="clbl">Tipo de cambio <span class="cval" id="tc-lbl">520 ₡/$</span></div>
-          <input type="range" id="tc" min="460" max="650" step="5" value="520" oninput="update()">
-        </div>
-        <div class="ctip">
-          <b>En pie:</b> Vendés los árboles parados al comprador, quien asume costos de corta
-          y transporte. Precio más bajo pero sin costos operativos.<br><br>
-          <b>Rollo en patio de aserradero:</b> Vos cortás y transportás; precio más alto pero
-          con costo de extracción (~$15–25/m³ típico en CR).
-        </div>
-        <div class="csec">Solo en mercado nacional — raleo</div>
-        <div class="ctip" style="margin-bottom:0">El raleo produce madera de menor diámetro (~20–24 cm DAP)
-          que no califica para exportación directa. Se vende en mercado local.</div>
-      </div>
-
-      <!-- Nacional -->
-      <div id="panel-nac" style="display:none">
-        <div class="csec">Cosecha final (nacional)</div>
-        <div class="ctrl">
-          <div class="clbl">Modalidad venta</div>
-          <div class="tog">
-            <button id="btn-mod-pie2" class="active" onclick="set('modalidad','pie')">En pie</button>
-            <button id="btn-mod-rollo2" onclick="set('modalidad','rollo')">Rollo en patio</button>
-          </div>
-        </div>
-        <div class="ctrl">
-          <div class="clbl">Precio cosecha <span class="cval" id="pnac-cf-lbl">200 ₡/PMT</span></div>
-          <input type="range" id="pnac-cf" min="80" max="500" step="10" value="200" oninput="update()">
-        </div>
-      </div>
-
-      <!-- Raleo (siempre nacional) -->
-      <div class="csec">Raleo — mercado nacional</div>
-      <div class="ctrl">
-        <div class="clbl">Precio raleo <span class="cval" id="pral-lbl">150 ₡/PMT</span></div>
-        <input type="range" id="pral" min="50" max="300" step="10" value="150" oninput="update()">
-      </div>
-      <div class="ctrl">
-        <div class="clbl" id="tc2-lbl-wrap">Tipo de cambio <span class="cval" id="tc2-lbl">520 ₡/$</span></div>
-        <input type="range" id="tc2" min="460" max="650" step="5" value="520" oninput="update()" id="tc2">
-      </div>
-      <div class="ctip">
-        <b>PMT (Pulgada Maderera Tica):</b> 1 PMT = 0.002360 m³ = 423.78 PMT/m³.<br>
-        Precio raleo 150 ₡/PMT ≈ <span id="tip-ral-usd">$122/m³</span>.<br>
-        Precio cosecha nacional 200 ₡/PMT ≈ <span id="tip-nac-usd">$163/m³</span>.
-      </div>
+    <div class="csec">Raleo 2</div>
+    <div class="chk-row"><input type="checkbox" id="chk-r2" onchange="update()"><label for="chk-r2">Hacer raleo 2</label></div>
+    <div id="r2b" style="display:none">
+      <div class="ctrl"><div class="clbl">Año <span class="cval" id="r2y-l">10</span></div><input type="range" id="r2y" min="6" max="13" value="10" oninput="update()"></div>
+      <div class="ctrl"><div class="clbl">Intensidad <span class="cval" id="ri2-l">25%</span></div><input type="range" id="ri2" min="10" max="45" step="5" value="25" oninput="update()"></div>
     </div>
-
-    <!-- ─ Tab 2: Gastos ──────────────────────────────────────── -->
-    <div class="tab-panel" id="tab2">
-      <div class="csec">Gastos operativos anuales</div>
-      <div class="ctrl">
-        <div class="clbl">Cuidador de finca (₡/mes) <span class="cval" id="cuid-lbl">₡300,000</span></div>
-        <input type="range" id="cuid" min="100000" max="700000" step="25000" value="300000" oninput="update()">
-      </div>
-      <div class="ctrl">
-        <div class="clbl">Electricidad + agua (₡/mes) <span class="cval" id="elec-lbl">₡20,000</span></div>
-        <input type="range" id="elec" min="0" max="100000" step="5000" value="20000" oninput="update()">
-      </div>
-      <div class="ctrl">
-        <div class="clbl">Impuestos municipales (₡/año) <span class="cval" id="imp-lbl">₡150,000</span></div>
-        <input type="range" id="imp" min="0" max="500000" step="25000" value="150000" oninput="update()">
-      </div>
-      <div class="ctrl">
-        <div class="clbl">Otros gastos anuales (₡/año) <span class="cval" id="otros-lbl">₡0</span></div>
-        <input type="range" id="otros" min="0" max="1000000" step="50000" value="0" oninput="update()">
-      </div>
-
-      <div class="csec">Gastos de intervención</div>
-      <div class="ctip">
-        <b>Costo de raleo</b> (solo si se realiza): Corta, troceo y saca de madera en terreno de 2.24 ha.
-        Referencia CR: <b>₡800–1,500/árbol</b> incluyendo mano de obra y motosierra
-        (CATIE 2006; FONAFIFO 2019). Con densidad ~380 árb/ha al año 7 y 25% de raleo ≈ 95 árb/ha × 2.24 ha ≈ 213 árboles.<br><br>
-        <b>Costo de cosecha final</b> (solo si vendés rollo en patio): Corta, troceo, arrastre y transporte
-        al aserradero. Referencia CR: <b>$15–30/m³</b> dependiendo de acceso y distancia (Murillo 2008).
-      </div>
-      <div class="ctrl">
-        <div class="clbl">Costo raleo (₡/árbol) <span class="cval" id="cral-lbl">₡1,000</span></div>
-        <input type="range" id="cral-arb" min="500" max="2500" step="100" value="1000" oninput="update()">
-      </div>
-      <div class="ctrl">
-        <div class="clbl">Costo cosecha final ($/m³) <span class="cval" id="ccf-lbl">$20/m³</span></div>
-        <input type="range" id="ccf" min="0" max="60" step="5" value="20" oninput="update()">
-      </div>
-      <div class="ctip">El costo de cosecha solo aplica si vendes en rollo (patio de aserradero).
-        Si vendes <b>en pie</b>, el comprador asume este costo.</div>
-    </div>
-
-    <!-- ─ Tab 3: Casas ───────────────────────────────────────── -->
-    <div class="tab-panel" id="tab3">
-      <div class="csec">Casas a construir con el raleo</div>
-      <div class="ctip">Solo pisos + paredes de tabla. La madera proviene del raleo 1.
-        Factor de aserradero: 50% (tronca → tabla útil).</div>
-      <div id="casas-list"></div>
-      <button class="add-btn" onclick="addCasa()">+ Agregar otra casa</button>
-
-      <div class="csec">Costo de construcción</div>
-      <div class="ctrl">
-        <div class="clbl">Mano de obra (₡/m²) <span class="cval" id="mo-lbl">₡80,000</span></div>
-        <input type="range" id="mo-m2" min="20000" max="200000" step="5000" value="80000" oninput="update()">
-      </div>
-      <div class="ctrl">
-        <div class="clbl">Otros materiales (₡/m²) <span class="cval" id="mat-lbl">₡50,000</span></div>
-        <input type="range" id="mat-m2" min="0" max="150000" step="5000" value="50000" oninput="update()">
-      </div>
-      <div class="ctip">
-        <b>Mano de obra:</b> Referencia mercado costarricense 2025 para carpintería/construcción
-        en madera: ₡70,000–120,000/m² (varía según zona y complejidad).<br><br>
-        <b>Otros materiales:</b> Clavos, tornillos, impermeabilizante, bisagras, pintura,
-        cubierta de techo (no incluida en madera de raleo).
-      </div>
-    </div>
-  </div><!-- end drawer -->
-
-  <div class="sidebar-footer">
-    Ec. alométrica: Fallas (2017) · 1 PMT = 0.002360 m³<br>IMA sigmoidal + boost post-raleo
+    <div class="csec">Post-raleo</div>
+    <div class="ctrl"><div class="clbl">Boost ICA <span class="cval" id="boost-l">+20%</span></div><input type="range" id="boost" min="0" max="50" step="5" value="20" oninput="update()"></div>
+    <div class="csec">Análisis financiero</div>
+    <div class="ctrl"><div class="clbl">Tasa descuento <span class="cval" id="tasa-l">8%</span></div><input type="range" id="tasa" min="3" max="20" value="8" oninput="update()"></div>
+    <div class="ctrl"><div class="clbl">Inflación USD/año <span class="cval" id="infl-l">2%</span></div><input type="range" id="infl" min="0" max="8" step="0.5" value="2" oninput="update()"></div>
+    <div class="ctip"><b>Boost post-raleo:</b> Árboles remanentes crecen 15–30% más rápido por 3 años (Murillo & Badilla 2004). 20% es conservador. <b>Raleo único en clones:</b> 33–38% es óptimo (no hay árbol "malo" que eliminar, solo liberás espacio).</div>
   </div>
+
+  <!-- s1: Precios -->
+  <div class="sp" id="sp1">
+    <div class="csec">Mercado cosecha</div>
+    <div class="ctrl">
+      <div class="tog"><button id="btn-mkt-exp" class="active" onclick="ss('mkt','export')">Exportación</button><button id="btn-mkt-nac" onclick="ss('mkt','nac')">Nacional</button></div>
+    </div>
+    <div id="pan-exp">
+      <div class="ctrl"><div class="clbl">Modalidad</div><div class="tog"><button id="btn-pie" class="active" onclick="ss('mod','pie')">En pie</button><button id="btn-rollo" onclick="ss('mod','rollo')">Rollo patio</button></div></div>
+      <div class="ctrl"><div class="clbl">Precio export <span class="cval" id="pexp-l">$300/m³</span></div><input type="range" id="pexp" min="100" max="700" step="25" value="300" oninput="update()"></div>
+      <div class="ctrl"><div class="clbl">Tipo cambio <span class="cval" id="tc-l">520 ₡/$</span></div><input type="range" id="tc" min="460" max="650" step="5" value="520" oninput="update()"></div>
+    </div>
+    <div id="pan-nac" style="display:none">
+      <div class="ctrl"><div class="clbl">Modalidad</div><div class="tog"><button id="btn-pie2" class="active" onclick="ss('mod','pie')">En pie</button><button id="btn-rollo2" onclick="ss('mod','rollo')">Rollo patio</button></div></div>
+      <div class="ctrl"><div class="clbl">Precio cosecha <span class="cval" id="pnac-l">200 ₡/PMT</span></div><input type="range" id="pnac" min="80" max="500" step="10" value="200" oninput="update()"></div>
+    </div>
+    <div class="csec">Raleo (siempre nacional)</div>
+    <div class="ctrl"><div class="clbl">Precio raleo <span class="cval" id="pral-l">150 ₡/PMT</span></div><input type="range" id="pral" min="50" max="300" step="10" value="150" oninput="update()"></div>
+    <div class="ctrl"><div class="clbl">Tipo cambio raleo <span class="cval" id="tc2-l">520 ₡/$</span></div><input type="range" id="tc2" min="460" max="650" step="5" value="520" oninput="update()"></div>
+    <div class="csec">Costo cosecha</div>
+    <div class="ctrl"><div class="clbl">Costo extracción <span class="cval" id="ccf-l">$20/m³</span></div><input type="range" id="ccf" min="0" max="60" step="5" value="20" oninput="update()"></div>
+    <div class="ctip">El costo de extracción solo aplica si vendes <b>rollo en patio</b>. Si vendes en pie, el comprador asume ese costo.</div>
+  </div>
+
+  <!-- s2: Gastos -->
+  <div class="sp" id="sp2">
+    <div class="csec">Operativos anuales</div>
+    <div class="ctrl"><div class="clbl">Cuidador (₡/mes) <span class="cval" id="cuid-l">₡300k</span></div><input type="range" id="cuid" min="100000" max="700000" step="25000" value="300000" oninput="update()"></div>
+    <div class="ctrl"><div class="clbl">Electricidad (₡/mes) <span class="cval" id="elec-l">₡20k</span></div><input type="range" id="elec" min="0" max="100000" step="5000" value="20000" oninput="update()"></div>
+    <div class="ctrl"><div class="clbl">Imp. municipales (₡/año) <span class="cval" id="imp-l">₡150k</span></div><input type="range" id="imp" min="0" max="500000" step="25000" value="150000" oninput="update()"></div>
+    <div class="ctrl"><div class="clbl">Otros (₡/año) <span class="cval" id="otros-l">₡0</span></div><input type="range" id="otros" min="0" max="1000000" step="50000" value="0" oninput="update()"></div>
+    <div class="csec">Intervenciones</div>
+    <div class="ctrl"><div class="clbl">Costo raleo (₡/árbol) <span class="cval" id="cral-l">₡1,000</span></div><input type="range" id="cral" min="500" max="2500" step="100" value="1000" oninput="update()"></div>
+  </div>
+
+  <!-- s3: Casas -->
+  <div class="sp" id="sp3">
+    <div class="csec">Casas con madera del raleo</div>
+    <div class="ctip">Solo pisos + paredes de tabla. Madera del raleo 1. Factor aserradero 50%.</div>
+    <div id="casas-sb"></div>
+    <button style="width:100%;padding:6px;background:rgba(255,255,255,.08);border:1px dashed rgba(255,255,255,.3);color:rgba(255,255,255,.65);border-radius:6px;cursor:pointer;font-size:11px;margin-top:4px" onclick="addCasa()">+ Agregar casa</button>
+    <div class="csec">Costos construcción</div>
+    <div class="ctrl"><div class="clbl">Mano de obra (₡/m²) <span class="cval" id="mo-l">₡80k</span></div><input type="range" id="mo" min="20000" max="200000" step="5000" value="80000" oninput="update()"></div>
+    <div class="ctrl"><div class="clbl">Otros materiales (₡/m²) <span class="cval" id="mat-l">₡50k</span></div><input type="range" id="mat" min="0" max="150000" step="5000" value="50000" oninput="update()"></div>
+  </div>
+
+  <div class="s-footer">Ec. Fallas (2017) · 1 PMT = 0.002360 m³<br>IMA sigmoidal · Boost post-raleo</div>
 </aside>
 
-<!-- ══ MAIN ═══════════════════════════════════════════════════════════════ -->
-<main class="main">
-
-  <!-- KPIs -->
-  <div class="kpi-strip">
-    <div class="kpi"><div class="kpi-lbl">Cosecha año 15 / ha</div><div class="kpi-val" id="kpi-cf">—</div><div class="kpi-sub" id="kpi-cf-sub">—</div></div>
-    <div class="kpi"><div class="kpi-lbl">Ingreso bruto total</div><div class="kpi-val" id="kpi-bruto">—</div><div class="kpi-sub" id="kpi-bruto-sub">—</div></div>
-    <div class="kpi hi"><div class="kpi-lbl">VPN (valor presente neto)</div><div class="kpi-val" id="kpi-vpn">—</div><div class="kpi-sub" id="kpi-vpn-sub">—</div></div>
-    <div class="kpi"><div class="kpi-lbl">Casa — uso del raleo</div><div class="kpi-val" id="kpi-casa">—</div><div class="kpi-sub" id="kpi-casa-sub">—</div></div>
-  </div>
-
-  <!-- Proyección -->
-  <div class="sec-lbl">Proyección de volumen en pie</div>
-  <div class="card">
-    <div class="ctitle">m³/ha · años 5 a 15</div>
-    <div class="csub-txt" id="vol-sub">Con efecto de liberación post-raleo</div>
-    <div style="position:relative;height:220px"><canvas id="volChart"></canvas></div>
-  </div>
-
-  <!-- Financiero -->
-  <div class="sec-lbl">Ingresos por evento</div>
-  <div class="grid2" style="margin-bottom:1rem">
-    <div class="card">
-      <div class="ctitle">Ingreso bruto (USD · 2.24 ha)</div>
-      <div class="csub-txt" id="fin-sub">Por evento de cosecha</div>
-      <div style="position:relative;height:180px"><canvas id="finChart"></canvas></div>
-    </div>
-    <div class="card">
-      <div class="ctitle">% por evento</div>
-      <div class="csub-txt">Distribución del ingreso bruto</div>
-      <div style="position:relative;height:180px"><canvas id="pieChart"></canvas></div>
-    </div>
-  </div>
-
-  <!-- Tarjetas financieras -->
-  <div class="sec-lbl">Detalle financiero</div>
-  <div class="grid2" id="fin-cards" style="margin-bottom:1rem"></div>
-
-  <!-- VPN + gastos -->
-  <div class="sec-lbl">Análisis de valor presente neto (VPN)</div>
-  <div class="card hi">
-    <div class="ctitle">Flujo descontado — 2.24 ha</div>
-    <div class="csub-txt" id="vpn-sub">Incluye gastos operativos e intervenciones</div>
-    <div id="vpn-table"></div>
-    <div class="note info" id="vpn-note"></div>
-  </div>
-
-  <!-- Gastos -->
-  <div class="sec-lbl">Gastos operativos acumulados</div>
-  <div class="card" id="gastos-card"></div>
-
-  <!-- Casas -->
-  <div class="sec-lbl">Madera del raleo para construcción</div>
-  <div id="casas-output"></div>
-
-</main>
+</div><!-- body-row -->
 </div><!-- app -->
 
 <script>
-const HA=2.24, PMT_M3=0.3048*0.3048*0.0254;
+// ═══════════════════════════════════════════════════════════════════
+// CONSTANTES
+// ═══════════════════════════════════════════════════════════════════
+const HA=2.24, PMT=0.3048*0.3048*0.0254;
+const ESTAB=new Date('2019-08-01');
+const INV1_DATE=new Date('2025-03-01');
+const COLORS=['#2C5F2E','#C8921A','#6B21A8','#C05020','#1A5276'];
+const PAR_COLORS={'P1':'#185FA5','P2':'#2C5F2E','P3':'#C05020'};
+const IMA_C={6:19,7:22,8:21,9:18,10:15,11:12,12:11,13:10,14:10,15:10};
+const IMA_O={6:30,7:34,8:32,9:28,10:22,11:17,12:14,13:13,14:13,15:13};
 
-const IMA={
-  C:{6:19,7:22,8:21,9:18,10:15,11:12,12:11,13:10,14:10,15:10},
-  O:{6:30,7:34,8:32,9:28,10:22,11:17,12:14,13:13,14:13,15:13}
+// ═══════════════════════════════════════════════════════════════════
+// DATOS BASE — Inventario 1 (marzo 2025)
+// ═══════════════════════════════════════════════════════════════════
+const INV1={
+  id:'inv1', name:'Inventario 1', date:'2025-03-01',
+  age:5.58, method:'trees',
+  parcelas:[
+    {id:'P1',area:200,trees:[
+      {n:1,dap:15.0,h:null},{n:2,dap:13.5,h:null},{n:3,dap:12.5,h:null},{n:4,dap:15.0,h:null},
+      {n:5,dap:17.0,h:null},{n:6,dap:15.5,h:null},{n:7,dap:16.0,h:null},{n:8,dap:15.5,h:null},
+      {n:9,dap:17.0,h:null},{n:10,dap:17.0,h:null},{n:11,dap:15.0,h:null},{n:12,dap:15.0,h:null}]},
+    {id:'P2',area:200,trees:[
+      {n:1,dap:19.0,h:null},{n:2,dap:13.5,h:null},{n:3,dap:19.0,h:null},{n:4,dap:20.0,h:null},
+      {n:5,dap:17.5,h:null},{n:6,dap:19.5,h:null},{n:7,dap:12.0,h:null},{n:8,dap:18.0,h:null},
+      {n:9,dap:15.0,h:null},{n:10,dap:11.5,h:null},{n:11,dap:17.0,h:null},{n:12,dap:16.5,h:null}]},
+    {id:'P3',area:200,trees:[
+      {n:1,dap:16.5,h:null},{n:2,dap:17.5,h:null},{n:3,dap:18.0,h:null},{n:4,dap:18.0,h:null},
+      {n:5,dap:18.5,h:null},{n:6,dap:17.5,h:null},{n:7,dap:18.0,h:null},{n:8,dap:16.5,h:null},
+      {n:9,dap:17.0,h:null},{n:10,dap:16.5,h:null}]}
+  ]
 };
 
-// State
+// ═══════════════════════════════════════════════════════════════════
+// ESTADO
+// ═══════════════════════════════════════════════════════════════════
+let inventarios=[INV1];
+let activeInvs=new Set(['inv1']);
 let S={
-  esc:'C', mkt:'export', modalidad:'pie',
-  r1on:true, r1y:7, rpct1:25,
-  r2on:true, r2y:10, rpct2:25,
-  boost:20, tasa:8, infldol:2,
-  pexp:300, tc:520, pnac_cf:200,
-  pral:150, tc2:520,
-  cuid:300000, elec:20000, imp:150000, otros:0,
-  cralArb:1000, ccf:20,
-  moM2:80000, matM2:50000,
-  casas:[{area:40,grosor:1.0,alto:2.5}]
+  esc:'C',mkt:'export',mod:'pie',
+  r1on:true,r1y:7,ri1:35,r2on:false,r2y:10,ri2:25,
+  boost:20,tasa:8,infl:2,
+  pexp:300,tc:520,pnac:200,pral:150,tc2:520,ccf:20,
+  cuid:300000,elec:20000,imp:150000,otros:0,cral:1000,
+  mo:80000,mat:50000,
+  casas:[{area:40,grosor:1.0,alto:2.5}],
+  metodo:'resumen'
 };
+let charts={};
+let sortCol=3,sortDir=1;
+let treeRows=[];
 
-let charts={vol:null,fin:null,pie:null};
+// ═══════════════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════════════
+const volF=d=>-0.0068*d+0.001*d*d;
+const abF=d=>Math.PI/4*(d/100)**2;
+const fN=(v,d=1)=>v.toFixed(d);
+const fU=v=>`$${Math.round(v).toLocaleString('en-US')}`;
+const fC=v=>v>=1e6?`₡${(v/1e6).toFixed(1)}M`:`₡${Math.round(v).toLocaleString('es-CR')}`;
+const L=(id,t)=>{const e=document.getElementById(id);if(e)e.textContent=t;};
+const get=(id,def)=>{const e=document.getElementById(id);return e?+e.value:def;};
 
-// ── Helpers ──────────────────────────────────────────────────────────────
-const fM=(v,d=1)=>v.toFixed(d);
-const fmtU=v=>v>=1000?`$${(v/1000).toFixed(0)}k`:`$${v.toFixed(0)}`;
-const fmtC=v=>v>=1e6?`₡${(v/1e6).toFixed(1)}M`:`₡${Math.round(v).toLocaleString('es-CR')}`;
-const fmtUf=v=>`$${Math.round(v).toLocaleString('en-US')}`;
+function invStats(inv){
+  let trees=[];
+  const totalArea=inv.parcelas.reduce((s,p)=>s+p.area,0);
+  inv.parcelas.forEach(p=>p.trees.forEach(t=>trees.push({...t,parc:p.id,parcArea:p.area})));
+  const daps=trees.map(t=>t.dap);
+  const mean=daps.reduce((a,b)=>a+b,0)/daps.length;
+  const sd=Math.sqrt(daps.map(d=>(d-mean)**2).reduce((a,b)=>a+b,0)/daps.length);
+  const abSample=trees.reduce((s,t)=>s+abF(t.dap),0);
+  const abHa=abSample*(10000/totalArea);
+  const volSample=trees.reduce((s,t)=>s+volF(t.dap),0);
+  const volHa=volSample*(10000/totalArea);
+  const densHa=trees.length*(10000/totalArea);
+  return {trees,mean,sd,abHa,volHa,densHa,n:trees.length,totalArea};
+}
 
-// ── Model ────────────────────────────────────────────────────────────────
-function buildRows(){
-  const ima=IMA[S.esc];
+function getActiveFlat(){
+  let rows=[];
+  inventarios.filter(i=>activeInvs.has(i.id)).forEach(inv=>{
+    const totalArea=inv.parcelas.reduce((s,p)=>s+p.area,0);
+    inv.parcelas.forEach(p=>p.trees.forEach(t=>{
+      const abTree=abF(t.dap);
+      const abHaScale=abTree*(10000/totalArea);
+      rows.push({invId:inv.id,invName:inv.name,parc:p.id,n:t.n,dap:t.dap,h:t.h,vol:volF(t.dap),ab:abTree,abHa:abHaScale});
+    }));
+  });
+  return rows;
+}
+
+function buildProjection(){
+  const ima=S.esc==='C'?IMA_C:IMA_O;
   const bf=1+S.boost/100;
-  let vol=91.1, br=0;
+  let vol=91.1,br=0;
   const rows=[];
   for(let y=5;y<=15;y++){
     const ib=y>5?(ima[y]||10):0;
@@ -486,8 +559,8 @@ function buildRows(){
     if(br>0&&y>5)br--;
     const vb=Math.round((vol+ica)*10)/10;
     let ex=0,lbl='';
-    if(S.r1on&&y===S.r1y){ex=Math.round(vb*S.rpct1/100*10)/10;br=3;lbl='R1';}
-    else if(S.r2on&&y===S.r2y){ex=Math.round(vb*S.rpct2/100*10)/10;br=3;lbl='R2';}
+    if(S.r1on&&y===S.r1y){ex=Math.round(vb*S.ri1/100*10)/10;br=3;lbl='R1';}
+    else if(S.r2on&&y===S.r2y){ex=Math.round(vb*S.ri2/100*10)/10;br=3;lbl='R2';}
     else if(y===15){ex=vb;lbl='CF';}
     const va=Math.round((vb-ex)*10)/10;
     vol=va;
@@ -498,424 +571,704 @@ function buildRows(){
 
 function calcFin(rows){
   const tc=S.mkt==='export'?S.tc:S.tc2;
-  const tcNac=S.tc2;   // raleo siempre en mercado nacional
-  // precio cosecha en CRC/m³
-  let pcfCrc;
-  if(S.mkt==='export') pcfCrc=S.pexp*tc;
-  else pcfCrc=S.pnac_cf/PMT_M3;
-  const pralCrc=S.pral/PMT_M3;
-
-  // inflación dólar: precio sube S.infldol% anual desde año 5
-  const infl=S.infldol/100;
-
+  const tcN=S.tc2;
+  const pcfCrc=S.mkt==='export'?S.pexp*tc:S.pnac/PMT;
+  const pralCrc=S.pral/PMT;
+  const infl=S.infl/100;
   const events=[];
   rows.forEach(r=>{
     if(!r.lbl||r.ex===0)return;
     const tot=r.ex*HA;
-    const yrs=r.y-5; // años desde base
-    const inflFactor=Math.pow(1+infl,yrs);
-    let ingCrc=0, costoCrc=0;
+    const yrs=r.y-5;
+    const iF=Math.pow(1+infl,yrs);
+    let ing=0,costo=0;
     if(r.lbl==='CF'){
-      ingCrc=tot*pcfCrc*inflFactor;
-      // costo cosecha si rollo en patio
-      if(S.modalidad==='rollo') costoCrc=tot*S.ccf*tc;
+      ing=tot*pcfCrc*iF;
+      if(S.mod==='rollo')costo=tot*S.ccf*tc;
     } else {
-      ingCrc=tot*pralCrc*inflFactor;
-      // costo raleo: estimar árboles ≈ vol/volArbol
-      const volArbol=r.vb/(S.esc==='C'?490:490)*r.ex/r.ex; // simplificado
-      const nArboles=Math.round(r.ex*HA/0.18); // ~0.18 m³/árbol raleo
-      costoCrc=nArboles*S.cralArb;
+      ing=tot*pralCrc*iF;
+      const nA=Math.round(r.ex*HA/0.18);
+      costo=nA*S.cral;
     }
-    const netoUsd=(ingCrc-costoCrc)/(r.lbl==='CF'?tc:tcNac);
-    // VPN del flujo en ese año
-    const vpnUsd=netoUsd/Math.pow(1+S.tasa/100,yrs);
-    events.push({y:r.y,lbl:r.lbl,vol:tot,ingCrc,costoCrc,netoUsd,vpnUsd,tc:r.lbl==='CF'?tc:tcNac});
+    const tcE=r.lbl==='CF'?tc:tcN;
+    const netoU=(ing-costo)/tcE;
+    const vpnU=netoU/Math.pow(1+S.tasa/100,yrs);
+    events.push({y:r.y,lbl:r.lbl,vol:tot,vha:r.ex,ing,costo,netoU,vpnU,tc:tcE});
   });
-  return {events,tc,pcfCrc,pralCrc};
+  return {events,tc,pcfCrc,pralCrc,tcN};
 }
 
 function calcGastos(){
   const tc=S.mkt==='export'?S.tc:S.tc2;
-  const anualCrc=(S.cuid*12)+S.elec*12+S.imp+S.otros;
-  // 10 años (año 5 a 15)
-  let totalCrc=0, vpnGastos=0;
+  const anual=(S.cuid*12)+S.elec*12+S.imp+S.otros;
+  let tot=0,vpn=0;
+  for(let y=5;y<=15;y++){tot+=anual;vpn+=anual/Math.pow(1+S.tasa/100,y-5);}
+  return {anual,tot,vpn,totU:tot/tc,vpnU:vpn/tc};
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// CHART HELPER
+// ═══════════════════════════════════════════════════════════════════
+function mkChart(id,type,data,opts={}){
+  const el=document.getElementById(id);
+  if(!el)return;
+  if(charts[id]){charts[id].destroy();}
+  charts[id]=new Chart(el,{type,data,options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:opts.legend||false},tooltip:{callbacks:opts.tooltip||{}}},scales:opts.scales||{},...(opts.extra||{})}});
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// TAB 0: INVENTARIO
+// ═══════════════════════════════════════════════════════════════════
+function renderInventarioTab(){
+  const rows=getActiveFlat();
+  if(!rows.length){document.getElementById('inv-kpis').innerHTML='<div class="note warn">No hay inventarios activos.</div>';return;}
+
+  // KPIs
+  const daps=rows.map(r=>r.dap);
+  const mean=daps.reduce((a,b)=>a+b,0)/daps.length;
+  const abHa=rows.reduce((s,r)=>s+r.abHa,0)/inventarios.filter(i=>activeInvs.has(i.id)).length;
+  const volHa=rows.reduce((s,r)=>s+r.vol,0)*(10000/600);
+  const densHa=rows.length*(10000/600);
+  document.getElementById('inv-kpis').innerHTML=`
+    <div class="kpi"><div class="kl">Árboles medidos</div><div class="kv">${rows.length}</div><div class="ks2">${inventarios.filter(i=>activeInvs.has(i.id)).length} inventario(s)</div></div>
+    <div class="kpi hi"><div class="kl">DAP promedio</div><div class="kv">${fN(mean)} cm</div><div class="ks2">SD: ${fN(Math.sqrt(daps.map(d=>(d-mean)**2).reduce((a,b)=>a+b,0)/daps.length))} cm</div></div>
+    <div class="kpi"><div class="kl">Área basal</div><div class="kv">${fN(abHa)} m²/ha</div><div class="ks2">${abHa>=16?'⚠ sobre umbral':'bajo umbral (16)'}</div></div>
+    <div class="kpi"><div class="kl">Vol. estimado</div><div class="kv">${fN(volHa)} m³/ha</div><div class="ks2">${fN(volHa*HA,0)} m³ total</div></div>
+    <div class="kpi"><div class="kl">Densidad</div><div class="kv">${Math.round(densHa)}</div><div class="ks2">árb/ha estimada</div></div>`;
+
+  // Histograma DAP
+  const bins=[10,12,14,16,18,20,22];
+  const bLabels=bins.slice(0,-1).map((b,i)=>`${b}–${bins[i+1]}`);
+  const parcs=[...new Set(rows.map(r=>r.parc))].sort();
+  const datasets=parcs.map((p,i)=>({
+    label:p,
+    data:bins.slice(0,-1).map((b,j)=>rows.filter(r=>r.parc===p&&r.dap>=b&&r.dap<bins[j+1]).length),
+    backgroundColor:Object.values(PAR_COLORS)[i]+'BB',borderColor:Object.values(PAR_COLORS)[i],borderWidth:1
+  }));
+  mkChart('ch-dap','bar',{labels:bLabels,datasets},{legend:true,scales:{x:{stacked:true,title:{display:true,text:'DAP (cm)',font:{size:10}}},y:{stacked:true,title:{display:true,text:'N° árboles',font:{size:10}},ticks:{stepSize:1}}}});
+
+  // Vol por árbol
+  const volDs=parcs.map((p,i)=>({
+    label:p,
+    data:rows.filter(r=>r.parc===p).map(r=>({x:r.dap,y:r.vol})),
+    backgroundColor:Object.values(PAR_COLORS)[i]+'99',borderColor:Object.values(PAR_COLORS)[i],pointRadius:5
+  }));
+  mkChart('ch-vol','scatter',{datasets:volDs},{legend:true,scales:{x:{title:{display:true,text:'DAP (cm)',font:{size:10}}},y:{title:{display:true,text:'Vol (m³)',font:{size:10}}}}});
+
+  // AB por parcela
+  const pStats=parcs.map(p=>{
+    const pr=rows.filter(r=>r.parc===p);
+    const ab=pr.reduce((s,r)=>s+r.ab,0)*(10000/200);
+    return {p,ab};
+  });
+  mkChart('ch-ab','bar',{labels:pStats.map(s=>s.p),datasets:[{data:pStats.map(s=>s.ab),backgroundColor:parcs.map((_,i)=>Object.values(PAR_COLORS)[i]+'BB'),borderColor:parcs.map((_,i)=>Object.values(PAR_COLORS)[i]),borderWidth:1}]},{scales:{y:{title:{display:true,text:'m²/ha',font:{size:10}}},x:{}},extra:{plugins:{legend:{display:false},annotation:{annotations:{line1:{type:'line',yMin:16,yMax:16,borderColor:'#D97706',borderWidth:1.5,borderDash:[4,3]}}}}}}});
+
+  // Densidad por inventario
+  const invActs=inventarios.filter(i=>activeInvs.has(i.id));
+  const densData=invActs.map(inv=>invStats(inv));
+  mkChart('ch-dens','bar',{labels:invActs.map(i=>i.name),datasets:[{data:densData.map(d=>d.densHa),backgroundColor:'#2C5F2E99',borderColor:'#2C5F2E',borderWidth:1,label:'árb/ha'}]},{scales:{y:{title:{display:true,text:'árb/ha',font:{size:10}}}}});
+
+  renderTable();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// TABLE
+// ═══════════════════════════════════════════════════════════════════
+function renderTable(){
+  const rows=getActiveFlat();
+  const pFilter=document.getElementById('f-parc').value;
+  const dapMin=+document.getElementById('f-dap-min').value||0;
+  const dapMax=+document.getElementById('f-dap-max').value||999;
+  const iFilter=document.getElementById('f-inv').value;
+  let filtered=rows.filter(r=>{
+    if(pFilter&&r.parc!==pFilter)return false;
+    if(r.dap<dapMin||r.dap>dapMax)return false;
+    if(iFilter&&r.invId!==iFilter)return false;
+    return true;
+  });
+  // Sort
+  const cols=['invName','parc','n','dap','h','vol','ab'];
+  filtered.sort((a,b)=>{
+    const av=a[cols[sortCol]]??0, bv=b[cols[sortCol]]??0;
+    return sortDir*(av>bv?1:av<bv?-1:0);
+  });
+  const tb=document.getElementById('tbl-body');
+  tb.innerHTML=filtered.map(r=>`<tr>
+    <td><span style="font-size:10px;font-weight:600;color:#0C447C;background:#E6F1FB;padding:1px 6px;border-radius:20px">${r.invName}</span></td>
+    <td><span class="tag ${r.parc==='P1'?'tg1':r.parc==='P2'?'tg2':'tg3'}">${r.parc}</span></td>
+    <td>${r.n}</td>
+    <td style="font-weight:600">${fN(r.dap)}</td>
+    <td>${r.h!=null?fN(r.h):'—'}</td>
+    <td>${fN(r.vol,4)}</td>
+    <td>${fN(r.ab,5)}</td>
+  </tr>`).join('');
+  L('tbl-count',`${filtered.length} árboles`);
+}
+
+function sortTbl(col){
+  if(sortCol===col)sortDir*=-1; else{sortCol=col;sortDir=1;}
+  renderTable();
+}
+
+function updateFilters(){
+  const rows=getActiveFlat();
+  const parcs=[...new Set(rows.map(r=>r.parc))].sort();
+  const invActs=inventarios.filter(i=>activeInvs.has(i.id));
+  const fp=document.getElementById('f-parc');
+  const fi=document.getElementById('f-inv');
+  if(fp)fp.innerHTML='<option value="">Todas las parcelas</option>'+parcs.map(p=>`<option>${p}</option>`).join('');
+  if(fi)fi.innerHTML='<option value="">Todos los inventarios</option>'+invActs.map(i=>`<option value="${i.id}">${i.name}</option>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// TAB 1: RALEOS
+// ═══════════════════════════════════════════════════════════════════
+function renderRaleosTab(){
+  const st=invStats(INV1);
+  const densBase=st.densHa;
+  const abBase=st.abHa;
+  const dapBase=st.mean;
+  const imaFn=(yr)=>S.esc==='C'?(IMA_C[yr]||10):(IMA_O[yr]||13);
+  const bf=1+S.boost/100;
+  const mort=0.01;
+
+  // Proyectar año a año DAP, densidad, AB
+  let dens=densBase,dap=dapBase,br=0;
+  const yrs=[],densArr=[],abArr=[],dapArr=[],volArr=[];
   for(let y=5;y<=15;y++){
-    totalCrc+=anualCrc;
-    vpnGastos+=anualCrc/Math.pow(1+S.tasa/100,y-5);
+    yrs.push(y);
+    const ib=y>5?imaFn(y):0;
+    const ica=(br>0&&y>5)?ib*bf:ib;
+    if(br>0&&y>5)br--;
+    dap+=y>5?ica*0.15:0; // DAP crece ~proporcionalmente al ICA vol
+    if(y>5)dens*=(1-mort);
+    if(S.r1on&&y===S.r1y){dens*=(1-S.ri1/100);br=3;}
+    else if(S.r2on&&y===S.r2y){dens*=(1-S.ri2/100);br=3;}
+    densArr.push(Math.round(dens));
+    abArr.push(Math.round((Math.PI/4*(dap/100)**2)*dens*10)/10);
+    dapArr.push(Math.round(dap*10)/10);
+    const vRow=buildProjection().find(r=>r.y===y);
+    volArr.push(vRow?vRow.vb:null);
   }
-  return {anualCrc,totalCrc,vpnGastos,totalUsd:totalCrc/tc,vpnUsd:vpnGastos/tc};
+
+  // KPIs raleo
+  const r1Row=buildProjection().find(r=>r.lbl==='R1');
+  const r1VolTot=r1Row?r1Row.ex*HA:0;
+  const densPost=r1Row?Math.round(densBase*(1-S.ri1/100)):densBase;
+  document.getElementById('ral-kpis').innerHTML=`
+    <div class="kpi"><div class="kl">Densidad actual</div><div class="kv">${Math.round(densBase)}</div><div class="ks2">árb/ha</div></div>
+    <div class="kpi hi"><div class="kl">${S.r1on?'Post raleo 1':'Sin raleo'}</div><div class="kv">${densPost}</div><div class="ks2">árb/ha remanentes</div></div>
+    <div class="kpi"><div class="kl">Vol. raleo 1</div><div class="kv">${r1VolTot>0?fN(r1VolTot,1):'—'} m³</div><div class="ks2">total 2.24 ha</div></div>
+    <div class="kpi"><div class="kl">Densidad cosecha</div><div class="kv">${densArr[densArr.length-1]}</div><div class="ks2">árb/ha año 15</div></div>`;
+
+  // Gráficos
+  const evtPts=yrs.map(y=>(S.r1on&&y===S.r1y)||(S.r2on&&y===S.r2y)||y===15);
+  const ptR=yrs.map((_,i)=>evtPts[i]?6:3);
+  const ptC=yrs.map((y,i)=>y===15?'#3B6D11':((S.r1on&&y===S.r1y)||(S.r2on&&y===S.r2y))?'#D97706':'#2C5F2E');
+  const commonScales={x:{ticks:{autoSkip:false,maxRotation:0,font:{size:9}},title:{display:true,text:'Año',font:{size:9}}},y:{ticks:{font:{size:9}},grid:{color:'rgba(0,0,0,0.04)'}}};
+
+  mkChart('ch-dens-t','line',{labels:yrs,datasets:[{data:densArr,borderColor:'#2C5F2E',backgroundColor:'rgba(44,95,46,.07)',fill:true,tension:.35,borderWidth:2,pointRadius:ptR,pointBackgroundColor:ptC}]},{scales:{...commonScales,y:{...commonScales.y,title:{display:true,text:'árb/ha',font:{size:9}}}}});
+  mkChart('ch-ab-t','line',{labels:yrs,datasets:[{data:abArr,borderColor:'#D97706',backgroundColor:'rgba(217,119,6,.06)',fill:true,tension:.35,borderWidth:2,pointRadius:ptR,pointBackgroundColor:ptC},{data:yrs.map(()=>16),borderColor:'#D97706',borderWidth:1,borderDash:[5,3],pointRadius:0,label:'Umbral 16 m²'}]},{legend:true,scales:{...commonScales,y:{...commonScales.y,title:{display:true,text:'m²/ha',font:{size:9}}}}});
+  mkChart('ch-dap-t','line',{labels:yrs,datasets:[{data:dapArr,borderColor:'#6B21A8',backgroundColor:'rgba(107,33,168,.06)',fill:true,tension:.35,borderWidth:2,pointRadius:ptR,pointBackgroundColor:ptC}]},{scales:{...commonScales,y:{...commonScales.y,title:{display:true,text:'DAP cm',font:{size:9}}}}});
+  mkChart('ch-vol-t','line',{labels:yrs,datasets:[{data:volArr,borderColor:'#2C5F2E',backgroundColor:'rgba(44,95,46,.07)',fill:true,tension:.35,borderWidth:2,pointRadius:ptR,pointBackgroundColor:ptC}]},{scales:{...commonScales,y:{...commonScales.y,title:{display:true,text:'m³/ha',font:{size:9}}}}});
+
+  // Comparativo intensidades
+  const tbl=document.getElementById('ral-compare');
+  const pcts=[20,25,30,35,40,45,50];
+  const recom=[33,34,35,36,37,38];
+  tbl.innerHTML=`<thead><tr>
+    <th style="text-align:left">Intensidad</th>
+    <th>Extraídos/ha</th><th>Remanentes/ha</th><th>Vol. raleo/ha (m³)</th>
+    <th>Rem. a cosecha</th><th>Esp. equiv.</th><th>Rango óptimo</th>
+  </tr></thead><tbody>${pcts.map(pct=>{
+    const ext=Math.round(densBase*pct/100);
+    const rem=Math.round((densBase-ext)*(1-mort)**8);
+    const vol=fN(volF(st.mean)*ext,1);
+    const esp=fN(1/Math.sqrt(densBase-Math.round(densBase*pct/100)),2);
+    const ok=rem>=250&&rem<=380;
+    const isRec=pct>=33&&pct<=38;
+    return `<tr${isRec?' class="rec"':''}>
+      <td>${pct}%</td><td>${ext}</td><td>${densBase-Math.round(densBase*pct/100)}</td>
+      <td>${vol}</td><td>${rem}</td><td>${esp} m</td>
+      <td style="color:${ok?'#27500A':'#991B1B'}">${ok?'✓ óptimo':'fuera de rango'}</td>
+    </tr>`;
+  }).join('')}</tbody>`;
 }
 
-function calcCasa(c){
-  const r=Math.sqrt(c.area/40);
-  const perim=2*(8*r+5*r);
-  const paredNeta=perim*c.alto*0.80;
-  const at=c.area+paredNeta;
-  const gm=c.grosor*0.0254;
-  const vt=at*gm*1.15/0.50;
-  return {at:Math.round(at),vt};
+// ═══════════════════════════════════════════════════════════════════
+// TAB 2: FINANCIERO
+// ═══════════════════════════════════════════════════════════════════
+function renderFinTab(){
+  const rows=buildProjection();
+  const {events,tc,pcfCrc,pralCrc,tcN}=calcFin(rows);
+  const gastos=calcGastos();
+  const brutoCrc=events.reduce((s,e)=>s+e.ing,0);
+  const brutoUsd=events.reduce((s,e)=>s+e.ing/e.tc,0);
+  const costoUsd=events.reduce((s,e)=>s+e.costo/e.tc,0);
+  const vpnIngUsd=events.reduce((s,e)=>s+e.vpnU,0);
+  const vpnNeto=vpnIngUsd-gastos.vpnU-costoUsd;
+  const cfRow=rows.find(r=>r.lbl==='CF');
+
+  document.getElementById('fin-kpis').innerHTML=`
+    <div class="kpi"><div class="kl">Cosecha año 15</div><div class="kv">${cfRow?fN(cfRow.ex):0} m³/ha</div><div class="ks2">${cfRow?fN(cfRow.ex*HA,0):0} m³ total</div></div>
+    <div class="kpi"><div class="kl">Ingreso bruto</div><div class="kv">${fU(brutoUsd)}</div><div class="ks2">${fC(brutoCrc)} CRC</div></div>
+    <div class="kpi hi"><div class="kl">VPN neto</div><div class="kv">${fU(vpnNeto)}</div><div class="ks2">Tasa ${S.tasa}% · ${S.infl}% inflación</div></div>
+    <div class="kpi"><div class="kl">Gastos 10 años</div><div class="kv">${fC(gastos.tot)}</div><div class="ks2">${fU(gastos.totU)} USD</div></div>`;
+
+  // Vol chart
+  const yrs=rows.map(r=>r.y), vbs=rows.map(r=>r.vb);
+  const evtY=new Set(rows.filter(r=>r.lbl).map(r=>r.y));
+  const ptC2=rows.map(r=>r.y===15?'#3B6D11':evtY.has(r.y)?'#D97706':'#2C5F2E');
+  const ptR2=rows.map(r=>r.y===15||evtY.has(r.y)?6:3);
+  mkChart('ch-vol-f','line',{labels:yrs,datasets:[{data:vbs,borderColor:'#2C5F2E',backgroundColor:'rgba(44,95,46,.07)',fill:true,tension:.35,borderWidth:2,pointRadius:ptR2,pointBackgroundColor:ptC2}]},{scales:{x:{ticks:{autoSkip:false,maxRotation:0,font:{size:9}}},y:{ticks:{font:{size:9},callback:v=>v+' m³'},grid:{color:'rgba(0,0,0,0.04)'},min:50}}});
+
+  // Fin bars
+  const cfC=S.mkt==='export'?'#6B21A8':'#C05020';
+  mkChart('ch-fin-f','bar',{
+    labels:events.map(e=>e.lbl==='CF'?`Cosecha (${e.y})`:`Raleo ${e.lbl.slice(1)} (${e.y})`),
+    datasets:[{data:events.map(e=>e.ing/e.tc),backgroundColor:events.map(e=>e.lbl==='CF'?cfC+'BB':e.lbl==='R1'?'#D97706BB':'#6B4226BB'),borderRadius:4}]
+  },{scales:{x:{ticks:{font:{size:9}}},y:{ticks:{font:{size:9},callback:v=>`$${(v/1000).toFixed(0)}k`}}}});
+
+  // Fin cards
+  const fc=document.getElementById('fin-cards');
+  fc.innerHTML='';
+  events.forEach(ev=>{
+    const usd=ev.ing/ev.tc;
+    const cosU=ev.costo/ev.tc;
+    const col=ev.lbl==='CF'?cfC:ev.lbl==='R1'?'#D97706':'#6B4226';
+    const pDesc=ev.lbl==='CF'?(S.mkt==='export'?`$${S.pexp}/m³`:`${S.pnac} ₡/PMT`):`${S.pral} ₡/PMT`;
+    const d=document.createElement('div');d.className='card';
+    d.innerHTML=`<div style="display:flex;align-items:center;gap:6px;margin-bottom:7px"><span style="width:8px;height:8px;border-radius:50%;background:${col};display:inline-block"></span><span style="font-size:12px;font-weight:600">${ev.lbl==='CF'?'Cosecha final':'Raleo '+ev.lbl.slice(1)} — año ${ev.y}</span></div>
+      <div class="frow"><span class="fk">Volumen 2.24 ha</span><span class="fv">${fN(ev.vol,1)} m³</span></div>
+      <div class="frow"><span class="fk">Precio<span class="fksub">${pDesc}</span></span><span class="fv">—</span></div>
+      ${cosU>0?`<div class="frow"><span class="fk">Costo operativo</span><span class="fv" style="color:#B91C1C">-${fU(cosU)}</span></div>`:''}
+      <div class="frow"><span class="fk">Ingreso (CRC)</span><span class="fv">${fC(ev.ing)}</span></div>
+      <div class="frow"><span class="fk">VPN descontado</span><span class="fv">${fU(ev.vpnU)}</span></div>
+      <div class="ftot"><span style="font-size:12px;font-weight:600">Ingreso USD</span><span class="ftv" style="color:${col}">${fU(usd)}</span></div>`;
+    fc.appendChild(d);
+  });
+  const dt=document.createElement('div');dt.className='card hi';dt.style.gridColumn='1/-1';
+  dt.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px"><div><div style="font-size:11px;color:var(--muted)">Total bruto · 2.24 ha</div><div style="font-size:12px;color:var(--muted)">${fC(brutoCrc)} · Costos: ${fU(costoUsd)}</div></div><div style="font-size:26px;font-weight:700;font-family:var(--mono);color:var(--teca)">${fU(brutoUsd)}</div></div>`;
+  fc.appendChild(dt);
+
+  // VPN table
+  const vtEl=document.getElementById('vpn-tbl');
+  let vpnAc=0;
+  const gAnualUsd=gastos.anual/tc;
+  vtEl.innerHTML=`<div class="tw" style="margin-top:8px"><table style="width:100%;border-collapse:collapse;font-size:11px;min-width:500px">
+    <thead><tr style="background:var(--teca-lt)">${['Año','Ingreso $','Costos $','Gastos $','Flujo neto $','VPN flujo','VPN acum.'].map(h=>`<th style="padding:4px 6px;font-weight:600;border-bottom:1px solid var(--border);text-align:right;font-size:10px;color:var(--muted)">${h}</th>`).join('')}</tr></thead>
+    <tbody>${rows.map(r=>{
+      const yF=r.y-5;const df=Math.pow(1+S.tasa/100,yF);
+      const ev=events.find(e=>e.y===r.y);
+      const evTc=ev?(ev.lbl==='CF'?tc:tcN):tc;
+      const ing=ev?ev.ing/evTc:0;const cst=ev?ev.costo/evTc:0;
+      const fl=ing-cst-gAnualUsd;const fpvn=fl/df;vpnAc+=fpvn;
+      return `<tr style="${vpnAc>0?'background:#F0FDF4':''}border-bottom:1px solid var(--border)">
+        <td style="padding:4px 6px;font-weight:${ing>0?600:400}">${r.y}${ing>0?' ★':''}</td>
+        <td style="padding:4px 6px;text-align:right;color:${ing>0?'#2C5F2E':'var(--muted)'}">${ing>0?fU(ing):'—'}</td>
+        <td style="padding:4px 6px;text-align:right;color:#B91C1C">${cst>0?`-${fU(cst)}`:'—'}</td>
+        <td style="padding:4px 6px;text-align:right;color:#B91C1C">-${fU(gAnualUsd)}</td>
+        <td style="padding:4px 6px;text-align:right;font-weight:600;color:${fl>0?'#2C5F2E':'#B91C1C'}">${fU(fl)}</td>
+        <td style="padding:4px 6px;text-align:right">${fU(fpvn)}</td>
+        <td style="padding:4px 6px;text-align:right;font-weight:600;color:${vpnAc>0?'#2C5F2E':'#B91C1C'}">${fU(vpnAc)}</td>
+      </tr>`;
+    }).join('')}</tbody></table></div>`;
+
+  // Gastos
+  const gc=document.getElementById('gastos-card');
+  gc.innerHTML=`<div class="ctitle">Gastos operativos 10 años</div><div class="csub">Años 5–15, no incluye intervenciones</div>
+    <div class="gasto-r"><span>Cuidador anual</span><span style="font-family:var(--mono);font-weight:600">${fC(S.cuid*12)}</span></div>
+    <div class="gasto-r"><span>Electricidad + agua anual</span><span style="font-family:var(--mono);font-weight:600">${fC(S.elec*12)}</span></div>
+    <div class="gasto-r"><span>Impuestos municipales anual</span><span style="font-family:var(--mono);font-weight:600">${fC(S.imp)}</span></div>
+    <div class="gasto-r"><span>Otros anual</span><span style="font-family:var(--mono);font-weight:600">${fC(S.otros)}</span></div>
+    <div class="gasto-r" style="font-weight:600;padding-top:8px;border-top:2px solid var(--border);margin-top:4px"><span>Total anual</span><span style="font-family:var(--mono)">${fC(gastos.anual)}</span></div>
+    <div class="gasto-r" style="font-weight:600"><span>Total nominal 10 años</span><span style="font-family:var(--mono)">${fC(gastos.tot)} · ${fU(gastos.totU)}</span></div>
+    <div class="gasto-r" style="font-weight:600;color:var(--teca)"><span>Total VPN (descontado)</span><span style="font-family:var(--mono)">${fC(gastos.vpn)} · ${fU(gastos.vpnU)}</span></div>`;
 }
 
-// ── UI helpers ────────────────────────────────────────────────────────────
-function set(k,v){
+// ═══════════════════════════════════════════════════════════════════
+// TAB 3: CONSTRUCCIÓN
+// ═══════════════════════════════════════════════════════════════════
+function renderCasaTab(){
+  const tc=S.mkt==='export'?S.tc:S.tc2;
+  const pralCrc=S.pral/PMT;
+  const r1Row=buildProjection().find(r=>r.lbl==='R1');
+  const trozaDisp=r1Row?r1Row.ex*HA:0;
+  const calcCasa=c=>{
+    const r=Math.sqrt(c.area/40);
+    const pared=2*(8*r+5*r)*c.alto*0.80;
+    const at=c.area+pared;
+    const vt=at*c.grosor*0.0254*1.15/0.50;
+    return{at:Math.round(at),vt};
+  };
+  const totalTroza=S.casas.reduce((s,c)=>s+calcCasa(c).vt,0);
+  const totalArea=S.casas.reduce((s,c)=>s+c.area,0);
+  const pct=trozaDisp>0?totalTroza/trozaDisp*100:0;
+  const sob=trozaDisp-totalTroza;
+
+  document.getElementById('casa-kpis').innerHTML=`
+    <div class="kpi"><div class="kl">Casas</div><div class="kv">${S.casas.length}</div><div class="ks2">${totalArea} m² total</div></div>
+    <div class="kpi"><div class="kl">Troza necesaria</div><div class="kv">${fN(totalTroza,1)} m³</div><div class="ks2">${pct.toFixed(1)}% del raleo</div></div>
+    <div class="kpi hi"><div class="kl">Disponible raleo 1</div><div class="kv">${fN(trozaDisp,1)} m³</div><div class="ks2">${sob>=0?'✓ suficiente':'⚠ insuficiente'}</div></div>
+    <div class="kpi"><div class="kl">Sobrante para venta</div><div class="kv">${fN(Math.max(sob,0)*0.5,1)} m³</div><div class="ks2">madera procesada</div></div>`;
+
+  const maxB=Math.max(trozaDisp*1.1,totalTroza*1.5,5);
+  const barsEl=document.getElementById('casa-bars');
+  barsEl.innerHTML='';
+  const mkBar=(lbl,v,col)=>{
+    const pct2=Math.min(v/maxB*100,100);
+    const d=document.createElement('div');d.className='brow';
+    d.innerHTML=`<div class="blbl">${lbl}</div><div class="bbg"><div class="bfill" style="width:${pct2.toFixed(1)}%;background:${col}"><span>${fN(v,1)} m³</span></div></div><div class="bnum">${(v/maxB*100).toFixed(0)}%</div>`;
+    barsEl.appendChild(d);
+  };
+  mkBar('Disponible raleo',trozaDisp,'#B4B2A9');
+  S.casas.forEach((c,i)=>mkBar(`Casa ${i+1} (${c.area}m², ${c.grosor}")`,calcCasa(c).vt,'#2C5F2E'));
+  if(S.casas.length>1)mkBar('Total casas',totalTroza,'#4A8A4D');
+
+  const noteEl=document.getElementById('casa-note');
+  noteEl.className='note '+(sob>=0?'ok':'warn');
+  noteEl.innerHTML=sob>=0?`✓ Todas las casas usan <b>${fN(totalTroza,1)} m³</b> (${pct.toFixed(1)}% del raleo). Sobran <b>${fN(sob,1)} m³</b> en troza → <b>${fN(sob*0.5,1)} m³</b> procesados para venta.`:`⚠ Las casas necesitan <b>${fN(totalTroza,1)} m³</b> pero el raleo disponible es <b>${fN(trozaDisp,1)} m³</b>. Faltan ${fN(-sob,1)} m³.`;
+
+  const cc=document.getElementById('casa-cost-cards');
+  cc.innerHTML='';
+  S.casas.forEach((c,i)=>{
+    const cCrc=c.area*(S.mo+S.mat);
+    const d=document.createElement('div');d.className='card';
+    d.innerHTML=`<div class="ctitle">Casa ${i+1} — ${c.area} m²</div>
+      <div class="frow"><span class="fk">Área construcción</span><span class="fv">${c.area} m²</span></div>
+      <div class="frow"><span class="fk">Tablas</span><span class="fv">${c.grosor}" · alto ${c.alto}m</span></div>
+      <div class="frow"><span class="fk">Mano de obra</span><span class="fv">${fC(c.area*S.mo)}</span></div>
+      <div class="frow"><span class="fk">Otros materiales</span><span class="fv">${fC(c.area*S.mat)}</span></div>
+      <div class="ftot"><span style="font-size:12px;font-weight:600">Total construcción</span><span class="ftv">${fC(cCrc)}</span></div>`;
+    cc.appendChild(d);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// TAB 4: CAMPO
+// ═══════════════════════════════════════════════════════════════════
+function renderCampoTab(){
+  const el=document.getElementById('inv-list');
+  el.innerHTML='';
+  inventarios.forEach((inv,i)=>{
+    const st=invStats(inv);
+    const d=document.createElement('div');d.className='inv-item'+(activeInvs.has(inv.id)?' cur':'');
+    d.innerHTML=`<div class="inv-item-left">
+      <div class="inv-name">${inv.name} <span style="font-size:10px;font-weight:400;color:var(--muted)">${inv.date}</span></div>
+      <div class="inv-meta">${st.n} árboles · DAP prom: ${fN(st.mean)} cm · ${fN(st.densHa,0)} árb/ha · AB: ${fN(st.abHa)} m²/ha</div>
+    </div>
+    <div style="display:flex;gap:5px;align-items:center">
+      <button class="btn btn-sm ${activeInvs.has(inv.id)?'btn-p':'btn-s'}" onclick="toggleInv('${inv.id}')">${activeInvs.has(inv.id)?'✓ Activo':'Activar'}</button>
+      ${i>0?`<button class="btn btn-sm btn-d" onclick="deleteInv('${inv.id}')">✕</button>`:''}
+    </div>`;
+    el.appendChild(d);
+  });
+}
+
+function toggleInv(id){
+  if(activeInvs.has(id)){if(activeInvs.size>1)activeInvs.delete(id);}
+  else activeInvs.add(id);
+  renderChips();update();
+}
+function deleteInv(id){
+  inventarios=inventarios.filter(i=>i.id!==id);
+  activeInvs.delete(id);
+  renderChips();update();renderCampoTab();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// CHIPS
+// ═══════════════════════════════════════════════════════════════════
+function renderChips(){
+  const el=document.getElementById('inv-chips');
+  el.innerHTML='<span style="font-size:10px;color:rgba(255,255,255,.4);margin-right:2px">VER:</span>'+
+    inventarios.map(inv=>`<span class="inv-chip ${activeInvs.has(inv.id)?'on':''}" onclick="toggleInv('${inv.id}')">${inv.name.replace('Inventario','Inv.')}</span>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// CAMPO — FORMULARIO
+// ═══════════════════════════════════════════════════════════════════
+function setMetodo(m){
+  S.metodo=m;
+  document.getElementById('btn-metodo-res').classList.toggle('active',m==='resumen');
+  document.getElementById('btn-metodo-arb').classList.toggle('active',m==='arboles');
+  document.getElementById('panel-resumen').style.display=m==='resumen'?'':'none';
+  document.getElementById('panel-arboles').style.display=m==='arboles'?'':'none';
+  if(m==='arboles')buildTreeTable();
+}
+
+function updateResumenUI(){
+  const n=+document.getElementById('ni-narboles').value||0;
+  const nparcelas=+document.getElementById('ni-nparcelas').value||1;
+  const areaParcela=+document.getElementById('ni-area-parcela').value||200;
+  const dapMean=+document.getElementById('ni-dap-mean').value||0;
+  const pr=document.getElementById('resumen-preview');
+  if(!dapMean||!n){pr.textContent='';return;}
+  const totalArea=nparcelas*areaParcela;
+  const densHa=n*(10000/totalArea);
+  const volHa=volF(dapMean)*(10000/(totalArea/n));
+  const abHa=(Math.PI/4*(dapMean/100)**2)*densHa;
+  pr.innerHTML=`<b>Preview:</b> Densidad estimada: <b>${Math.round(densHa)} árb/ha</b> · AB estimada: <b>${fN(abHa)} m²/ha</b> · Vol estimado: <b>${fN(volHa,1)} m³/ha</b>`;
+}
+
+function buildTreeTable(){
+  const np=+document.getElementById('ni-nparcelas-arb').value||3;
+  const tb=document.getElementById('tree-rows');
+  if(treeRows.length===0){
+    treeRows=[];
+    for(let p=1;p<=np;p++)treeRows.push({parc:`P${p}`,n:1,dap:'',h:''});
+  }
+  renderTreeRows();
+}
+function renderTreeRows(){
+  const tb=document.getElementById('tree-rows');
+  tb.innerHTML=treeRows.map((r,i)=>`<tr>
+    <td style="padding:3px 6px"><select style="width:55px;padding:3px;border:1px solid var(--border);border-radius:4px;font-size:11px" onchange="treeRows[${i}].parc=this.value">
+      ${[...Array(+document.getElementById('ni-nparcelas-arb').value||3)].map((_,p)=>`<option${r.parc===`P${p+1}`?' selected':''}>P${p+1}</option>`).join('')}
+    </select></td>
+    <td style="padding:3px 6px;text-align:right"><input type="number" style="width:55px;padding:3px 5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:right" value="${r.n}" onchange="treeRows[${i}].n=+this.value"></td>
+    <td style="padding:3px 6px;text-align:right"><input type="number" step="0.1" style="width:65px;padding:3px 5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:right" value="${r.dap}" placeholder="cm" oninput="treeRows[${i}].dap=+this.value;updateArbPreview()"></td>
+    <td style="padding:3px 6px;text-align:right"><input type="number" step="0.1" style="width:60px;padding:3px 5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:right" value="${r.h}" placeholder="m" oninput="treeRows[${i}].h=+this.value"></td>
+    <td style="padding:3px 6px"><button onclick="rmTreeRow(${i})" style="border:none;background:#FEF2F2;color:#B91C1C;border-radius:4px;padding:2px 6px;cursor:pointer;font-size:10px">✕</button></td>
+  </tr>`).join('');
+}
+function addTreeRow(){
+  const np=+document.getElementById('ni-nparcelas-arb').value||3;
+  const lastN=treeRows.length?treeRows[treeRows.length-1].n+1:1;
+  treeRows.push({parc:'P1',n:lastN,dap:'',h:''});renderTreeRows();
+}
+function rmTreeRow(i){treeRows.splice(i,1);renderTreeRows();}
+function clearTreeTable(){treeRows=[];renderTreeRows();}
+function updateArbPreview(){
+  const daps=treeRows.filter(r=>r.dap>0).map(r=>r.dap);
+  if(!daps.length){document.getElementById('arb-preview').textContent='';return;}
+  const mean=daps.reduce((a,b)=>a+b,0)/daps.length;
+  const np=+document.getElementById('ni-nparcelas-arb').value||1;
+  const ap=+document.getElementById('ni-area-arb').value||200;
+  const totalArea=np*ap;
+  const densHa=daps.length*(10000/totalArea);
+  document.getElementById('arb-preview').innerHTML=`<b>${daps.length} árboles</b> · DAP prom: <b>${fN(mean)} cm</b> · Densidad: <b>${Math.round(densHa)} árb/ha</b>`;
+}
+
+function buildInvFromForm(){
+  const nombre=document.getElementById('ni-nombre').value||`Inventario ${inventarios.length+1}`;
+  const fecha=document.getElementById('ni-fecha').value||new Date().toISOString().slice(0,10);
+  const edad=+document.getElementById('ni-edad').value||(new Date(fecha)-ESTAB)/(365.25*86400000);
+  const densidad=+document.getElementById('ni-dens').value||512;
+  const ha=+document.getElementById('ni-ha').value||2.24;
+  const notas=document.getElementById('ni-notas').value||'';
+  const id='inv'+(Date.now());
+
+  if(S.metodo==='resumen'){
+    const nparcelas=+document.getElementById('ni-nparcelas').value||3;
+    const areaP=+document.getElementById('ni-area-parcela').value||200;
+    const nArboles=+document.getElementById('ni-narboles').value||0;
+    const dapMean=+document.getElementById('ni-dap-mean').value||0;
+    const dapSd=+document.getElementById('ni-dap-sd').value||0;
+    const altura=+document.getElementById('ni-altura').value||null;
+    // Generar árboles sintéticos con distribución normal aproximada
+    const trees=[];
+    const nPerP=Math.round(nArboles/nparcelas);
+    const parcelas=[];
+    for(let p=0;p<nparcelas;p++){
+      const pts=[];
+      for(let i=0;i<nPerP;i++){
+        // Box-Muller
+        const u1=Math.random(),u2=Math.random();
+        const z=Math.sqrt(-2*Math.log(u1))*Math.cos(2*Math.PI*u2);
+        const dap=Math.max(dapMean+z*dapSd,5);
+        pts.push({n:i+1,dap:Math.round(dap*10)/10,h:altura});
+      }
+      parcelas.push({id:`P${p+1}`,area:areaP,trees:pts});
+    }
+    return {id,name:nombre,date:fecha,age:edad,method:'resumen',notas,parcelas};
+  } else {
+    // Árbol por árbol
+    const np=+document.getElementById('ni-nparcelas-arb').value||3;
+    const ap=+document.getElementById('ni-area-arb').value||200;
+    const parcMap={};
+    treeRows.filter(r=>r.dap>0).forEach(r=>{
+      if(!parcMap[r.parc])parcMap[r.parc]=[];
+      parcMap[r.parc].push({n:r.n,dap:r.dap,h:r.h||null});
+    });
+    const parcelas=Object.entries(parcMap).map(([pid,trees])=>({id:pid,area:ap,trees}));
+    return {id,name:nombre,date:fecha,age:edad,method:'trees',notas,parcelas};
+  }
+}
+
+function previewInventario(){
+  const inv=buildInvFromForm();
+  const st=invStats(inv);
+  const el=document.getElementById('gh-status');
+  el.className='gh-st ok';el.style.display='block';
+  el.innerHTML=`Preview: <b>${inv.name}</b> · ${st.n} árboles · DAP prom ${fN(st.mean)} cm · ${Math.round(st.densHa)} árb/ha · AB ${fN(st.abHa)} m²/ha · Vol ${fN(st.volHa,1)} m³/ha`;
+}
+
+async function guardarInventario(){
+  const inv=buildInvFromForm();
+  const user=document.getElementById('gh-user').value.trim();
+  const repo=document.getElementById('gh-repo').value.trim();
+  const token=document.getElementById('gh-token').value.trim()||localStorage.getItem('gh-token');
+  const el=document.getElementById('gh-status');
+  if(!token){el.className='gh-st err';el.style.display='block';el.textContent='Falta el token de GitHub. Configuralo arriba.';return;}
+  el.className='gh-st loading';el.style.display='block';el.textContent='Guardando en GitHub...';
+  try{
+    const fname=`inventarios/${inv.id}_${inv.date}.json`;
+    const content=btoa(unescape(encodeURIComponent(JSON.stringify(inv,null,2))));
+    // Verificar si ya existe
+    let sha=null;
+    try{const r=await fetch(`https://api.github.com/repos/${user}/${repo}/contents/${fname}`,{headers:{'Authorization':`Bearer ${token}`}});if(r.ok){const d=await r.json();sha=d.sha;}}catch{}
+    const body={message:`Inventario: ${inv.name} (${inv.date})`,content,...(sha?{sha}:{})};
+    const res=await fetch(`https://api.github.com/repos/${user}/${repo}/contents/${fname}`,{method:'PUT',headers:{'Authorization':`Bearer ${token}`,'Content-Type':'application/json'},body:JSON.stringify(body)});
+    if(res.ok){
+      el.className='gh-st ok';el.textContent=`✓ Guardado en ${user}/${repo}/${fname}`;
+      addInventarioLocal(inv);
+    } else {
+      const err=await res.json();
+      el.className='gh-st err';el.textContent=`Error GitHub: ${err.message}`;
+    }
+  }catch(e){el.className='gh-st err';el.textContent=`Error: ${e.message}`;}
+}
+
+function guardarLocal(){
+  const inv=buildInvFromForm();
+  addInventarioLocal(inv);
+  const blob=new Blob([JSON.stringify(inv,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`${inv.id}_${inv.date}.json`;a.click();
+  const el=document.getElementById('gh-status');
+  el.className='gh-st ok';el.style.display='block';el.textContent=`✓ Guardado localmente y descargado: ${inv.name}`;
+}
+
+function addInventarioLocal(inv){
+  if(!inventarios.find(i=>i.id===inv.id))inventarios.push(inv);
+  activeInvs.add(inv.id);
+  renderChips();renderCampoTab();update();
+}
+
+function saveGHConfig(){
+  const token=document.getElementById('gh-token').value.trim();
+  if(token)localStorage.setItem('gh-token',token);
+  localStorage.setItem('gh-user',document.getElementById('gh-user').value);
+  localStorage.setItem('gh-repo',document.getElementById('gh-repo').value);
+  L('gh-config-st','✓ Configuración guardada');
+}
+
+async function loadFromGitHub(){
+  const user=localStorage.getItem('gh-user')||'vic-forestry';
+  const repo=localStorage.getItem('gh-repo')||'teca-dashboard';
+  const token=localStorage.getItem('gh-token');
+  if(!token)return;
+  try{
+    const r=await fetch(`https://api.github.com/repos/${user}/${repo}/contents/inventarios`,{headers:{Authorization:`Bearer ${token}`}});
+    if(!r.ok)return;
+    const files=await r.json();
+    for(const f of files.filter(f=>f.name.endsWith('.json'))){
+      try{
+        const rc=await fetch(f.download_url);
+        const inv=await rc.json();
+        if(!inventarios.find(i=>i.id===inv.id))inventarios.push(inv);
+      }catch{}
+    }
+    renderChips();renderCampoTab();
+  }catch{}
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// SIDEBAR CASAS
+// ═══════════════════════════════════════════════════════════════════
+function renderCasasSb(){
+  const el=document.getElementById('casas-sb');el.innerHTML='';
+  S.casas.forEach((c,i)=>{
+    const d=document.createElement('div');
+    d.style.cssText='background:rgba(0,0,0,.15);border-radius:6px;padding:8px 9px;margin-bottom:7px;position:relative';
+    d.innerHTML=`<div style="font-size:10px;font-weight:600;color:rgba(255,255,255,.5);margin-bottom:6px">Casa ${i+1}${S.casas.length>1?`<button onclick="rmCasa(${i})" style="float:right;background:rgba(220,50,50,.3);border:none;color:#fca5a5;border-radius:3px;padding:1px 5px;font-size:9px;cursor:pointer">✕</button>`:''}
+</div>
+<div class="ctrl"><div class="clbl">Tamaño <span class="cval">${c.area} m²</span></div><input type="range" min="20" max="200" step="5" value="${c.area}" oninput="S.casas[${i}].area=+this.value;this.previousElementSibling.lastChild.textContent=this.value+' m²';update()"></div>
+<div class="ctrl"><div class="clbl">Grosor <span class="cval">${c.grosor}"</span></div><input type="range" min="0.75" max="2" step="0.25" value="${c.grosor}" oninput="S.casas[${i}].grosor=+this.value;this.previousElementSibling.lastChild.textContent=this.value+'&quot;';update()"></div>
+<div class="ctrl"><div class="clbl">Alto paredes <span class="cval">${c.alto.toFixed(1)} m</span></div><input type="range" min="2.0" max="3.5" step="0.1" value="${c.alto}" oninput="S.casas[${i}].alto=+this.value;this.previousElementSibling.lastChild.textContent=this.value+' m';update()"></div>`;
+    el.appendChild(d);
+  });
+}
+function addCasa(){S.casas.push({area:40,grosor:1.0,alto:2.5});renderCasasSb();update();}
+function rmCasa(i){if(S.casas.length>1){S.casas.splice(i,1);renderCasasSb();update();}}
+
+// ═══════════════════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════════════════
+let currentTab=0;
+function goTab(i){
+  currentTab=i;
+  document.querySelectorAll('.mtab').forEach((t,j)=>t.classList.toggle('active',j===i));
+  document.querySelectorAll('.tp').forEach((p,j)=>p.classList.toggle('active',j===i));
+  if(i===0){renderInventarioTab();updateFilters();}
+  else if(i===1)renderRaleosTab();
+  else if(i===2)renderFinTab();
+  else if(i===3)renderCasaTab();
+  else if(i===4)renderCampoTab();
+}
+function sTab(i){
+  document.querySelectorAll('.stab').forEach((t,j)=>t.classList.toggle('active',j===i));
+  document.querySelectorAll('.sp').forEach((p,j)=>p.classList.toggle('active',j===i));
+}
+function ss(k,v){
   S[k]=v;
-  // sync toggles
-  if(k==='esc'){['C','O'].forEach(x=>document.getElementById('btn-'+x).classList.toggle('active',x===v))}
+  if(k==='esc'){['C','O'].forEach(x=>document.getElementById('btn-'+x).classList.toggle('active',x===v));}
   if(k==='mkt'){
     ['exp','nac'].forEach(x=>document.getElementById('btn-mkt-'+x).classList.toggle('active',x===v.replace('export','exp')));
-    document.getElementById('panel-export').style.display=v==='export'?'':'none';
-    document.getElementById('panel-nac').style.display=v==='nac'?'':'none';
-    // tc2 siempre visible: raleo siempre es mercado nacional
+    document.getElementById('pan-exp').style.display=v==='export'?'':'none';
+    document.getElementById('pan-nac').style.display=v==='nac'?'':'none';
   }
-  if(k==='modalidad'){
-    ['pie','pie2'].forEach(id=>{const el=document.getElementById('btn-mod-'+id);if(el)el.classList.toggle('active',v==='pie')});
-    ['rollo','rollo2'].forEach(id=>{const el=document.getElementById('btn-mod-'+id);if(el)el.classList.toggle('active',v==='rollo')});
+  if(k==='mod'){
+    ['pie','pie2'].forEach(id=>{const e=document.getElementById('btn-'+id);if(e)e.classList.toggle('active',v==='pie');});
+    ['rollo','rollo2'].forEach(id=>{const e=document.getElementById('btn-'+id);if(e)e.classList.toggle('active',v==='rollo');});
   }
   update();
 }
 
-function toggleDrawer(){
-  document.getElementById('drawer').classList.toggle('open');
-}
-function showTab(i){
-  document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('active',j===i));
-  document.querySelectorAll('.tab-panel').forEach((p,j)=>p.classList.toggle('active',j===i));
-}
-
-// Casas en sidebar
-function renderCasasSidebar(){
-  const el=document.getElementById('casas-list');
-  el.innerHTML='';
-  S.casas.forEach((c,i)=>{
-    const div=document.createElement('div');
-    div.className='casa-block';
-    div.innerHTML=`<div class="casa-block-title">Casa ${i+1} ${S.casas.length>1?`<button class="rm-btn" onclick="rmCasa(${i})">✕</button>`:''}
-</div>
-<div class="ctrl"><div class="clbl">Tamaño <span class="cval">${c.area} m²</span></div>
-<input type="range" min="20" max="200" step="5" value="${c.area}" oninput="S.casas[${i}].area=+this.value;this.previousElementSibling.lastChild.textContent=this.value+' m²';update()"></div>
-<div class="ctrl"><div class="clbl">Grosor tablas <span class="cval">${c.grosor}"</span></div>
-<input type="range" min="0.75" max="2" step="0.25" value="${c.grosor}" oninput="S.casas[${i}].grosor=+this.value;this.previousElementSibling.lastChild.textContent=this.value+'&quot;';update()"></div>
-<div class="ctrl"><div class="clbl">Altura paredes <span class="cval">${c.alto.toFixed(1)} m</span></div>
-<input type="range" min="2.0" max="3.5" step="0.1" value="${c.alto}" oninput="S.casas[${i}].alto=+this.value;this.previousElementSibling.lastChild.textContent=this.value+' m';update()"></div>`;
-    el.appendChild(div);
-  });
-}
-function addCasa(){S.casas.push({area:40,grosor:1.0,alto:2.5});renderCasasSidebar();update();}
-function rmCasa(i){if(S.casas.length>1){S.casas.splice(i,1);renderCasasSidebar();update();}}
-
-// ── Main update ───────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════
+// MAIN UPDATE
+// ═══════════════════════════════════════════════════════════════════
 function update(){
-  // Read all sliders
-  const get=(id,def)=>{const el=document.getElementById(id);return el?+el.value:def;};
   S.r1on=document.getElementById('chk-r1').checked;
   S.r2on=document.getElementById('chk-r2').checked;
-  S.r1y=get('r1y',7); S.rpct1=get('rpct1',25);
-  S.r2y=get('r2y',10); S.rpct2=get('rpct2',25);
+  S.r1y=get('r1y',7);S.ri1=get('ri1',35);
+  S.r2y=get('r2y',10);S.ri2=get('ri2',25);
   if(S.r2on&&S.r1on&&S.r2y<=S.r1y){S.r2y=S.r1y+1;document.getElementById('r2y').value=S.r2y;}
-  S.boost=get('boost',20); S.tasa=get('tasa',8); S.infldol=get('infldol',2);
-  S.pexp=get('pexp',300); S.tc=get('tc',520);
-  S.pnac_cf=get('pnac-cf',200); S.tc2=get('tc2',520);
-  S.pral=get('pral',150);
-  S.cuid=get('cuid',300000); S.elec=get('elec',20000);
-  S.imp=get('imp',150000); S.otros=get('otros',0);
-  S.cralArb=get('cral-arb',1000); S.ccf=get('ccf',20);
-  S.moM2=get('mo-m2',80000); S.matM2=get('mat-m2',50000);
+  S.boost=get('boost',20);S.tasa=get('tasa',8);S.infl=get('infl',2);
+  S.pexp=get('pexp',300);S.tc=get('tc',520);S.pnac=get('pnac',200);
+  S.pral=get('pral',150);S.tc2=get('tc2',520);S.ccf=get('ccf',20);
+  S.cuid=get('cuid',300000);S.elec=get('elec',20000);S.imp=get('imp',150000);
+  S.otros=get('otros',0);S.cral=get('cral',1000);
+  S.mo=get('mo',80000);S.mat=get('mat',50000);
 
-  const tc=S.mkt==='export'?S.tc:S.tc2;
+  document.getElementById('r1b').style.display=S.r1on?'':'none';
+  document.getElementById('r2b').style.display=S.r2on?'':'none';
 
-  // Labels
-  const L=(id,txt)=>{const e=document.getElementById(id);if(e)e.textContent=txt;};
-  L('r1y-lbl',`Año ${S.r1y}`); L('rpct1-lbl',`${S.rpct1}%`);
-  L('r2y-lbl',`Año ${S.r2y}`); L('rpct2-lbl',`${S.rpct2}%`);
-  L('boost-lbl',`+${S.boost}%`); L('tasa-lbl',`${S.tasa}%`); L('infldol-lbl',`${S.infldol}%`);
-  L('pexp-lbl',`$${S.pexp}/m³`); L('tc-lbl',`${S.tc} ₡/$`); L('tc2-lbl',`${S.tc2} ₡/$`);
-  L('pnac-cf-lbl',`${S.pnac_cf} ₡/PMT`); L('pral-lbl',`${S.pral} ₡/PMT`);
-  L('cuid-lbl',fmtC(S.cuid)+'/mes'); L('elec-lbl',fmtC(S.elec)+'/mes');
-  L('imp-lbl',fmtC(S.imp)+'/año'); L('otros-lbl',fmtC(S.otros)+'/año');
-  L('cral-lbl',`₡${S.cralArb.toLocaleString('es-CR')}/árbol`); L('ccf-lbl',`$${S.ccf}/m³`);
-  L('mo-lbl',fmtC(S.moM2)+'/m²'); L('mat-lbl',fmtC(S.matM2)+'/m²');
-  // raleo/casa visibility
-  document.getElementById('r1-block').style.display=S.r1on?'':'none';
-  document.getElementById('r2-block').style.display=S.r2on?'':'none';
-  // PMT tips
-  L('tip-ral-usd',`$${(S.pral/PMT_M3/S.tc2).toFixed(0)}/m³`);
-  L('tip-nac-usd',`$${(S.pnac_cf/PMT_M3/S.tc2).toFixed(0)}/m³`);
+  L('r1y-l',S.r1y);L('ri1-l',S.ri1+'%');L('r2y-l',S.r2y);L('ri2-l',S.ri2+'%');
+  L('boost-l','+'+S.boost+'%');L('tasa-l',S.tasa+'%');L('infl-l',S.infl+'%');
+  L('pexp-l','$'+S.pexp+'/m³');L('tc-l',S.tc+' ₡/$');L('pnac-l',S.pnac+' ₡/PMT');
+  L('pral-l',S.pral+' ₡/PMT');L('tc2-l',S.tc2+' ₡/$');L('ccf-l','$'+S.ccf+'/m³');
+  L('cuid-l','₡'+Math.round(S.cuid/1000)+'k');L('elec-l','₡'+Math.round(S.elec/1000)+'k');
+  L('imp-l','₡'+Math.round(S.imp/1000)+'k');L('otros-l','₡'+Math.round(S.otros/1000)+'k');
+  L('cral-l','₡'+S.cral.toLocaleString());L('mo-l','₡'+Math.round(S.mo/1000)+'k');
+  L('mat-l','₡'+Math.round(S.mat/1000)+'k');
 
-  // Build model
-  const rows=buildRows();
-  const {events,pcfCrc,pralCrc}=calcFin(rows);
-  const gastos=calcGastos();
-
-  const yrs=rows.map(r=>r.y);
-  const vbs=rows.map(r=>r.vb);
-  const evtYrs=new Set(rows.filter(r=>r.lbl).map(r=>r.y));
-
-  // Cosecha
-  const cfEv=events.find(e=>e.lbl==='CF');
-  const cfHa=(rows.find(r=>r.lbl==='CF')||{ex:0}).ex;
-  L('kpi-cf',`${fM(cfHa)} m³/ha`);
-  L('kpi-cf-sub',`Total: ${fM(cfHa*HA,0)} m³`);
-
-  // Ingreso bruto
-  const brutoCrc=events.reduce((s,e)=>s+e.ingCrc,0);
-  const brutoUsd=events.reduce((s,e)=>s+e.ingCrc/e.tc,0);
-  const costoUsd=events.reduce((s,e)=>s+e.costoCrc/e.tc,0);
-  L('kpi-bruto',fmtUf(brutoUsd));
-  L('kpi-bruto-sub',`${fmtC(brutoCrc)} CRC`);
-
-  // VPN
-  const vpnIngUsd=events.reduce((s,e)=>s+e.vpnUsd,0);
-  const vpnGastUsd=gastos.vpnUsd;
-  const vpnNeto=vpnIngUsd-vpnGastUsd-costoUsd;
-  L('kpi-vpn',fmtUf(vpnNeto));
-  L('kpi-vpn-sub',`Tasa ${S.tasa}% · ${S.infldol}% inflación $`);
-
-  // ── Chart volumen ────────────────────────────────────────────
-  const ptCol=yrs.map(y=>y===15?'#3B6D11':(evtYrs.has(y)&&y!==15)?'#D97706':'#2C5F2E');
-  const ptR=yrs.map(y=>y===15||evtYrs.has(y)?7:3);
-  const ptSt=yrs.map(y=>y===15?'star':evtYrs.has(y)?'triangle':'circle');
-
-  if(!charts.vol){
-    charts.vol=new Chart(document.getElementById('volChart'),{
-      type:'line',
-      data:{labels:yrs,datasets:[{label:'Vol en pie',data:vbs,
-        borderColor:'#2C5F2E',backgroundColor:'rgba(44,95,46,0.07)',
-        fill:true,tension:0.35,borderWidth:2,
-        pointRadius:ptR,pointStyle:ptSt,pointBackgroundColor:ptCol}]},
-      options:{responsive:true,maintainAspectRatio:false,
-        plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.parsed.y.toFixed(1)} m³/ha`}}},
-        scales:{
-          x:{ticks:{autoSkip:false,maxRotation:0,font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'}},
-          y:{ticks:{font:{size:10},callback:v=>v+' m³'},grid:{color:'rgba(0,0,0,0.04)'},min:50}
-        }}
-    });
-  } else {
-    charts.vol.data.labels=yrs;
-    charts.vol.data.datasets[0].data=vbs;
-    charts.vol.data.datasets[0].pointRadius=ptR;
-    charts.vol.data.datasets[0].pointStyle=ptSt;
-    charts.vol.data.datasets[0].pointBackgroundColor=ptCol;
-    charts.vol.update('none');
-  }
-
-  // ── Chart financiero ─────────────────────────────────────────
-  const evLabels=events.map(e=>`${e.lbl==='CF'?'Cosecha':e.lbl} (año ${e.y})`);
-  const evValsUsd=events.map(e=>e.ingCrc/tc);
-  const cfCol=S.mkt==='export'?'#6B21A8':'#C05020';
-  const evColors=events.map(e=>e.lbl==='CF'?cfCol:e.lbl==='R1'?'#D97706':'#6B4226');
-
-  if(!charts.fin){
-    charts.fin=new Chart(document.getElementById('finChart'),{
-      type:'bar',
-      data:{labels:evLabels,datasets:[{data:evValsUsd,backgroundColor:evColors,borderRadius:4,borderSkipped:false}]},
-      options:{responsive:true,maintainAspectRatio:false,
-        plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`$${Math.round(c.parsed.y).toLocaleString()}`}}},
-        scales:{
-          x:{ticks:{font:{size:9},maxRotation:20},grid:{display:false}},
-          y:{ticks:{font:{size:9},callback:v=>`$${(v/1000).toFixed(0)}k`},grid:{color:'rgba(0,0,0,0.04)'}}
-        }}
-    });
-  } else {
-    charts.fin.data.labels=evLabels;
-    charts.fin.data.datasets[0].data=evValsUsd;
-    charts.fin.data.datasets[0].backgroundColor=evColors;
-    charts.fin.update('none');
-  }
-
-  // ── Chart pie ────────────────────────────────────────────────
-  const pieColors=events.map(e=>e.lbl==='CF'?cfCol+'DD':e.lbl==='R1'?'#D97706CC':'#6B4226CC');
-  if(!charts.pie){
-    charts.pie=new Chart(document.getElementById('pieChart'),{
-      type:'doughnut',
-      data:{labels:evLabels,datasets:[{data:evValsUsd,backgroundColor:pieColors,borderColor:'#fff',borderWidth:3,hoverOffset:4}]},
-      options:{responsive:true,maintainAspectRatio:false,cutout:'60%',
-        plugins:{legend:{position:'bottom',labels:{font:{size:9},boxWidth:10,padding:8}},
-          tooltip:{callbacks:{label:c=>{const t=c.dataset.data.reduce((a,b)=>a+b,0);return `${c.label}: ${(c.parsed/t*100).toFixed(1)}%`;}}}}}
-    });
-  } else {
-    charts.pie.data.labels=evLabels;
-    charts.pie.data.datasets[0].data=evValsUsd;
-    charts.pie.data.datasets[0].backgroundColor=pieColors;
-    charts.pie.update('none');
-  }
-
-  // ── Fin cards ────────────────────────────────────────────────
-  const fg=document.getElementById('fin-cards');
-  fg.innerHTML='';
-  events.forEach(ev=>{
-    const usd=ev.ingCrc/ev.tc;
-    const costoUsdEv=ev.costoCrc/ev.tc;
-    const col=ev.lbl==='CF'?cfCol:ev.lbl==='R1'?'#D97706':'#6B4226';
-    const prDesc=ev.lbl==='CF'
-      ? (S.mkt==='export'?`$${S.pexp}/m³ exportación`:`${S.pnac_cf} ₡/PMT nac.`)
-      : `${S.pral} ₡/PMT`;
-    const d=document.createElement('div');
-    d.className='card';
-    d.innerHTML=`<div style="display:flex;align-items:center;gap:7px;margin-bottom:8px">
-      <span style="width:9px;height:9px;border-radius:50%;background:${col};display:inline-block;flex-shrink:0"></span>
-      <span style="font-size:13px;font-weight:600">${ev.lbl==='CF'?'Cosecha final':'Raleo '+ev.lbl.slice(1)} — año ${ev.y}</span></div>
-      <div class="fin-row"><span class="fin-k">Volumen (2.24 ha)</span><span class="fin-v">${fM(ev.vol,1)} m³</span></div>
-      <div class="fin-row"><span class="fin-k">Precio<span class="fin-ksub">${prDesc}</span></span><span class="fin-v">—</span></div>
-      ${costoUsdEv>0?`<div class="fin-row"><span class="fin-k">Costo operativo</span><span class="fin-v" style="color:#B91C1C">-${fmtUf(costoUsdEv)}</span></div>`:''}
-      <div class="fin-row"><span class="fin-k">Ingreso bruto (CRC)</span><span class="fin-v">${fmtC(ev.ingCrc)}</span></div>
-      <div class="fin-row"><span class="fin-k">VPN (año base)</span><span class="fin-v">${fmtUf(ev.vpnUsd)}</span></div>
-      <div class="fin-tot"><span class="fin-tot-lbl">Ingreso bruto (USD)</span><span class="fin-tot-val" style="color:${col}">${fmtUf(usd)}</span></div>`;
-    fg.appendChild(d);
-  });
-  // Total card
-  const dt=document.createElement('div');
-  dt.className='card hi'; dt.style.gridColumn='1/-1';
-  const netUsd=brutoUsd-costoUsd;
-  dt.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px">
-    <div>
-      <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Total bruto · 2.24 ha · años 5–15</div>
-      <div style="font-size:12px;color:var(--muted)">${fmtC(brutoCrc)} CRC &nbsp;·&nbsp; Costos intervención: ${fmtUf(costoUsd)}</div>
-      <div style="font-size:12px;color:var(--muted);margin-top:2px">Ingreso neto de intervenciones: <b>${fmtUf(netUsd)}</b></div>
-    </div>
-    <div style="text-align:right">
-      <div style="font-size:11px;color:var(--muted)">Bruto USD</div>
-      <div style="font-size:26px;font-weight:700;font-family:var(--mono);color:var(--teca)">${fmtUf(brutoUsd)}</div>
-    </div></div>`;
-  fg.appendChild(dt);
-
-  // ── VPN table ────────────────────────────────────────────────
-  const vpnEl=document.getElementById('vpn-table');
-  const rows2=[];
-  const anualCrc=gastos.anualCrc;
-  let vpnAcum=0;
-  for(let y=5;y<=15;y++){
-    const yrsFromBase=y-5;
-    const df=Math.pow(1+S.tasa/100,yrsFromBase);
-    const gastAnualUsd=anualCrc/tc;
-    const gastVPN=gastAnualUsd/df;
-    const evEste=events.find(e=>e.y===y);
-    const tcEv=evEste?(evEste.lbl==='CF'?tc:S.tc2):tc;
-    const ingBruto=evEste?evEste.ingCrc/tcEv:0;
-    const costoEv=evEste?evEste.costoCrc/tcEv:0;
-    const flujoNeto=ingBruto-costoEv-gastAnualUsd;
-    const flujoVPN=flujoNeto/df;
-    vpnAcum+=flujoVPN;
-    rows2.push({y,ingBruto,costoEv,gastAnualUsd,flujoNeto,flujoVPN,vpnAcum});
-  }
-  vpnEl.innerHTML=`<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px;min-width:480px">
-    <thead><tr style="background:#EAF3EB">
-      <th style="padding:5px 6px;text-align:left;font-weight:600;border-bottom:1px solid var(--border)">Año</th>
-      <th style="padding:5px 6px;text-align:right;font-weight:600;border-bottom:1px solid var(--border)">Ingreso bruto $</th>
-      <th style="padding:5px 6px;text-align:right;font-weight:600;border-bottom:1px solid var(--border)">Costos $</th>
-      <th style="padding:5px 6px;text-align:right;font-weight:600;border-bottom:1px solid var(--border)">Gastos $</th>
-      <th style="padding:5px 6px;text-align:right;font-weight:600;border-bottom:1px solid var(--border)">Flujo neto $</th>
-      <th style="padding:5px 6px;text-align:right;font-weight:600;border-bottom:1px solid var(--border)">VPN flujo $</th>
-      <th style="padding:5px 6px;text-align:right;font-weight:600;border-bottom:1px solid var(--border)">VPN acum. $</th>
-    </tr></thead><tbody>
-    ${rows2.map(r=>`<tr style="border-bottom:1px solid var(--border);${r.vpnAcum>0?'background:#F0FDF4':''}">
-      <td style="padding:4px 6px;font-weight:${r.ingBruto>0?600:400}">${r.y}${r.ingBruto>0?` ★`:''}</td>
-      <td style="padding:4px 6px;text-align:right;color:${r.ingBruto>0?'#2C5F2E':'var(--muted)'}">${r.ingBruto>0?fmtUf(r.ingBruto):'—'}</td>
-      <td style="padding:4px 6px;text-align:right;color:#B91C1C">${r.costoEv>0?`-${fmtUf(r.costoEv)}`:'—'}</td>
-      <td style="padding:4px 6px;text-align:right;color:#B91C1C">-${fmtUf(r.gastAnualUsd)}</td>
-      <td style="padding:4px 6px;text-align:right;font-weight:600;color:${r.flujoNeto>0?'#2C5F2E':'#B91C1C'}">${fmtUf(r.flujoNeto)}</td>
-      <td style="padding:4px 6px;text-align:right">${fmtUf(r.flujoVPN)}</td>
-      <td style="padding:4px 6px;text-align:right;font-weight:600;color:${r.vpnAcum>0?'#2C5F2E':'#B91C1C'}">${fmtUf(r.vpnAcum)}</td>
-    </tr>`).join('')}
-    </tbody></table></div>`;
-  document.getElementById('vpn-note').innerHTML=
-    `VPN neto (ingresos − costos interv. − gastos operativos): <b>${fmtUf(vpnNeto)}</b> USD &nbsp;·&nbsp; `+
-    `Gastos operativos acumulados descontados: <b>${fmtUf(vpnGastUsd)}</b> USD`;
-
-  // ── Gastos card ──────────────────────────────────────────────
-  const gc=document.getElementById('gastos-card');
-  gc.innerHTML=`<div class="ctitle">Gastos operativos — 10 años (año 5–15)</div>
-    <div class="csub-txt">Sin incluir intervenciones</div>
-    <div class="gasto-row"><span>Cuidador (anual)</span><span style="font-family:var(--mono);font-weight:600">${fmtC(S.cuid*12)}</span></div>
-    <div class="gasto-row"><span>Electricidad + agua (anual)</span><span style="font-family:var(--mono);font-weight:600">${fmtC(S.elec*12)}</span></div>
-    <div class="gasto-row"><span>Impuestos municipales (anual)</span><span style="font-family:var(--mono);font-weight:600">${fmtC(S.imp)}</span></div>
-    <div class="gasto-row"><span>Otros (anual)</span><span style="font-family:var(--mono);font-weight:600">${fmtC(S.otros)}</span></div>
-    <div class="gasto-row" style="font-weight:600;font-size:13px;margin-top:4px;padding-top:8px;border-top:2px solid var(--border)">
-      <span>Total anual</span><span style="font-family:var(--mono)">${fmtC(gastos.anualCrc)}</span></div>
-    <div class="gasto-row" style="font-weight:600">
-      <span>Total 10 años (nominal)</span><span style="font-family:var(--mono)">${fmtC(gastos.totalCrc)} · ${fmtUf(gastos.totalUsd)}</span></div>
-    <div class="gasto-row" style="font-weight:600;color:var(--teca)">
-      <span>Total 10 años (VPN descontado)</span><span style="font-family:var(--mono)">${fmtC(gastos.vpnGastos)} · ${fmtUf(gastos.vpnUsd)}</span></div>`;
-
-  // ── Casas output ─────────────────────────────────────────────
-  const r1Row=rows.find(r=>r.lbl==='R1');
-  const trozaDisp=r1Row?r1Row.ex*HA:0;
-  const casasOut=document.getElementById('casas-output');
-  casasOut.innerHTML='';
-
-  if(S.casas.length===0){casasOut.innerHTML='<div class="note">Agregá casas en el panel de Casas.</div>';return;}
-
-  const totalTroza=S.casas.reduce((s,c)=>s+calcCasa(c).vt,0);
-  const totalAreaCasas=S.casas.reduce((s,c)=>s+c.area,0);
-  const costoCasasCrc=totalAreaCasas*(S.moM2+S.matM2);
-  const pct=trozaDisp>0?totalTroza/trozaDisp*100:0;
-  const sobrante=trozaDisp-totalTroza;
-
-  const barsDiv=document.createElement('div');
-  barsDiv.className='card';
-  const maxB=Math.max(trozaDisp*1.1,totalTroza*1.5,10);
-
-  let barsHtml=`<div class="ctitle">Madera del raleo 1 (año ${S.r1on?S.r1y:'—'}) vs. necesidades</div>
-    <div class="csub-txt">Factor aserradero 50% · volumen en troza</div><div style="margin-top:10px">`;
-
-  // Bar: disponible
-  const pDisp=Math.min(trozaDisp/maxB*100,100);
-  barsHtml+=`<div class="bar-row">
-    <div class="bar-lbl">Disponible (${S.esc==='C'?'conserv.':'optimista'})</div>
-    <div class="bar-bg"><div class="bar-fill" style="width:${pDisp.toFixed(1)}%;background:#B4B2A9"><span>${fM(trozaDisp,1)} m³</span></div></div>
-    <div class="bar-num">100%</div></div>`;
-
-  // Bars casas
-  S.casas.forEach((c,i)=>{
-    const {vt}=calcCasa(c);
-    const pC=Math.min(vt/maxB*100,100);
-    const threshPct=(totalTroza/maxB*100).toFixed(1);
-    barsHtml+=`<div class="bar-row">
-      <div class="bar-lbl">Casa ${i+1} (${c.area} m², ${c.grosor}")</div>
-      <div class="bar-bg"><div class="bar-fill" style="width:${pC.toFixed(1)}%;background:#2C5F2E"><span>${fM(vt,1)} m³</span></div></div>
-      <div class="bar-num">${(vt/trozaDisp*100).toFixed(1)}%</div></div>`;
-  });
-
-  if(S.casas.length>1){
-    const pT=Math.min(totalTroza/maxB*100,100);
-    barsHtml+=`<div class="bar-row" style="border-top:1px solid var(--border);padding-top:6px;margin-top:4px">
-      <div class="bar-lbl" style="font-weight:600">Total casas</div>
-      <div class="bar-bg"><div class="bar-fill" style="width:${pT.toFixed(1)}%;background:#4A8A4D"><span>${fM(totalTroza,1)} m³</span></div></div>
-      <div class="bar-num">${pct.toFixed(1)}%</div></div>`;
-  }
-  barsHtml+=`</div>`;
-
-  const noteHtml=sobrante>=0
-    ? `<div class="note ok">✓ Todas las casas usan <b>${fM(totalTroza,1)} m³</b> (${pct.toFixed(1)}% del raleo). Sobran <b>${fM(sobrante,1)} m³</b> en troza → <b>${fM(sobrante*0.5,1)} m³</b> procesados para venta.</div>`
-    : `<div class="note warn">⚠ Las casas necesitan <b>${fM(totalTroza,1)} m³</b> pero el raleo disponible es <b>${fM(trozaDisp,1)} m³</b>. Faltan ${fM(-sobrante,1)} m³. Opciones: reducir tamaño, usar raleo 2, o comprar madera adicional.</div>`;
-
-  barsDiv.innerHTML=barsHtml+noteHtml;
-  casasOut.appendChild(barsDiv);
-
-  // Costos de construcción
-  const costCard=document.createElement('div');
-  costCard.className='card';
-  let costoHtml=`<div class="ctitle">Costos de construcción</div><div class="csub-txt">Mano de obra + materiales complementarios</div>`;
-  S.casas.forEach((c,i)=>{
-    const costoCrc=c.area*(S.moM2+S.matM2);
-    const costoUsdC=costoCrc/tc;
-    costoHtml+=`<div class="gasto-row"><span>Casa ${i+1} — ${c.area} m²</span><span style="font-family:var(--mono);font-weight:600">${fmtC(costoCrc)} · ${fmtUf(costoUsdC)}</span></div>`;
-  });
-  costoHtml+=`<div class="gasto-row" style="font-weight:600;font-size:13px;margin-top:4px;padding-top:8px;border-top:2px solid var(--border)">
-    <span>Total construcción (${totalAreaCasas} m²)</span>
-    <span style="font-family:var(--mono)">${fmtC(costoCasasCrc)} · ${fmtUf(costoCasasCrc/tc)}</span></div>`;
-  costoHtml+=`<div class="note info" style="margin-top:8px">La madera de la casa proviene del raleo — su valor equivale a madera que no se vende. `+
-    `Valor de oportunidad: <b>${fmtUf(totalTroza*pralCrc/S.tc2)}</b> USD (troza al precio de raleo).</div>`;
-
-  // KPI casa
-  L('kpi-casa',`${pct.toFixed(1)}%`);
-  L('kpi-casa-sub',`${fM(totalTroza,1)} m³ de ${fM(trozaDisp,1)} m³ disp.`);
-
-  costCard.innerHTML=costoHtml;
-  casasOut.appendChild(costCard);
+  if(currentTab===0){renderInventarioTab();}
+  else if(currentTab===1)renderRaleosTab();
+  else if(currentTab===2)renderFinTab();
+  else if(currentTab===3)renderCasaTab();
 }
 
-// Init
-renderCasasSidebar();
+// ═══════════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════════
+document.getElementById('ni-fecha').value=new Date().toISOString().slice(0,10);
+if(localStorage.getItem('gh-token'))document.getElementById('gh-token').value=localStorage.getItem('gh-token');
+if(localStorage.getItem('gh-user'))document.getElementById('gh-user').value=localStorage.getItem('gh-user');
+if(localStorage.getItem('gh-repo'))document.getElementById('gh-repo').value=localStorage.getItem('gh-repo');
+renderCasasSb();
+renderChips();
+loadFromGitHub();
 update();
 </script>
 </body>
