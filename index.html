@@ -216,9 +216,8 @@ tbody tr:hover{background:var(--teca-lt)}
           <th onclick="sortTbl(1)">Parcela</th>
           <th onclick="sortTbl(2)">Árbol #</th>
           <th onclick="sortTbl(3)">DAP (cm) ↕</th>
-          <th onclick="sortTbl(4)">Altura (m)</th>
-          <th onclick="sortTbl(5)">Vol (m³)</th>
-          <th onclick="sortTbl(6)">AB (m²)</th>
+          <th onclick="sortTbl(4)">Vol (m³)</th>
+          <th onclick="sortTbl(5)">AB (m²)</th>
         </tr></thead>
         <tbody id="tbl-body"></tbody>
       </table></div>
@@ -340,12 +339,7 @@ tbody tr:hover{background:var(--teca-lt)}
               <input id="ni-dap-mean" type="number" step="0.1" placeholder="16.4" oninput="updateResumenUI()">
             </div>
           </div>
-          <div class="fg" style="grid-template-columns:1fr;gap:10px;margin-top:4px">
-            <div class="fl">
-              <label>Altura comercial promedio (m)</label>
-              <input id="ni-altura" type="number" step="0.1" placeholder="ej: 12.0" oninput="updateResumenUI()">
-            </div>
-          </div>
+          <input id="ni-altura" type="hidden" value="">
           <!-- Inputs ocultos que se calculan solos (necesarios para buildInvFromForm) -->
           <input id="ni-dap-sd" type="hidden" value="2">
 
@@ -402,7 +396,6 @@ tbody tr:hover{background:var(--teca-lt)}
                 <th style="text-align:left;background:var(--bg);padding:5px 6px;border-bottom:1px solid var(--border)">Parcela</th>
                 <th style="text-align:left;background:var(--bg);padding:5px 6px;border-bottom:1px solid var(--border)">Árbol #</th>
                 <th style="text-align:right;background:var(--bg);padding:5px 6px;border-bottom:1px solid var(--border)">DAP (cm)</th>
-                <th style="text-align:right;background:var(--bg);padding:5px 6px;border-bottom:1px solid var(--border)">Altura (m)</th>
                 <th style="background:var(--bg);padding:5px 6px;border-bottom:1px solid var(--border)"></th>
               </tr></thead>
               <tbody id="tree-rows"></tbody>
@@ -837,7 +830,7 @@ function renderTable() {
     return true;
   });
 
-  var colKeys = ['invName','parc','n','dap','h','vol','ab'];
+  var colKeys = ['invName','parc','n','dap','vol','ab'];
   filtered.sort(function(a,b) {
     var av = a[colKeys[sortCol]] == null ? 0 : a[colKeys[sortCol]];
     var bv = b[colKeys[sortCol]] == null ? 0 : b[colKeys[sortCol]];
@@ -853,7 +846,6 @@ function renderTable() {
       '<td><span class="tag '+tagCls+'">'+r.parc+'</span></td>' +
       '<td>'+r.n+'</td>' +
       '<td style="font-weight:600">'+fN(r.dap)+'</td>' +
-      '<td>'+(r.h!=null?fN(r.h):'—')+'</td>' +
       '<td>'+fN(r.vol,4)+'</td>' +
       '<td>'+fN(r.ab,5)+'</td>' +
       '</tr>';
@@ -1304,8 +1296,7 @@ function renderTreeRows() {
     return '<tr>' +
       '<td style="padding:3px 6px"><select style="width:55px;padding:3px;border:1px solid var(--border);border-radius:4px;font-size:11px" onchange="treeRows['+i+'].parc=this.value">'+opts+'</select></td>' +
       '<td style="padding:3px 6px;text-align:right"><input type="number" style="width:50px;padding:3px 5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:right" value="'+r.n+'" onchange="treeRows['+i+'].n=+this.value"></td>' +
-      '<td style="padding:3px 6px;text-align:right"><input type="number" step="0.1" style="width:60px;padding:3px 5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:right" value="'+r.dap+'" placeholder="cm" oninput="treeRows['+i+'].dap=+this.value;updateArbPreview()"></td>' +
-      '<td style="padding:3px 6px;text-align:right"><input type="number" step="0.1" style="width:55px;padding:3px 5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:right" value="'+r.h+'" placeholder="m" oninput="treeRows['+i+'].h=+this.value"></td>' +
+      '<td style="padding:3px 6px;text-align:right"><input type="number" step="0.1" style="width:70px;padding:3px 5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:right" value="'+r.dap+'" placeholder="cm" oninput="treeRows['+i+'].dap=+this.value;updateArbPreview()"></td>' +
       '<td style="padding:3px 6px"><button onclick="rmTreeRow('+i+')" style="border:none;background:#FEF2F2;color:#B91C1C;border-radius:4px;padding:2px 6px;cursor:pointer;font-size:10px">✕</button></td>' +
       '</tr>';
   }).join('');
