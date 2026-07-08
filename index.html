@@ -405,6 +405,27 @@ tbody tr:hover{background:var(--teca-lt)}
         </div>
 
         <!-- Notas -->
+
+        <!-- Mortalidad -->
+        <div style="margin-top:12px;padding:12px 14px;background:var(--bg);border-radius:8px;border:1px solid var(--border)">
+          <div style="font-size:12px;font-weight:600;margin-bottom:10px;color:var(--text)">🌿 Mortalidad observada</div>
+          <div class="fg" style="grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px">
+            <div class="fl">
+              <label>Árboles muertos (total plantación)</label>
+              <input id="ni-muertos" type="number" min="0" placeholder="ej: 45" oninput="updateMortalidad()">
+            </div>
+            <div class="fl">
+              <label>Total árboles plantados originalmente</label>
+              <input id="ni-total-orig" type="number" placeholder="ej: 1400" oninput="updateMortalidad()">
+            </div>
+            <div class="fl">
+              <label>% Mortalidad acumulada</label>
+              <input id="ni-mort-pct" type="text" readonly style="background:#f5f5f3;color:var(--muted);cursor:not-allowed" placeholder="calculado">
+            </div>
+          </div>
+          <div id="mort-preview" style="font-size:11px;color:var(--muted)"></div>
+        </div>
+
         <div class="fg c1" style="margin-top:8px">
           <div class="fl"><label>Notas de campo (opcional)</label><textarea id="ni-notas" rows="2" placeholder="Observaciones, condiciones del sitio, etc."></textarea></div>
         </div>
@@ -412,8 +433,8 @@ tbody tr:hover{background:var(--teca-lt)}
         <!-- Acciones -->
         <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;align-items:center">
           <button class="btn btn-s" onclick="previewInventario()">👁 Preview</button>
-          <button class="btn btn-p" onclick="guardarInventario()">💾 Guardar en GitHub</button>
-          <button class="btn btn-s" onclick="guardarLocal()">📥 Guardar local</button>
+          <button class="btn btn-p" onclick="guardarInventario()">☁️ Guardar GitHub (online)</button>
+          <button class="btn btn-s" onclick="guardarLocal()">📥 Guardar local (sin internet)</button>
         </div>
         <div id="gh-status" class="gh-st" style="display:none"></div>
       </div>
@@ -603,9 +624,15 @@ function invStats(inv) {
     if (inv.resumen.densHa) densHa = inv.resumen.densHa;
     if (inv.resumen.dapMean) mean   = inv.resumen.dapMean;
     if (inv.resumen.dapSd)   sd     = inv.resumen.dapSd;
-    // Recalcular AB y vol desde el DAP real si se proporcionó
     abHa  = abF(mean) * densHa;
     volHa = volF(mean) * densHa;
+  }
+  // Si hay dato de mortalidad, ajustar densidad
+  if (inv.mortalidad && inv.mortalidad.origTotal) {
+    var densCorr = (inv.mortalidad.origTotal - inv.mortalidad.muertos) / HA;
+    densHa = densCorr;
+    abHa   = abF(mean) * densHa;
+    volHa  = volF(mean) * densHa;
   }
   return {
     trees: trees,
@@ -1148,6 +1175,40 @@ function renderCasaTab() {
 // TAB 4: CAMPO
 // ═══════════════════════════════════════════════════
 
+function updateMortalidad() {
+  var muertos  = +document.getElementById('ni-muertos').value || 0;
+  var origTotal = +document.getElementById('ni-total-orig').value || 0;
+  var pctEl    = document.getElementById('ni-mort-pct');
+  var prevEl   = document.getElementById('mort-preview');
+  if (!origTotal || !muertos) {
+    if (pctEl) pctEl.value = '';
+    if (prevEl) prevEl.textContent = '';
+    return;
+  }
+  var pct = (muertos / origTotal * 100);
+  if (pctEl) pctEl.value = pct.toFixed(1) + '%';
+  // Calcular densidad actual corregida por mortalidad
+  var densOrig = origTotal / HA;
+  var densActual = (origTotal - muertos) / HA;
+  var mortAnual = null;
+  var edadEl = document.getElementById('ni-edad');
+  if (edadEl && +edadEl.value) {
+    mortAnual = (pct / 100) / +edadEl.value * 100;
+  }
+  if (prevEl) {
+    prevEl.innerHTML =
+      'Densidad original: <b>' + Math.round(densOrig) + ' arb/ha</b> &nbsp;·&nbsp; ' +
+      'Densidad actual corregida: <b>' + Math.round(densActual) + ' arb/ha</b>' +
+      (mortAnual ? ' &nbsp;·&nbsp; Tasa anual: <b>' + mortAnual.toFixed(1) + '%/año</b>' : '');
+  }
+  // Actualizar ni-dens con la densidad corregida por mortalidad
+  var densInput = document.getElementById('ni-dens');
+  if (densInput) {
+    densInput.value = Math.round(densActual);
+    updateResumenUI();
+  }
+}
+
 function renderCampoTab() {
   // Auto-fill densidad del inventario activo más reciente
   var activeInvList = inventarios.filter(function(i){ return activeInvs.has(i.id); });
@@ -1422,7 +1483,10 @@ function buildInvFromForm() {
       parcelas.push({id:'P'+(p+1), area:areaP, trees:pts});
     }
     // Guardar también los valores resumen directos para referencia
-    return {id:id, name:nombre, date:fecha, age:edad, method:'resumen', notas:notas,
+    var muertos = +document.getElementById('ni-muertos').value||0;
+    var origTotal = +document.getElementById('ni-total-orig').value||0;
+    var mortData = muertos&&origTotal ? {muertos:muertos,origTotal:origTotal,pct:+(muertos/origTotal*100).toFixed(2)} : null;
+    return {id:id, name:nombre, date:fecha, age:edad, method:'resumen', notas:notas, mortalidad:mortData,
             resumen:{dapMean:dapMean, dapSd:dapSd, densHa:densObs||Math.round(nArboles*(10000/totalAreaM)), altura:altura},
             parcelas:parcelas};
   } else {
@@ -1434,7 +1498,10 @@ function buildInvFromForm() {
       parcMap[r.parc].push({n:r.n, dap:r.dap, h:r.h||null});
     });
     var parcelas2 = Object.keys(parcMap).map(function(pid){ return {id:pid, area:ap2, trees:parcMap[pid]}; });
-    return {id:id, name:nombre, date:fecha, age:edad, method:'trees', notas:notas, parcelas:parcelas2};
+    var muertos2 = +document.getElementById('ni-muertos').value||0;
+    var origTotal2 = +document.getElementById('ni-total-orig').value||0;
+    var mortData2 = muertos2&&origTotal2 ? {muertos:muertos2,origTotal:origTotal2,pct:+(muertos2/origTotal2*100).toFixed(2)} : null;
+    return {id:id, name:nombre, date:fecha, age:edad, method:'trees', notas:notas, mortalidad:mortData2, parcelas:parcelas2};
   }
 }
 
