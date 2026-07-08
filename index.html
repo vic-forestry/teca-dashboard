@@ -374,6 +374,10 @@ tbody tr:hover{background:var(--teca-lt)}
               </div>
             </div>
           </div>
+
+          <!-- Sugerencia de raleo según área basal -->
+          <div id="raleo-suggest" style="display:none;margin-top:12px;border-radius:8px;padding:12px 14px;border-left:4px solid #ccc"></div>
+
         </div>
 
         <!-- Árbol por árbol -->
@@ -1404,6 +1408,81 @@ function updateResumenUI() {
     var ageDays = (new Date(fechaEl.value) - new Date('2019-08-01')) / (365.25*86400000);
     edadEl.value = ageDays.toFixed(2);
   }
+
+  renderRaleoSuggest(abHa, densHa, dapMean);
+}
+
+function renderRaleoSuggest(abHa, densHa, dapMean) {
+  var box = document.getElementById('raleo-suggest');
+  if (!box) return;
+  if (!abHa || !densHa || !dapMean) { box.style.display = 'none'; return; }
+
+  // Definir escenario según área basal
+  var band, color, bg, titulo, texto, intMin, intMax, intRec;
+  if (abHa < 14) {
+    band='sanitario'; color='#16A34A'; bg='#F0FDF4';
+    titulo='Raleo pleno prematuro';
+    texto='El rodal todavía tiene holgura. Un raleo pleno sería prematuro. Recomendado: <b>raleo sanitario ligero (&lt;10%)</b>, extrayendo solo árboles defectuosos (bifurcados, torcidos, daño de viento). Re-medir en 6–12 meses.';
+    intMin=5; intMax=10; intRec=8;
+  } else if (abHa < 16) {
+    band='decision'; color='#CA8A04'; bg='#FEFCE8';
+    titulo='Zona de decisión';
+    texto='Estás cerca del umbral. Un <b>primer raleo moderado (30–33%)</b> es defendible, empezando por los defectuosos. Justificable por el componente sanitario y por anticiparse al riesgo de viento.';
+    intMin=30; intMax=33; intRec=32;
+  } else if (abHa < 18) {
+    band='pleno'; color='#EA580C'; bg='#FFF7ED';
+    titulo='Umbral alcanzado';
+    texto='El área basal cruzó el umbral de 16 m²/ha. <b>Primer raleo pleno justificado (33–38%)</b>. Recomendado 35%.';
+    intMin=33; intMax=38; intRec=35;
+  } else {
+    band='urgente'; color='#B91C1C'; bg='#FEF2F2';
+    titulo='Competencia alta — intervención urgente';
+    texto='El área basal está muy sobre el umbral. La competencia ya frena el crecimiento en diámetro. <b>Intervención urgente (35–38%)</b>.';
+    intMin=35; intMax=38; intRec=38;
+  }
+
+  // Tabla de escenarios con árboles a marcar por caja
+  var escenarios = [];
+  var pcts = [];
+  for (var p=intMin; p<=intMax; p++) { if (p===intMin||p===intMax||p===intRec) pcts.push(p); }
+  if (pcts.indexOf(intRec)<0) pcts.push(intRec);
+  pcts = pcts.filter(function(v,i,a){return a.indexOf(v)===i;}).sort(function(a,b){return a-b;});
+
+  var cajas = [4,6,8];
+  var rows = pcts.map(function(pct){
+    var frac = pct/100;
+    var remHa   = Math.round(densHa*frac);
+    var quedaHa = Math.round(densHa*(1-frac));
+    var totalFinca = Math.round(densHa*frac*2.24);
+    var cajaTxt = cajas.map(function(c){
+      return '<span style="display:inline-block;margin-right:10px">caja de '+c+' → <b>'+Math.round(c*frac)+'</b></span>';
+    }).join('');
+    var esRec = (pct===intRec);
+    return '<tr style="'+(esRec?'background:'+bg+';font-weight:600':'')+'">' +
+      '<td style="padding:4px 8px;border-bottom:1px solid #eee">'+pct+'%'+(esRec?' ★':'')+'</td>' +
+      '<td style="padding:4px 8px;border-bottom:1px solid #eee;text-align:right">'+remHa+'</td>' +
+      '<td style="padding:4px 8px;border-bottom:1px solid #eee;text-align:right">'+quedaHa+'</td>' +
+      '<td style="padding:4px 8px;border-bottom:1px solid #eee;text-align:right">'+totalFinca+'</td>' +
+      '<td style="padding:4px 8px;border-bottom:1px solid #eee;font-size:11px">'+cajaTxt+'</td>' +
+      '</tr>';
+  }).join('');
+
+  box.style.display = '';
+  box.style.borderLeftColor = color;
+  box.style.background = bg;
+  box.innerHTML =
+    '<div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:'+color+';margin-bottom:4px">Sugerencia de raleo · AB = '+fN(abHa,2)+' m²/ha</div>' +
+    '<div style="font-weight:700;color:'+color+';margin-bottom:6px">'+titulo+'</div>' +
+    '<div style="font-size:13px;line-height:1.5;color:var(--text);margin-bottom:10px">'+texto+'</div>' +
+    '<table style="width:100%;border-collapse:collapse;font-size:12px">' +
+    '<thead><tr style="text-align:left;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.04em">' +
+    '<th style="padding:4px 8px">Intensidad</th>' +
+    '<th style="padding:4px 8px;text-align:right">Extraer/ha</th>' +
+    '<th style="padding:4px 8px;text-align:right">Quedan/ha</th>' +
+    '<th style="padding:4px 8px;text-align:right">Total finca (2.24 ha)</th>' +
+    '<th style="padding:4px 8px">Marcar por caja de árboles</th>' +
+    '</tr></thead><tbody>'+rows+'</tbody></table>' +
+    '<div style="font-size:11px;color:var(--muted);margin-top:8px">★ = recomendado. "Caja" = grupo de árboles contiguos: por cada N árboles, marcá para eliminar la cantidad indicada, priorizando los de menor DAP o peor forma.</div>';
 }
 
 function buildTreeTable() {
