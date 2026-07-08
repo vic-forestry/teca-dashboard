@@ -1175,10 +1175,18 @@ function renderCampoTab() {
       '<div class="inv-meta">'+st.n+' árboles · DAP: '+fN(st.mean)+' cm · '+Math.round(st.densHa)+' árb/ha · AB: '+fN(st.abHa)+' m²/ha</div></div>' +
       '<div style="display:flex;gap:5px;align-items:center">' +
       '<button class="btn btn-sm '+(activeInvs.has(inv.id)?'btn-p':'btn-s')+'" onclick="toggleInv(\''+inv.id+'\')">'+(activeInvs.has(inv.id)?'✓ Activo':'Activar')+'</button>' +
-      (i>0?'<button class="btn btn-sm btn-d" onclick="deleteInv(\''+inv.id+'\')">✕</button>':'') +
+      (i>0?'<button class="btn btn-sm btn-d" onclick="confirmDelete(\''+inv.id+'\',\''+inv.name+'\')" title="Borrar de GitHub">🗑 Borrar</button>':'') +
       '</div>';
     el.appendChild(d);
   });
+}
+
+function confirmDelete(id, name) {
+  if (confirm('¿Borrar "'+name+'" de esta sesión y de GitHub?
+
+Esta acción no se puede deshacer.')) {
+    deleteInv(id);
+  }
 }
 
 function toggleInv(id) {
@@ -1187,12 +1195,40 @@ function toggleInv(id) {
   renderChips();
   update();
 }
-function deleteInv(id) {
+async function deleteInv(id) {
+  // Buscar el inventario para encontrar su archivo en GitHub
+  var inv = inventarios.filter(function(i){ return i.id===id; })[0];
+  // Borrar de la lista local primero
   inventarios = inventarios.filter(function(i){ return i.id!==id; });
   activeInvs.delete(id);
   renderChips();
   renderCampoTab();
   update();
+  // Borrar de GitHub si tenemos token
+  if (!inv) return;
+  var user  = localStorage.getItem('gh-user') || 'vic-forestry';
+  var repo  = localStorage.getItem('gh-repo') || 'teca-dashboard';
+  var token = localStorage.getItem('gh-token');
+  if (!token) return;
+  try {
+    // Listar archivos en inventarios/ para encontrar el SHA del archivo
+    var r = await fetch('https://api.github.com/repos/'+user+'/'+repo+'/contents/inventarios',
+      {headers:{Authorization:'Bearer '+token}});
+    if (!r.ok) return;
+    var files = await r.json();
+    // Buscar archivo que contenga el id del inventario
+    var target = null;
+    for (var i=0; i<files.length; i++) {
+      if (files[i].name.indexOf(inv.id) >= 0) { target = files[i]; break; }
+    }
+    if (!target) return;
+    // Borrar el archivo usando su SHA
+    await fetch('https://api.github.com/repos/'+user+'/'+repo+'/contents/'+target.path, {
+      method: 'DELETE',
+      headers: {Authorization:'Bearer '+token, 'Content-Type':'application/json'},
+      body: JSON.stringify({message:'Eliminar inventario: '+inv.name, sha: target.sha})
+    });
+  } catch(e) {}
 }
 
 // ═══════════════════════════════════════════════════
@@ -1470,18 +1506,29 @@ async function loadFromGitHub() {
     var r = await fetch('https://api.github.com/repos/'+user+'/'+repo+'/contents/inventarios', {headers:{Authorization:'Bearer '+token}});
     if (!r.ok) return;
     var files = await r.json();
+    // Construir lista de IDs en GitHub
+    var ghIds = [];
+    var loaded = [];
     for (var i=0; i<files.length; i++) {
       var f = files[i];
       if (!f.name.endsWith('.json')) continue;
       try {
         var rc = await fetch(f.download_url);
         var inv = await rc.json();
-        if (!inventarios.filter(function(x){ return x.id===inv.id; }).length) inventarios.push(inv);
+        ghIds.push(inv.id);
+        if (!inventarios.filter(function(x){ return x.id===inv.id; }).length) {
+          inventarios.push(inv);
+          loaded.push(inv.name);
+        }
       } catch(e) {}
     }
-    renderChips();
-    renderCampoTab();
-    update();
+    // Guardar lista de IDs de GitHub en localStorage para referencia
+    localStorage.setItem('gh-inv-ids', JSON.stringify(ghIds));
+    if (loaded.length > 0) {
+      renderChips();
+      renderCampoTab();
+      update();
+    }
   } catch(e) {}
 }
 
