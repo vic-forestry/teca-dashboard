@@ -1248,7 +1248,8 @@ async function deleteInv(id) {
       // Match por path guardado O por id en el nombre O descargando y comparando id
       var match = false;
       if (ghPath && f.path === ghPath) { match = true; }
-      else if (f.name.indexOf(inv.id) >= 0) { match = true; }
+      else if (inv._ghFileName && f.name === inv._ghFileName) { match = true; }
+      else if (!inv._ghFileName && f.name.indexOf(inv.id) >= 0) { match = true; }
       else {
         // Descargar y comparar id dentro del JSON
         try {
@@ -1567,6 +1568,7 @@ async function loadFromGitHub() {
         ghIds.push(inv.id);
         if (!inventarios.filter(function(x){ return x.id===inv.id; }).length) {
           inv._ghPath = f.path;  // guardar path para borrado
+          inv._ghFileName = f.name;  // nombre exacto del archivo
           inventarios.push(inv);
           loaded.push(inv.name);
         }
