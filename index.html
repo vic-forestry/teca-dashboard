@@ -305,11 +305,10 @@ tbody tr:hover{background:var(--teca-lt)}
           <div class="fl"><label>Nombre del inventario</label><input id="ni-nombre" placeholder="Ej: Inventario 2 — Julio 2026"></div>
           <div class="fl"><label>Fecha de medición</label><input id="ni-fecha" type="date"></div>
         </div>
-        <div class="fg c3">
-          <div class="fl"><label>Edad plantación (años)</label><input id="ni-edad" type="number" step="0.1" placeholder="6.93"></div>
-          <div class="fl"><label>Densidad observada (árb/ha) <span style="font-size:10px;color:var(--muted);font-weight:400">— ingresá el valor de campo</span></label><input id="ni-dens" type="text" type="number" oninput="updateResumenUI()" style="width:100%;padding:6px 9px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:var(--sans)" placeholder="ej: 600"></div>
-          <div class="fl"><label>Área total plantación (ha)</label><input id="ni-ha" type="number" step="0.01" value="2.24"></div>
-        </div>
+        <!-- Campos ocultos calculados automáticamente -->
+        <input id="ni-edad" type="hidden" value="">
+        <input id="ni-dens" type="hidden" value="">
+        <input id="ni-ha"   type="hidden" value="2.24">
 
         <!-- Método de ingreso -->
         <div style="margin-bottom:10px">
@@ -1274,6 +1273,17 @@ function updateResumenUI() {
     abEl.style.color = abHa >= 16 ? '#B91C1C' : 'var(--teca)';
     var abCard = abEl.parentElement;
     if (abCard) abCard.title = abHa >= 16 ? 'Sobre umbral de raleo (16 m²/ha)' : '';
+  }
+
+  // Auto-fill campos ocultos
+  var densEl = document.getElementById('ni-dens');
+  if (densEl && densHa) densEl.value = densHa;
+
+  var fechaEl = document.getElementById('ni-fecha');
+  var edadEl  = document.getElementById('ni-edad');
+  if (edadEl && fechaEl && fechaEl.value) {
+    var ageDays = (new Date(fechaEl.value) - new Date('2019-08-01')) / (365.25*86400000);
+    edadEl.value = ageDays.toFixed(2);
   }
 }
 
