@@ -612,8 +612,11 @@ function calcGastos(){
 function mkChart(id,type,data,opts={}){
   const el=document.getElementById(id);
   if(!el)return;
-  if(charts[id]){charts[id].destroy();}
-  charts[id]=new Chart(el,{type,data,options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:opts.legend||false},tooltip:{callbacks:opts.tooltip||{}}},scales:opts.scales||{},...(opts.extra||{})}});
+  if(charts[id]){try{charts[id].destroy();}catch(e){} charts[id]=null;}
+  const options={responsive:true,maintainAspectRatio:false,animation:{duration:200},
+    plugins:{legend:{display:opts.legend||false}},scales:opts.scales||{}};
+  if(opts.extra){const ex=opts.extra;Object.keys(ex).forEach(k=>options[k]=ex[k]);}
+  try{charts[id]=new Chart(el,{type,data,options});}catch(e){console.warn('Chart',id,e);}
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -1200,11 +1203,14 @@ function goTab(i){
   currentTab=i;
   document.querySelectorAll('.mtab').forEach((t,j)=>t.classList.toggle('active',j===i));
   document.querySelectorAll('.tp').forEach((p,j)=>p.classList.toggle('active',j===i));
-  if(i===0){renderInventarioTab();updateFilters();}
-  else if(i===1)renderRaleosTab();
-  else if(i===2)renderFinTab();
-  else if(i===3)renderCasaTab();
-  else if(i===4)renderCampoTab();
+  // Use rAF so canvas is visible before Chart.js tries to render
+  requestAnimationFrame(()=>{
+    if(i===0){updateFilters();renderInventarioTab();}
+    else if(i===1)renderRaleosTab();
+    else if(i===2)renderFinTab();
+    else if(i===3)renderCasaTab();
+    else if(i===4)renderCampoTab();
+  });
 }
 function sTab(i){
   document.querySelectorAll('.stab').forEach((t,j)=>t.classList.toggle('active',j===i));
@@ -1253,23 +1259,41 @@ function update(){
   L('cral-l','₡'+S.cral.toLocaleString());L('mo-l','₡'+Math.round(S.mo/1000)+'k');
   L('mat-l','₡'+Math.round(S.mat/1000)+'k');
 
-  if(currentTab===0){renderInventarioTab();}
-  else if(currentTab===1)renderRaleosTab();
-  else if(currentTab===2)renderFinTab();
-  else if(currentTab===3)renderCasaTab();
+  requestAnimationFrame(()=>{
+    if(currentTab===0){updateFilters();renderInventarioTab();}
+    else if(currentTab===1)renderRaleosTab();
+    else if(currentTab===2)renderFinTab();
+    else if(currentTab===3)renderCasaTab();
+  });
 }
 
 // ═══════════════════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════════════════
-document.getElementById('ni-fecha').value=new Date().toISOString().slice(0,10);
-if(localStorage.getItem('gh-token'))document.getElementById('gh-token').value=localStorage.getItem('gh-token');
-if(localStorage.getItem('gh-user'))document.getElementById('gh-user').value=localStorage.getItem('gh-user');
-if(localStorage.getItem('gh-repo'))document.getElementById('gh-repo').value=localStorage.getItem('gh-repo');
-renderCasasSb();
-renderChips();
-loadFromGitHub();
-update();
+function init(){
+  document.getElementById('ni-fecha').value=new Date().toISOString().slice(0,10);
+  const ghToken=localStorage.getItem('gh-token');
+  const ghUser=localStorage.getItem('gh-user');
+  const ghRepo=localStorage.getItem('gh-repo');
+  if(ghToken){const el=document.getElementById('gh-token');if(el)el.value=ghToken;}
+  if(ghUser){const el=document.getElementById('gh-user');if(el)el.value=ghUser;}
+  if(ghRepo){const el=document.getElementById('gh-repo');if(el)el.value=ghRepo;}
+  renderCasasSb();
+  renderChips();
+  updateFilters();
+  // Give DOM time to paint before rendering charts
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
+      update();
+      loadFromGitHub();
+    });
+  });
+}
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',init);
+} else {
+  init();
+}
 </script>
 </body>
 </html>
