@@ -1,0 +1,199 @@
+{
+  "id": "inv1783481994286",
+  "name": "Inventario 2",
+  "date": "2026-07-08",
+  "age": 6.93,
+  "method": "resumen",
+  "notas": "",
+  "resumen": {
+    "dapMean": 0,
+    "dapSd": 2,
+    "densHa": 567,
+    "altura": null
+  },
+  "parcelas": [
+    {
+      "id": "P1",
+      "area": 200,
+      "trees": [
+        {
+          "n": 1,
+          "dap": 5,
+          "h": null
+        },
+        {
+          "n": 2,
+          "dap": 5,
+          "h": null
+        },
+        {
+          "n": 3,
+          "dap": 5,
+          "h": null
+        },
+        {
+          "n": 4,
+          "dap": 5,
+          "h": null
+        },
+        {
+          "n": 5,
+          "dap": 5,
+          "h": null
+        },
+        {
+          "n": 6,
+          "dap": 5,
+          "h": null
+        },
+        {
+          "n": 7,
+          "dap": 5,
+          "h": null
+        },
+        {
+          "n": 8,
+          "dap": 5,
+          "h": null
+        },
+        {
+          "n": 9,
+          "dap": 5,
+          "h": null
+        },
+        {
+          "n": 10,
+          "dap": 5,
+          "h": null
+        },
+        {
+          "n": 11,
+          "dap": 5,
+          "h": null
+        }
+      ]
+    },
+    {
+      "id": "P2",
+      "area": 200,
+      "trees": [
+        {
+          "n": 1,
+          "dap": 5,
+          "h": null
+        },
+        {
+          "n": 2,
+          "dap": 5,
+          "h": null
+        },
+        {
+          "n": 3,
+          "dap": 5,
+          "h": null
+        },
+        {
+          "n": 4,
+          "dap": 5,
+          "h": null
+        },
+        {
+          "n": 5,
+          "dap": 5,
+          "h": null
+        },
+        {
+          "n": 6,
+          "dap": 5,
+          "h": null
+        },
+        {
+          "n": 7,
+          "dap": 5,
+          "h": null
+        },
+        {
+          "n": 8,
+          "dap": 5,
+          "h": null
+        },
+        {
+          "n": 9,
+          "dap": 5,
+          "h": null
+        },
+        {
+          "n": 10,
+          "dap": 5,
+          "h": null
+        },
+        {
+          "n": 11,
+          "dap": 5,
+          "h": null
+        }
+      ]
+    },
+    {
+      "id": "P3",
+      "area": 200,
+      "trees": [
+        {
+          "n": 1,
+          "dap": 5,
+          "h": null
+        },
+        {
+          "n": 2,
+          "dap": 5,
+          "h": null
+        },
+        {
+          "n": 3,
+          "dap": 5,
+          "h": null
+        },
+        {
+          "n": 4,
+          "dap": 5,
+          "h": null
+        },
+        {
+          "n": 5,
+          "dap": 5,
+          "h": null
+        },
+        {
+          "n": 6,
+          "dap": 5,
+          "h": null
+        },
+        {
+          "n": 7,
+          "dap": 5,
+          "h": null
+        },
+        {
+          "n": 8,
+          "dap": 5,
+          "h": null
+        },
+        {
+          "n": 9,
+          "dap": 5,
+          "h": null
+        },
+        {
+          "n": 10,
+          "dap": 5,
+          "h": null
+        },
+        {
+          "n": 11,
+          "dap": 5,
+          "h": null
+        }
+      ]
+    }
+  ]
+}
