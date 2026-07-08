@@ -307,7 +307,7 @@ tbody tr:hover{background:var(--teca-lt)}
         </div>
         <div class="fg c3">
           <div class="fl"><label>Edad plantación (años)</label><input id="ni-edad" type="number" step="0.1" placeholder="6.93"></div>
-          <div class="fl"><label>Densidad estimada (árb/ha) <span style="font-size:10px;color:var(--muted);font-weight:400">— calculada del inventario activo</span></label><input id="ni-dens" type="text" readonly style="background:#f5f5f3;color:var(--muted);cursor:not-allowed" placeholder="—"></div>
+          <div class="fl"><label>Densidad observada (árb/ha) <span style="font-size:10px;color:var(--muted);font-weight:400">— ingresá el valor de campo</span></label><input id="ni-dens" type="text" type="number" oninput="updateResumenUI()" style="width:100%;padding:6px 9px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:var(--sans)" placeholder="ej: 600"></div>
           <div class="fl"><label>Área total plantación (ha)</label><input id="ni-ha" type="number" step="0.01" value="2.24"></div>
         </div>
 
@@ -322,17 +322,65 @@ tbody tr:hover{background:var(--teca-lt)}
 
         <!-- Resumen -->
         <div id="panel-resumen">
-          <div class="fg c3">
-            <div class="fl"><label>N° parcelas</label><input id="ni-nparcelas" type="number" value="3" min="1" oninput="updateResumenUI()"></div>
-            <div class="fl"><label>Área c/parcela (m²)</label><input id="ni-area-parcela" type="number" value="200" oninput="updateResumenUI()"></div>
-            <div class="fl"><label>N° árboles medidos</label><input id="ni-narboles" type="number" placeholder="34" oninput="updateResumenUI()"></div>
+          <!-- Inputs que el usuario llena -->
+          <div class="fg" style="grid-template-columns:1fr 1fr;gap:10px">
+            <div class="fl">
+              <label>N° parcelas</label>
+              <input id="ni-nparcelas" type="number" value="3" min="1" oninput="updateResumenUI()">
+            </div>
+            <div class="fl">
+              <label>Área c/parcela (m²) <span id="ni-radio-lbl" style="font-size:10px;color:var(--muted);font-weight:400"></span></label>
+              <input id="ni-area-parcela" type="number" value="200" oninput="updateResumenUI()">
+            </div>
+            <div class="fl">
+              <label>N° árboles medidos</label>
+              <input id="ni-narboles" type="number" placeholder="34" oninput="updateResumenUI()">
+            </div>
+            <div class="fl">
+              <label>DAP promedio (cm)</label>
+              <input id="ni-dap-mean" type="number" step="0.1" placeholder="16.4" oninput="updateResumenUI()">
+            </div>
           </div>
-          <div class="fg c3">
-            <div class="fl"><label>DAP promedio (cm)</label><input id="ni-dap-mean" type="number" step="0.01" placeholder="16.37" oninput="updateResumenUI()"></div>
-            <div class="fl"><label>DAP desv. estándar (cm)</label><input id="ni-dap-sd" type="number" step="0.01" placeholder="2.13"></div>
-            <div class="fl"><label>Altura promedio (m)</label><input id="ni-altura" type="number" step="0.1" placeholder="12.0"></div>
+          <div class="fg" style="grid-template-columns:1fr;gap:10px;margin-top:4px">
+            <div class="fl">
+              <label>Altura comercial promedio (m)</label>
+              <input id="ni-altura" type="number" step="0.1" placeholder="ej: 12.0" oninput="updateResumenUI()">
+            </div>
           </div>
-          <div id="resumen-preview" class="note info" style="margin-bottom:10px"></div>
+          <!-- Inputs ocultos que se calculan solos (necesarios para buildInvFromForm) -->
+          <input id="ni-dap-sd" type="hidden" value="2">
+
+          <!-- Resultados calculados automáticamente -->
+          <div id="resumen-preview" style="display:none"></div>
+          <div style="margin-top:12px;background:var(--bg);border-radius:8px;padding:10px 14px">
+            <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:8px">Calculado automáticamente</div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px">
+              <div class="kpi" style="padding:.6rem .8rem">
+                <div class="kl">Área muestreada</div>
+                <div class="kv" id="calc-area" style="font-size:15px">—</div>
+              </div>
+              <div class="kpi" style="padding:.6rem .8rem">
+                <div class="kl">Densidad</div>
+                <div class="kv" id="calc-dens" style="font-size:15px">—</div>
+                <div class="ks2">árb/ha</div>
+              </div>
+              <div class="kpi" style="padding:.6rem .8rem">
+                <div class="kl">Área basal</div>
+                <div class="kv" id="calc-ab" style="font-size:15px">—</div>
+                <div class="ks2">m²/ha</div>
+              </div>
+              <div class="kpi" style="padding:.6rem .8rem">
+                <div class="kl">Vol. estimado</div>
+                <div class="kv" id="calc-vol" style="font-size:15px">—</div>
+                <div class="ks2">m³/ha</div>
+              </div>
+              <div class="kpi" style="padding:.6rem .8rem">
+                <div class="kl">Radio parcela</div>
+                <div class="kv" id="calc-radio" style="font-size:15px">—</div>
+                <div class="ks2">m</div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Árbol por árbol -->
@@ -554,12 +602,25 @@ function invStats(inv) {
   var sd = Math.sqrt(daps.map(function(d){ return (d-mean)*(d-mean); }).reduce(function(a,b){ return a+b; }, 0) / daps.length);
   var abSample = trees.reduce(function(s,t){ return s+abF(t.dap); }, 0);
   var volSample = trees.reduce(function(s,t){ return s+volF(t.dap); }, 0);
+  // Si el inventario tiene valores resumen directos (ingresados por el usuario),
+  // usarlos para densidad y mean — son más precisos que los árboles sintéticos
+  var densHa = trees.length*(10000/totalArea);
+  var abHa   = abSample*(10000/totalArea);
+  var volHa  = volSample*(10000/totalArea);
+  if (inv.resumen) {
+    if (inv.resumen.densHa) densHa = inv.resumen.densHa;
+    if (inv.resumen.dapMean) mean   = inv.resumen.dapMean;
+    if (inv.resumen.dapSd)   sd     = inv.resumen.dapSd;
+    // Recalcular AB y vol desde el DAP real si se proporcionó
+    abHa  = abF(mean) * densHa;
+    volHa = volF(mean) * densHa;
+  }
   return {
     trees: trees,
     mean: mean, sd: sd,
-    abHa: abSample*(10000/totalArea),
-    volHa: volSample*(10000/totalArea),
-    densHa: trees.length*(10000/totalArea),
+    abHa: abHa,
+    volHa: volHa,
+    densHa: densHa,
     n: trees.length,
     totalArea: totalArea
   };
@@ -1175,16 +1236,45 @@ function setMetodo(m) {
 }
 
 function updateResumenUI() {
-  var n = +document.getElementById('ni-narboles').value||0;
-  var np = +document.getElementById('ni-nparcelas').value||1;
-  var ap = +document.getElementById('ni-area-parcela').value||200;
+  var n       = +document.getElementById('ni-narboles').value||0;
+  var np      = +document.getElementById('ni-nparcelas').value||1;
+  var ap      = +document.getElementById('ni-area-parcela').value||200;
   var dapMean = +document.getElementById('ni-dap-mean').value||0;
-  var pr = document.getElementById('resumen-preview');
-  if (!dapMean||!n||!pr) return;
-  var totalArea = np*ap;
-  var densHa = n*(10000/totalArea);
-  var abHa = abF(dapMean)*densHa;
-  pr.innerHTML = '<b>Preview:</b> Densidad: <b>'+Math.round(densHa)+' árb/ha</b> · AB: <b>'+fN(abHa)+' m²/ha</b> · Vol: <b>'+fN(volF(dapMean)*(10000/(totalArea/n)),1)+' m³/ha</b>';
+
+  // Calcular radio de parcela circular equivalente
+  var radio = Math.sqrt(ap / Math.PI);
+  var radioEl = document.getElementById('ni-radio-lbl');
+  if (radioEl) radioEl.textContent = '(radio ' + fN(radio, 1) + ' m)';
+
+  var totalArea = np * ap;
+  var densHa    = n ? Math.round(n * (10000 / totalArea)) : 0;
+
+  // Actualizar ni-dens (para buildInvFromForm)
+  var densEl = document.getElementById('ni-dens');
+  if (densEl && densHa) densEl.value = densHa;
+
+  // Calcular AB y vol solo si hay DAP
+  var abHa  = dapMean ? abF(dapMean) * densHa : 0;
+  var volHa = dapMean ? volF(dapMean) * densHa : 0;
+
+  // Actualizar tarjetas calculadas
+  function setCalc(id, val, decimals) {
+    var el = document.getElementById(id);
+    if (el) el.textContent = val ? fN(val, decimals===undefined?1:decimals) : '—';
+  }
+  setCalc('calc-area',  totalArea, 0);
+  setCalc('calc-dens',  densHa,    0);
+  setCalc('calc-ab',    abHa,      2);
+  setCalc('calc-vol',   volHa,     1);
+  setCalc('calc-radio', radio,     1);
+
+  // Highlight si AB supera umbral
+  var abEl = document.getElementById('calc-ab');
+  if (abEl) {
+    abEl.style.color = abHa >= 16 ? '#B91C1C' : 'var(--teca)';
+    var abCard = abEl.parentElement;
+    if (abCard) abCard.title = abHa >= 16 ? 'Sobre umbral de raleo (16 m²/ha)' : '';
+  }
 }
 
 function buildTreeTable() {
@@ -1240,21 +1330,30 @@ function buildInvFromForm() {
     var areaP     = +document.getElementById('ni-area-parcela').value||200;
     var nArboles  = +document.getElementById('ni-narboles').value||0;
     var dapMean   = +document.getElementById('ni-dap-mean').value||0;
-    var dapSd     = +document.getElementById('ni-dap-sd').value||0;
+    var dapSd     = +document.getElementById('ni-dap-sd').value||2;
     var altura    = +document.getElementById('ni-altura').value||null;
-    var nPerP = Math.round(nArboles/nparcelas);
+    var densObs   = +document.getElementById('ni-dens').value||0;
+    // Derivar nArboles desde densidad si no se puso directamente
+    var totalAreaM = nparcelas * areaP;
+    if (!nArboles && densObs) nArboles = Math.round(densObs * totalAreaM / 10000);
+    if (!nArboles) nArboles = 30; // fallback
+    var nPerP = Math.max(1, Math.round(nArboles/nparcelas));
     var parcelas = [];
     for (var p=0; p<nparcelas; p++) {
       var pts = [];
       for (var i=0; i<nPerP; i++) {
+        // Box-Muller para distribucion normal
         var u1=Math.random(), u2=Math.random();
-        var z = Math.sqrt(-2*Math.log(u1))*Math.cos(2*Math.PI*u2);
-        var dap = Math.max(dapMean+z*dapSd, 5);
+        var z = Math.sqrt(-2*Math.log(Math.max(u1,1e-10)))*Math.cos(2*Math.PI*u2);
+        var dap = Math.max(dapMean + z*dapSd, 5);
         pts.push({n:i+1, dap:Math.round(dap*10)/10, h:altura});
       }
       parcelas.push({id:'P'+(p+1), area:areaP, trees:pts});
     }
-    return {id:id, name:nombre, date:fecha, age:edad, method:'resumen', notas:notas, parcelas:parcelas};
+    // Guardar también los valores resumen directos para referencia
+    return {id:id, name:nombre, date:fecha, age:edad, method:'resumen', notas:notas,
+            resumen:{dapMean:dapMean, dapSd:dapSd, densHa:densObs||Math.round(nArboles*(10000/totalAreaM)), altura:altura},
+            parcelas:parcelas};
   } else {
     var np2 = +document.getElementById('ni-nparcelas-arb').value||3;
     var ap2 = +document.getElementById('ni-area-arb').value||200;
