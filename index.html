@@ -457,843 +457,984 @@ tbody tr:hover{background:var(--teca-lt)}
 </div><!-- app -->
 
 <script>
-// ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
 // CONSTANTES
-// ═══════════════════════════════════════════════════════════════════
-const HA=2.24, PMT=0.3048*0.3048*0.0254;
-const ESTAB=new Date('2019-08-01');
-const INV1_DATE=new Date('2025-03-01');
-const COLORS=['#2C5F2E','#C8921A','#6B21A8','#C05020','#1A5276'];
-const PAR_COLORS={'P1':'#185FA5','P2':'#2C5F2E','P3':'#C05020'};
-const IMA_C={6:19,7:22,8:21,9:18,10:15,11:12,12:11,13:10,14:10,15:10};
-const IMA_O={6:30,7:34,8:32,9:28,10:22,11:17,12:14,13:13,14:13,15:13};
+// ═══════════════════════════════════════════════════
+const HA = 2.24;
+const PMT = 0.3048 * 0.3048 * 0.0254;
+const ESTAB = new Date('2019-08-01');
+const PAR_COLORS = { P1: '#185FA5', P2: '#2C5F2E', P3: '#C05020' };
+const IMA_C = {6:19,7:22,8:21,9:18,10:15,11:12,12:11,13:10,14:10,15:10};
+const IMA_O = {6:30,7:34,8:32,9:28,10:22,11:17,12:14,13:13,14:13,15:13};
 
-// ═══════════════════════════════════════════════════════════════════
-// DATOS BASE — Inventario 1 (marzo 2025)
-// ═══════════════════════════════════════════════════════════════════
-const INV1={
-  id:'inv1', name:'Inventario 1', date:'2025-03-01',
-  age:5.58, method:'trees',
+// ═══════════════════════════════════════════════════
+// INVENTARIO 1
+// ═══════════════════════════════════════════════════
+const INV1 = {
+  id:'inv1', name:'Inventario 1', date:'2025-03-01', age:5.58, method:'trees',
   parcelas:[
     {id:'P1',area:200,trees:[
       {n:1,dap:15.0,h:null},{n:2,dap:13.5,h:null},{n:3,dap:12.5,h:null},{n:4,dap:15.0,h:null},
       {n:5,dap:17.0,h:null},{n:6,dap:15.5,h:null},{n:7,dap:16.0,h:null},{n:8,dap:15.5,h:null},
-      {n:9,dap:17.0,h:null},{n:10,dap:17.0,h:null},{n:11,dap:15.0,h:null},{n:12,dap:15.0,h:null}]},
+      {n:9,dap:17.0,h:null},{n:10,dap:17.0,h:null},{n:11,dap:15.0,h:null},{n:12,dap:15.0,h:null}
+    ]},
     {id:'P2',area:200,trees:[
       {n:1,dap:19.0,h:null},{n:2,dap:13.5,h:null},{n:3,dap:19.0,h:null},{n:4,dap:20.0,h:null},
       {n:5,dap:17.5,h:null},{n:6,dap:19.5,h:null},{n:7,dap:12.0,h:null},{n:8,dap:18.0,h:null},
-      {n:9,dap:15.0,h:null},{n:10,dap:11.5,h:null},{n:11,dap:17.0,h:null},{n:12,dap:16.5,h:null}]},
+      {n:9,dap:15.0,h:null},{n:10,dap:11.5,h:null},{n:11,dap:17.0,h:null},{n:12,dap:16.5,h:null}
+    ]},
     {id:'P3',area:200,trees:[
       {n:1,dap:16.5,h:null},{n:2,dap:17.5,h:null},{n:3,dap:18.0,h:null},{n:4,dap:18.0,h:null},
       {n:5,dap:18.5,h:null},{n:6,dap:17.5,h:null},{n:7,dap:18.0,h:null},{n:8,dap:16.5,h:null},
-      {n:9,dap:17.0,h:null},{n:10,dap:16.5,h:null}]}
+      {n:9,dap:17.0,h:null},{n:10,dap:16.5,h:null}
+    ]}
   ]
 };
 
-// ═══════════════════════════════════════════════════════════════════
-// ESTADO
-// ═══════════════════════════════════════════════════════════════════
-let inventarios=[INV1];
-let activeInvs=new Set(['inv1']);
-let S={
-  esc:'C',mkt:'export',mod:'pie',
-  r1on:true,r1y:7,ri1:35,r2on:false,r2y:10,ri2:25,
-  boost:20,tasa:8,infl:2,
-  pexp:300,tc:520,pnac:200,pral:150,tc2:520,ccf:20,
-  cuid:300000,elec:20000,imp:150000,otros:0,cral:1000,
-  mo:80000,mat:50000,
-  casas:[{area:40,grosor:1.0,alto:2.5}],
+// ═══════════════════════════════════════════════════
+// ESTADO GLOBAL
+// ═══════════════════════════════════════════════════
+let inventarios = [INV1];
+let activeInvs = new Set(['inv1']);
+let charts = {};
+let sortCol = 3, sortDir = 1;
+let treeRows = [];
+let currentTab = 0;
+let S = {
+  esc:'C', mkt:'export', mod:'pie',
+  r1on:true, r1y:7, ri1:35,
+  r2on:false, r2y:10, ri2:25,
+  boost:20, tasa:8, infl:2,
+  pexp:300, tc:520, pnac:200,
+  pral:150, tc2:520, ccf:20,
+  cuid:300000, elec:20000, imp:150000, otros:0, cral:1000,
+  mo:80000, mat:50000,
+  casas:[{area:40, grosor:1.0, alto:2.5}],
   metodo:'resumen'
 };
-let charts={};
-let sortCol=3,sortDir=1;
-let treeRows=[];
 
-// ═══════════════════════════════════════════════════════════════════
-// HELPERS
-// ═══════════════════════════════════════════════════════════════════
-const volF=d=>-0.0068*d+0.001*d*d;
-const abF=d=>Math.PI/4*(d/100)**2;
-const fN=(v,d=1)=>v.toFixed(d);
-const fU=v=>`$${Math.round(v).toLocaleString('en-US')}`;
-const fC=v=>v>=1e6?`₡${(v/1e6).toFixed(1)}M`:`₡${Math.round(v).toLocaleString('es-CR')}`;
-const L=(id,t)=>{const e=document.getElementById(id);if(e)e.textContent=t;};
-const get=(id,def)=>{const e=document.getElementById(id);return e?+e.value:def;};
+// ═══════════════════════════════════════════════════
+// MATH HELPERS
+// ═══════════════════════════════════════════════════
+function volF(d) { return -0.0068*d + 0.001*d*d; }
+function abF(d)  { return Math.PI/4*(d/100)*(d/100); }
+function fN(v, d) { return (d===undefined?1:d, v.toFixed(d===undefined?1:d)); }
+function fU(v)   { return '$'+Math.round(v).toLocaleString('en-US'); }
+function fC(v)   { return v>=1e6 ? '₡'+(v/1e6).toFixed(1)+'M' : '₡'+Math.round(v).toLocaleString('es-CR'); }
+function L(id,t) { var e=document.getElementById(id); if(e) e.textContent=t; }
+function get(id, def) { var e=document.getElementById(id); return e ? +e.value : def; }
 
-function invStats(inv){
-  let trees=[];
-  const totalArea=inv.parcelas.reduce((s,p)=>s+p.area,0);
-  inv.parcelas.forEach(p=>p.trees.forEach(t=>trees.push({...t,parc:p.id,parcArea:p.area})));
-  const daps=trees.map(t=>t.dap);
-  const mean=daps.reduce((a,b)=>a+b,0)/daps.length;
-  const sd=Math.sqrt(daps.map(d=>(d-mean)**2).reduce((a,b)=>a+b,0)/daps.length);
-  const abSample=trees.reduce((s,t)=>s+abF(t.dap),0);
-  const abHa=abSample*(10000/totalArea);
-  const volSample=trees.reduce((s,t)=>s+volF(t.dap),0);
-  const volHa=volSample*(10000/totalArea);
-  const densHa=trees.length*(10000/totalArea);
-  return {trees,mean,sd,abHa,volHa,densHa,n:trees.length,totalArea};
+// ═══════════════════════════════════════════════════
+// MODELO
+// ═══════════════════════════════════════════════════
+function invStats(inv) {
+  var trees = [];
+  var totalArea = inv.parcelas.reduce(function(s,p){ return s+p.area; }, 0);
+  inv.parcelas.forEach(function(p) {
+    p.trees.forEach(function(t) {
+      trees.push({dap:t.dap, h:t.h, parc:p.id, parcArea:p.area});
+    });
+  });
+  var daps = trees.map(function(t){ return t.dap; });
+  var mean = daps.reduce(function(a,b){ return a+b; }, 0) / daps.length;
+  var sd = Math.sqrt(daps.map(function(d){ return (d-mean)*(d-mean); }).reduce(function(a,b){ return a+b; }, 0) / daps.length);
+  var abSample = trees.reduce(function(s,t){ return s+abF(t.dap); }, 0);
+  var volSample = trees.reduce(function(s,t){ return s+volF(t.dap); }, 0);
+  return {
+    trees: trees,
+    mean: mean, sd: sd,
+    abHa: abSample*(10000/totalArea),
+    volHa: volSample*(10000/totalArea),
+    densHa: trees.length*(10000/totalArea),
+    n: trees.length,
+    totalArea: totalArea
+  };
 }
 
-function getActiveFlat(){
-  let rows=[];
-  inventarios.filter(i=>activeInvs.has(i.id)).forEach(inv=>{
-    const totalArea=inv.parcelas.reduce((s,p)=>s+p.area,0);
-    inv.parcelas.forEach(p=>p.trees.forEach(t=>{
-      const abTree=abF(t.dap);
-      const abHaScale=abTree*(10000/totalArea);
-      rows.push({invId:inv.id,invName:inv.name,parc:p.id,n:t.n,dap:t.dap,h:t.h,vol:volF(t.dap),ab:abTree,abHa:abHaScale});
-    }));
+function getActiveFlat() {
+  var rows = [];
+  inventarios.filter(function(i){ return activeInvs.has(i.id); }).forEach(function(inv) {
+    var totalArea = inv.parcelas.reduce(function(s,p){ return s+p.area; }, 0);
+    inv.parcelas.forEach(function(p) {
+      p.trees.forEach(function(t) {
+        var abTree = abF(t.dap);
+        rows.push({
+          invId: inv.id, invName: inv.name, parc: p.id,
+          n: t.n, dap: t.dap, h: t.h,
+          vol: volF(t.dap), ab: abTree,
+          abHa: abTree*(10000/totalArea)
+        });
+      });
+    });
   });
   return rows;
 }
 
-function buildProjection(){
-  const ima=S.esc==='C'?IMA_C:IMA_O;
-  const bf=1+S.boost/100;
-  let vol=91.1,br=0;
-  const rows=[];
-  for(let y=5;y<=15;y++){
-    const ib=y>5?(ima[y]||10):0;
-    const ica=(br>0&&y>5)?ib*bf:ib;
-    if(br>0&&y>5)br--;
-    const vb=Math.round((vol+ica)*10)/10;
-    let ex=0,lbl='';
-    if(S.r1on&&y===S.r1y){ex=Math.round(vb*S.ri1/100*10)/10;br=3;lbl='R1';}
-    else if(S.r2on&&y===S.r2y){ex=Math.round(vb*S.ri2/100*10)/10;br=3;lbl='R2';}
-    else if(y===15){ex=vb;lbl='CF';}
-    const va=Math.round((vb-ex)*10)/10;
-    vol=va;
-    rows.push({y,ica:Math.round(ica*10)/10,vb,ex,lbl,va});
+function buildProjection() {
+  var ima = S.esc==='C' ? IMA_C : IMA_O;
+  var bf = 1 + S.boost/100;
+  var vol = 91.1, br = 0;
+  var rows = [];
+  for (var y=5; y<=15; y++) {
+    var ib = y>5 ? (ima[y]||10) : 0;
+    var ica = (br>0 && y>5) ? ib*bf : ib;
+    if (br>0 && y>5) br--;
+    var vb = Math.round((vol+ica)*10)/10;
+    var ex = 0, lbl = '';
+    if (S.r1on && y===S.r1y)       { ex=Math.round(vb*S.ri1/100*10)/10; br=3; lbl='R1'; }
+    else if (S.r2on && y===S.r2y) { ex=Math.round(vb*S.ri2/100*10)/10; br=3; lbl='R2'; }
+    else if (y===15)               { ex=vb; lbl='CF'; }
+    var va = Math.round((vb-ex)*10)/10;
+    vol = va;
+    rows.push({y:y, ica:Math.round(ica*10)/10, vb:vb, ex:ex, lbl:lbl, va:va});
   }
   return rows;
 }
 
-function calcFin(rows){
-  const tc=S.mkt==='export'?S.tc:S.tc2;
-  const tcN=S.tc2;
-  const pcfCrc=S.mkt==='export'?S.pexp*tc:S.pnac/PMT;
-  const pralCrc=S.pral/PMT;
-  const infl=S.infl/100;
-  const events=[];
-  rows.forEach(r=>{
-    if(!r.lbl||r.ex===0)return;
-    const tot=r.ex*HA;
-    const yrs=r.y-5;
-    const iF=Math.pow(1+infl,yrs);
-    let ing=0,costo=0;
-    if(r.lbl==='CF'){
-      ing=tot*pcfCrc*iF;
-      if(S.mod==='rollo')costo=tot*S.ccf*tc;
+function calcFin(rows) {
+  var tc  = S.mkt==='export' ? S.tc : S.tc2;
+  var tcN = S.tc2;
+  var pcfCrc = S.mkt==='export' ? S.pexp*tc : S.pnac/PMT;
+  var pralCrc = S.pral/PMT;
+  var infl = S.infl/100;
+  var events = [];
+  rows.forEach(function(r) {
+    if (!r.lbl || r.ex===0) return;
+    var tot = r.ex*HA;
+    var yrs = r.y-5;
+    var iF = Math.pow(1+infl, yrs);
+    var ing=0, costo=0;
+    if (r.lbl==='CF') {
+      ing = tot*pcfCrc*iF;
+      if (S.mod==='rollo') costo = tot*S.ccf*tc;
     } else {
-      ing=tot*pralCrc*iF;
-      const nA=Math.round(r.ex*HA/0.18);
-      costo=nA*S.cral;
+      ing = tot*pralCrc*iF;
+      var nA = Math.round(r.ex*HA/0.18);
+      costo = nA*S.cral;
     }
-    const tcE=r.lbl==='CF'?tc:tcN;
-    const netoU=(ing-costo)/tcE;
-    const vpnU=netoU/Math.pow(1+S.tasa/100,yrs);
-    events.push({y:r.y,lbl:r.lbl,vol:tot,vha:r.ex,ing,costo,netoU,vpnU,tc:tcE});
+    var tcE = r.lbl==='CF' ? tc : tcN;
+    var netoU = (ing-costo)/tcE;
+    var vpnU = netoU/Math.pow(1+S.tasa/100, yrs);
+    events.push({y:r.y, lbl:r.lbl, vol:tot, vha:r.ex, ing:ing, costo:costo, netoU:netoU, vpnU:vpnU, tc:tcE});
   });
-  return {events,tc,pcfCrc,pralCrc,tcN};
+  return {events:events, tc:tc, tcN:tcN, pcfCrc:pcfCrc, pralCrc:pralCrc};
 }
 
-function calcGastos(){
-  const tc=S.mkt==='export'?S.tc:S.tc2;
-  const anual=(S.cuid*12)+S.elec*12+S.imp+S.otros;
-  let tot=0,vpn=0;
-  for(let y=5;y<=15;y++){tot+=anual;vpn+=anual/Math.pow(1+S.tasa/100,y-5);}
-  return {anual,tot,vpn,totU:tot/tc,vpnU:vpn/tc};
+function calcGastos() {
+  var tc = S.mkt==='export' ? S.tc : S.tc2;
+  var anual = S.cuid*12 + S.elec*12 + S.imp + S.otros;
+  var tot=0, vpn=0;
+  for (var y=5; y<=15; y++) {
+    tot += anual;
+    vpn += anual/Math.pow(1+S.tasa/100, y-5);
+  }
+  return {anual:anual, tot:tot, vpn:vpn, totU:tot/tc, vpnU:vpn/tc};
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// CHART HELPER
-// ═══════════════════════════════════════════════════════════════════
-function mkChart(id,type,data,opts={}){
-  const el=document.getElementById(id);
-  if(!el)return;
-  if(charts[id]){try{charts[id].destroy();}catch(e){} charts[id]=null;}
-  const options={responsive:true,maintainAspectRatio:false,animation:{duration:200},
-    plugins:{legend:{display:opts.legend||false}},scales:opts.scales||{}};
-  if(opts.extra){const ex=opts.extra;Object.keys(ex).forEach(k=>options[k]=ex[k]);}
-  try{charts[id]=new Chart(el,{type,data,options});}catch(e){console.warn('Chart',id,e);}
+// ═══════════════════════════════════════════════════
+// CHART HELPER — completamente reescrito
+// ═══════════════════════════════════════════════════
+function mkChart(id, type, data, scales, legend) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  if (charts[id]) {
+    try { charts[id].destroy(); } catch(e) {}
+    charts[id] = null;
+  }
+  charts[id] = new Chart(el, {
+    type: type,
+    data: data,
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 150 },
+      plugins: {
+        legend: { display: legend===true }
+      },
+      scales: scales || {}
+    }
+  });
 }
 
-// ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
 // TAB 0: INVENTARIO
-// ═══════════════════════════════════════════════════════════════════
-function renderInventarioTab(){
-  const rows=getActiveFlat();
-  if(!rows.length){document.getElementById('inv-kpis').innerHTML='<div class="note warn">No hay inventarios activos.</div>';return;}
+// ═══════════════════════════════════════════════════
+function renderInventarioTab() {
+  var rows = getActiveFlat();
+  var kpiEl = document.getElementById('inv-kpis');
+  if (!kpiEl) return;
 
-  // KPIs
-  const daps=rows.map(r=>r.dap);
-  const mean=daps.reduce((a,b)=>a+b,0)/daps.length;
-  const abHa=rows.reduce((s,r)=>s+r.abHa,0)/inventarios.filter(i=>activeInvs.has(i.id)).length;
-  const volHa=rows.reduce((s,r)=>s+r.vol,0)*(10000/600);
-  const densHa=rows.length*(10000/600);
-  document.getElementById('inv-kpis').innerHTML=`
-    <div class="kpi"><div class="kl">Árboles medidos</div><div class="kv">${rows.length}</div><div class="ks2">${inventarios.filter(i=>activeInvs.has(i.id)).length} inventario(s)</div></div>
-    <div class="kpi hi"><div class="kl">DAP promedio</div><div class="kv">${fN(mean)} cm</div><div class="ks2">SD: ${fN(Math.sqrt(daps.map(d=>(d-mean)**2).reduce((a,b)=>a+b,0)/daps.length))} cm</div></div>
-    <div class="kpi"><div class="kl">Área basal</div><div class="kv">${fN(abHa)} m²/ha</div><div class="ks2">${abHa>=16?'⚠ sobre umbral':'bajo umbral (16)'}</div></div>
-    <div class="kpi"><div class="kl">Vol. estimado</div><div class="kv">${fN(volHa)} m³/ha</div><div class="ks2">${fN(volHa*HA,0)} m³ total</div></div>
-    <div class="kpi"><div class="kl">Densidad</div><div class="kv">${Math.round(densHa)}</div><div class="ks2">árb/ha estimada</div></div>`;
+  if (!rows.length) {
+    kpiEl.innerHTML = '<div class="note warn">No hay inventarios activos.</div>';
+    return;
+  }
+
+  var daps = rows.map(function(r){ return r.dap; });
+  var mean = daps.reduce(function(a,b){ return a+b; }, 0)/daps.length;
+  var variance = daps.map(function(d){ return (d-mean)*(d-mean); }).reduce(function(a,b){ return a+b; }, 0)/daps.length;
+  var sd = Math.sqrt(variance);
+  var nActInvs = inventarios.filter(function(i){ return activeInvs.has(i.id); }).length;
+  var abHa = rows.reduce(function(s,r){ return s+r.abHa; }, 0) / nActInvs;
+  var volHa = rows.reduce(function(s,r){ return s+r.vol; }, 0) * (10000/600);
+  var densHa = rows.length * (10000/600);
+
+  kpiEl.innerHTML =
+    '<div class="kpi"><div class="kl">Árboles medidos</div><div class="kv">'+rows.length+'</div><div class="ks2">'+nActInvs+' inventario(s)</div></div>' +
+    '<div class="kpi hi"><div class="kl">DAP promedio</div><div class="kv">'+fN(mean)+' cm</div><div class="ks2">SD: '+fN(sd)+' cm</div></div>' +
+    '<div class="kpi"><div class="kl">Área basal</div><div class="kv">'+fN(abHa)+' m²/ha</div><div class="ks2">'+(abHa>=16?'⚠ sobre umbral':'bajo umbral (16)')+'</div></div>' +
+    '<div class="kpi"><div class="kv">'+fN(volHa)+' m³/ha</div><div class="kl">Vol. estimado</div><div class="ks2">'+fN(volHa*HA,0)+' m³ total</div></div>' +
+    '<div class="kpi"><div class="kl">Densidad</div><div class="kv">'+Math.round(densHa)+'</div><div class="ks2">árb/ha est.</div></div>';
 
   // Histograma DAP
-  const bins=[10,12,14,16,18,20,22];
-  const bLabels=bins.slice(0,-1).map((b,i)=>`${b}–${bins[i+1]}`);
-  const parcs=[...new Set(rows.map(r=>r.parc))].sort();
-  const datasets=parcs.map((p,i)=>({
-    label:p,
-    data:bins.slice(0,-1).map((b,j)=>rows.filter(r=>r.parc===p&&r.dap>=b&&r.dap<bins[j+1]).length),
-    backgroundColor:Object.values(PAR_COLORS)[i]+'BB',borderColor:Object.values(PAR_COLORS)[i],borderWidth:1
-  }));
-  mkChart('ch-dap','bar',{labels:bLabels,datasets},{legend:true,scales:{x:{stacked:true,title:{display:true,text:'DAP (cm)',font:{size:10}}},y:{stacked:true,title:{display:true,text:'N° árboles',font:{size:10}},ticks:{stepSize:1}}}});
+  var bins = [10,12,14,16,18,20,22];
+  var bLabels = bins.slice(0,-1).map(function(b,i){ return b+'–'+bins[i+1]; });
+  var parcs = [];
+  rows.forEach(function(r){ if (parcs.indexOf(r.parc)<0) parcs.push(r.parc); });
+  parcs.sort();
+  var pcols = Object.values(PAR_COLORS);
+  var dsDap = parcs.map(function(p,pi) {
+    return {
+      label: p,
+      data: bins.slice(0,-1).map(function(b,bi) {
+        return rows.filter(function(r){ return r.parc===p && r.dap>=b && r.dap<bins[bi+1]; }).length;
+      }),
+      backgroundColor: pcols[pi]+'BB',
+      borderColor: pcols[pi],
+      borderWidth: 1
+    };
+  });
+  mkChart('ch-dap','bar',{labels:bLabels,datasets:dsDap},
+    {x:{stacked:true,title:{display:true,text:'DAP (cm)',font:{size:10}}},
+     y:{stacked:true,title:{display:true,text:'N° árboles',font:{size:10}},ticks:{stepSize:1}}},
+    true);
 
-  // Vol por árbol
-  const volDs=parcs.map((p,i)=>({
-    label:p,
-    data:rows.filter(r=>r.parc===p).map(r=>({x:r.dap,y:r.vol})),
-    backgroundColor:Object.values(PAR_COLORS)[i]+'99',borderColor:Object.values(PAR_COLORS)[i],pointRadius:5
-  }));
-  mkChart('ch-vol','scatter',{datasets:volDs},{legend:true,scales:{x:{title:{display:true,text:'DAP (cm)',font:{size:10}}},y:{title:{display:true,text:'Vol (m³)',font:{size:10}}}}});
+  // Scatter vol vs DAP
+  var dsVol = parcs.map(function(p,pi) {
+    return {
+      label: p,
+      data: rows.filter(function(r){ return r.parc===p; }).map(function(r){ return {x:r.dap,y:r.vol}; }),
+      backgroundColor: pcols[pi]+'99',
+      borderColor: pcols[pi],
+      pointRadius: 5
+    };
+  });
+  mkChart('ch-vol','scatter',{datasets:dsVol},
+    {x:{title:{display:true,text:'DAP (cm)',font:{size:10}}},
+     y:{title:{display:true,text:'Vol (m³)',font:{size:10}}}},
+    true);
 
   // AB por parcela
-  const pStats=parcs.map(p=>{
-    const pr=rows.filter(r=>r.parc===p);
-    const ab=pr.reduce((s,r)=>s+r.ab,0)*(10000/200);
-    return {p,ab};
+  var pAB = parcs.map(function(p) {
+    var pr = rows.filter(function(r){ return r.parc===p; });
+    return pr.reduce(function(s,r){ return s+r.ab; }, 0)*(10000/200);
   });
-  mkChart('ch-ab','bar',{labels:pStats.map(s=>s.p),datasets:[{data:pStats.map(s=>s.ab),backgroundColor:parcs.map((_,i)=>Object.values(PAR_COLORS)[i]+'BB'),borderColor:parcs.map((_,i)=>Object.values(PAR_COLORS)[i]),borderWidth:1}]},{scales:{y:{title:{display:true,text:'m²/ha',font:{size:10}}},x:{}},extra:{plugins:{legend:{display:false},annotation:{annotations:{line1:{type:'line',yMin:16,yMax:16,borderColor:'#D97706',borderWidth:1.5,borderDash:[4,3]}}}}}}});
+  mkChart('ch-ab','bar',
+    {labels:parcs, datasets:[{data:pAB, backgroundColor:parcs.map(function(_,i){ return pcols[i]+'BB'; }), borderColor:parcs.map(function(_,i){ return pcols[i]; }), borderWidth:1}]},
+    {y:{title:{display:true,text:'m²/ha',font:{size:10}}}},
+    false);
 
   // Densidad por inventario
-  const invActs=inventarios.filter(i=>activeInvs.has(i.id));
-  const densData=invActs.map(inv=>invStats(inv));
-  mkChart('ch-dens','bar',{labels:invActs.map(i=>i.name),datasets:[{data:densData.map(d=>d.densHa),backgroundColor:'#2C5F2E99',borderColor:'#2C5F2E',borderWidth:1,label:'árb/ha'}]},{scales:{y:{title:{display:true,text:'árb/ha',font:{size:10}}}}});
+  var invActs = inventarios.filter(function(i){ return activeInvs.has(i.id); });
+  var densByInv = invActs.map(function(inv){ return invStats(inv).densHa; });
+  mkChart('ch-dens','bar',
+    {labels:invActs.map(function(i){ return i.name; }), datasets:[{data:densByInv, backgroundColor:'#2C5F2E99', borderColor:'#2C5F2E', borderWidth:1}]},
+    {y:{title:{display:true,text:'árb/ha',font:{size:10}}}},
+    false);
 
   renderTable();
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// TABLE
-// ═══════════════════════════════════════════════════════════════════
-function renderTable(){
-  const rows=getActiveFlat();
-  const pFilter=document.getElementById('f-parc').value;
-  const dapMin=+document.getElementById('f-dap-min').value||0;
-  const dapMax=+document.getElementById('f-dap-max').value||999;
-  const iFilter=document.getElementById('f-inv').value;
-  let filtered=rows.filter(r=>{
-    if(pFilter&&r.parc!==pFilter)return false;
-    if(r.dap<dapMin||r.dap>dapMax)return false;
-    if(iFilter&&r.invId!==iFilter)return false;
+// ═══════════════════════════════════════════════════
+// TABLA
+// ═══════════════════════════════════════════════════
+function renderTable() {
+  var rows = getActiveFlat();
+  var pFilter = (document.getElementById('f-parc')||{}).value || '';
+  var dapMin  = +(document.getElementById('f-dap-min')||{value:0}).value || 0;
+  var dapMax  = +(document.getElementById('f-dap-max')||{value:999}).value || 999;
+  var iFilter = (document.getElementById('f-inv')||{}).value || '';
+
+  var filtered = rows.filter(function(r) {
+    if (pFilter && r.parc!==pFilter) return false;
+    if (r.dap<dapMin || r.dap>dapMax) return false;
+    if (iFilter && r.invId!==iFilter) return false;
     return true;
   });
-  // Sort
-  const cols=['invName','parc','n','dap','h','vol','ab'];
-  filtered.sort((a,b)=>{
-    const av=a[cols[sortCol]]??0, bv=b[cols[sortCol]]??0;
-    return sortDir*(av>bv?1:av<bv?-1:0);
+
+  var colKeys = ['invName','parc','n','dap','h','vol','ab'];
+  filtered.sort(function(a,b) {
+    var av = a[colKeys[sortCol]] == null ? 0 : a[colKeys[sortCol]];
+    var bv = b[colKeys[sortCol]] == null ? 0 : b[colKeys[sortCol]];
+    return sortDir * (av>bv ? 1 : av<bv ? -1 : 0);
   });
-  const tb=document.getElementById('tbl-body');
-  tb.innerHTML=filtered.map(r=>`<tr>
-    <td><span style="font-size:10px;font-weight:600;color:#0C447C;background:#E6F1FB;padding:1px 6px;border-radius:20px">${r.invName}</span></td>
-    <td><span class="tag ${r.parc==='P1'?'tg1':r.parc==='P2'?'tg2':'tg3'}">${r.parc}</span></td>
-    <td>${r.n}</td>
-    <td style="font-weight:600">${fN(r.dap)}</td>
-    <td>${r.h!=null?fN(r.h):'—'}</td>
-    <td>${fN(r.vol,4)}</td>
-    <td>${fN(r.ab,5)}</td>
-  </tr>`).join('');
-  L('tbl-count',`${filtered.length} árboles`);
+
+  var tb = document.getElementById('tbl-body');
+  if (!tb) return;
+  tb.innerHTML = filtered.map(function(r) {
+    var tagCls = r.parc==='P1'?'tg1':r.parc==='P2'?'tg2':'tg3';
+    return '<tr>' +
+      '<td><span style="font-size:10px;font-weight:600;color:#0C447C;background:#E6F1FB;padding:1px 6px;border-radius:20px">'+r.invName+'</span></td>' +
+      '<td><span class="tag '+tagCls+'">'+r.parc+'</span></td>' +
+      '<td>'+r.n+'</td>' +
+      '<td style="font-weight:600">'+fN(r.dap)+'</td>' +
+      '<td>'+(r.h!=null?fN(r.h):'—')+'</td>' +
+      '<td>'+fN(r.vol,4)+'</td>' +
+      '<td>'+fN(r.ab,5)+'</td>' +
+      '</tr>';
+  }).join('');
+  L('tbl-count', filtered.length+' árboles');
 }
 
-function sortTbl(col){
-  if(sortCol===col)sortDir*=-1; else{sortCol=col;sortDir=1;}
+function sortTbl(col) {
+  if (sortCol===col) sortDir*=-1; else { sortCol=col; sortDir=1; }
   renderTable();
 }
 
-function updateFilters(){
-  const rows=getActiveFlat();
-  const parcs=[...new Set(rows.map(r=>r.parc))].sort();
-  const invActs=inventarios.filter(i=>activeInvs.has(i.id));
-  const fp=document.getElementById('f-parc');
-  const fi=document.getElementById('f-inv');
-  if(fp)fp.innerHTML='<option value="">Todas las parcelas</option>'+parcs.map(p=>`<option>${p}</option>`).join('');
-  if(fi)fi.innerHTML='<option value="">Todos los inventarios</option>'+invActs.map(i=>`<option value="${i.id}">${i.name}</option>`).join('');
+function updateFilters() {
+  var rows = getActiveFlat();
+  var parcs = [];
+  rows.forEach(function(r){ if(parcs.indexOf(r.parc)<0) parcs.push(r.parc); });
+  parcs.sort();
+  var invActs = inventarios.filter(function(i){ return activeInvs.has(i.id); });
+  var fp = document.getElementById('f-parc');
+  var fi = document.getElementById('f-inv');
+  if (fp) fp.innerHTML = '<option value="">Todas las parcelas</option>' + parcs.map(function(p){ return '<option>'+p+'</option>'; }).join('');
+  if (fi) fi.innerHTML = '<option value="">Todos los inventarios</option>' + invActs.map(function(i){ return '<option value="'+i.id+'">'+i.name+'</option>'; }).join('');
 }
 
-// ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
 // TAB 1: RALEOS
-// ═══════════════════════════════════════════════════════════════════
-function renderRaleosTab(){
-  const st=invStats(INV1);
-  const densBase=st.densHa;
-  const abBase=st.abHa;
-  const dapBase=st.mean;
-  const imaFn=(yr)=>S.esc==='C'?(IMA_C[yr]||10):(IMA_O[yr]||13);
-  const bf=1+S.boost/100;
-  const mort=0.01;
+// ═══════════════════════════════════════════════════
+function renderRaleosTab() {
+  var st = invStats(INV1);
+  var densBase = st.densHa;
+  var dapBase  = st.mean;
+  var imaFn = function(yr) { return S.esc==='C' ? (IMA_C[yr]||10) : (IMA_O[yr]||13); };
+  var bf = 1+S.boost/100;
+  var mort = 0.01;
 
-  // Proyectar año a año DAP, densidad, AB
-  let dens=densBase,dap=dapBase,br=0;
-  const yrs=[],densArr=[],abArr=[],dapArr=[],volArr=[];
-  for(let y=5;y<=15;y++){
+  // Project density, DAP, AB year by year
+  var dens=densBase, dap=dapBase, br=0;
+  var yrs=[],densArr=[],abArr=[],dapArr=[],volArr=[];
+  var projRows = buildProjection();
+
+  for (var y=5; y<=15; y++) {
     yrs.push(y);
-    const ib=y>5?imaFn(y):0;
-    const ica=(br>0&&y>5)?ib*bf:ib;
-    if(br>0&&y>5)br--;
-    dap+=y>5?ica*0.15:0; // DAP crece ~proporcionalmente al ICA vol
-    if(y>5)dens*=(1-mort);
-    if(S.r1on&&y===S.r1y){dens*=(1-S.ri1/100);br=3;}
-    else if(S.r2on&&y===S.r2y){dens*=(1-S.ri2/100);br=3;}
+    var ib = y>5 ? imaFn(y) : 0;
+    var ica = (br>0 && y>5) ? ib*bf : ib;
+    if (br>0 && y>5) br--;
+    dap += y>5 ? ica*0.12 : 0;
+    if (y>5) dens *= (1-mort);
+    if (S.r1on && y===S.r1y) { dens*=(1-S.ri1/100); br=3; }
+    else if (S.r2on && y===S.r2y) { dens*=(1-S.ri2/100); br=3; }
     densArr.push(Math.round(dens));
-    abArr.push(Math.round((Math.PI/4*(dap/100)**2)*dens*10)/10);
+    abArr.push(Math.round(abF(dap)*dens*10)/10);
     dapArr.push(Math.round(dap*10)/10);
-    const vRow=buildProjection().find(r=>r.y===y);
-    volArr.push(vRow?vRow.vb:null);
+    var vRow = projRows.filter(function(r){ return r.y===y; })[0];
+    volArr.push(vRow ? vRow.vb : null);
   }
 
-  // KPIs raleo
-  const r1Row=buildProjection().find(r=>r.lbl==='R1');
-  const r1VolTot=r1Row?r1Row.ex*HA:0;
-  const densPost=r1Row?Math.round(densBase*(1-S.ri1/100)):densBase;
-  document.getElementById('ral-kpis').innerHTML=`
-    <div class="kpi"><div class="kl">Densidad actual</div><div class="kv">${Math.round(densBase)}</div><div class="ks2">árb/ha</div></div>
-    <div class="kpi hi"><div class="kl">${S.r1on?'Post raleo 1':'Sin raleo'}</div><div class="kv">${densPost}</div><div class="ks2">árb/ha remanentes</div></div>
-    <div class="kpi"><div class="kl">Vol. raleo 1</div><div class="kv">${r1VolTot>0?fN(r1VolTot,1):'—'} m³</div><div class="ks2">total 2.24 ha</div></div>
-    <div class="kpi"><div class="kl">Densidad cosecha</div><div class="kv">${densArr[densArr.length-1]}</div><div class="ks2">árb/ha año 15</div></div>`;
+  var r1Row = projRows.filter(function(r){ return r.lbl==='R1'; })[0];
+  var r1VolTot = r1Row ? r1Row.ex*HA : 0;
+  var densPost = S.r1on ? Math.round(densBase*(1-S.ri1/100)) : Math.round(densBase);
 
-  // Gráficos
-  const evtPts=yrs.map(y=>(S.r1on&&y===S.r1y)||(S.r2on&&y===S.r2y)||y===15);
-  const ptR=yrs.map((_,i)=>evtPts[i]?6:3);
-  const ptC=yrs.map((y,i)=>y===15?'#3B6D11':((S.r1on&&y===S.r1y)||(S.r2on&&y===S.r2y))?'#D97706':'#2C5F2E');
-  const commonScales={x:{ticks:{autoSkip:false,maxRotation:0,font:{size:9}},title:{display:true,text:'Año',font:{size:9}}},y:{ticks:{font:{size:9}},grid:{color:'rgba(0,0,0,0.04)'}}};
+  var rkEl = document.getElementById('ral-kpis');
+  if (rkEl) rkEl.innerHTML =
+    '<div class="kpi"><div class="kl">Densidad actual</div><div class="kv">'+Math.round(densBase)+'</div><div class="ks2">árb/ha</div></div>' +
+    '<div class="kpi hi"><div class="kl">'+(S.r1on?'Post raleo 1':'Sin raleo')+'</div><div class="kv">'+densPost+'</div><div class="ks2">árb/ha remanentes</div></div>' +
+    '<div class="kpi"><div class="kl">Vol. raleo 1</div><div class="kv">'+(r1VolTot>0?fN(r1VolTot,1):'—')+' m³</div><div class="ks2">total '+HA+' ha</div></div>' +
+    '<div class="kpi"><div class="kl">Densidad cosecha</div><div class="kv">'+densArr[densArr.length-1]+'</div><div class="ks2">árb/ha año 15</div></div>';
 
-  mkChart('ch-dens-t','line',{labels:yrs,datasets:[{data:densArr,borderColor:'#2C5F2E',backgroundColor:'rgba(44,95,46,.07)',fill:true,tension:.35,borderWidth:2,pointRadius:ptR,pointBackgroundColor:ptC}]},{scales:{...commonScales,y:{...commonScales.y,title:{display:true,text:'árb/ha',font:{size:9}}}}});
-  mkChart('ch-ab-t','line',{labels:yrs,datasets:[{data:abArr,borderColor:'#D97706',backgroundColor:'rgba(217,119,6,.06)',fill:true,tension:.35,borderWidth:2,pointRadius:ptR,pointBackgroundColor:ptC},{data:yrs.map(()=>16),borderColor:'#D97706',borderWidth:1,borderDash:[5,3],pointRadius:0,label:'Umbral 16 m²'}]},{legend:true,scales:{...commonScales,y:{...commonScales.y,title:{display:true,text:'m²/ha',font:{size:9}}}}});
-  mkChart('ch-dap-t','line',{labels:yrs,datasets:[{data:dapArr,borderColor:'#6B21A8',backgroundColor:'rgba(107,33,168,.06)',fill:true,tension:.35,borderWidth:2,pointRadius:ptR,pointBackgroundColor:ptC}]},{scales:{...commonScales,y:{...commonScales.y,title:{display:true,text:'DAP cm',font:{size:9}}}}});
-  mkChart('ch-vol-t','line',{labels:yrs,datasets:[{data:volArr,borderColor:'#2C5F2E',backgroundColor:'rgba(44,95,46,.07)',fill:true,tension:.35,borderWidth:2,pointRadius:ptR,pointBackgroundColor:ptC}]},{scales:{...commonScales,y:{...commonScales.y,title:{display:true,text:'m³/ha',font:{size:9}}}}});
+  var evtSet = {};
+  if (S.r1on) evtSet[S.r1y]=true;
+  if (S.r2on) evtSet[S.r2y]=true;
+  evtSet[15]=true;
+  var ptR = yrs.map(function(y){ return evtSet[y] ? 6 : 3; });
+  var ptC = yrs.map(function(y){ return y===15?'#3B6D11':evtSet[y]?'#D97706':'#2C5F2E'; });
 
-  // Comparativo intensidades
-  const tbl=document.getElementById('ral-compare');
-  const pcts=[20,25,30,35,40,45,50];
-  const recom=[33,34,35,36,37,38];
-  tbl.innerHTML=`<thead><tr>
-    <th style="text-align:left">Intensidad</th>
-    <th>Extraídos/ha</th><th>Remanentes/ha</th><th>Vol. raleo/ha (m³)</th>
-    <th>Rem. a cosecha</th><th>Esp. equiv.</th><th>Rango óptimo</th>
-  </tr></thead><tbody>${pcts.map(pct=>{
-    const ext=Math.round(densBase*pct/100);
-    const rem=Math.round((densBase-ext)*(1-mort)**8);
-    const vol=fN(volF(st.mean)*ext,1);
-    const esp=fN(1/Math.sqrt(densBase-Math.round(densBase*pct/100)),2);
-    const ok=rem>=250&&rem<=380;
-    const isRec=pct>=33&&pct<=38;
-    return `<tr${isRec?' class="rec"':''}>
-      <td>${pct}%</td><td>${ext}</td><td>${densBase-Math.round(densBase*pct/100)}</td>
-      <td>${vol}</td><td>${rem}</td><td>${esp} m</td>
-      <td style="color:${ok?'#27500A':'#991B1B'}">${ok?'✓ óptimo':'fuera de rango'}</td>
-    </tr>`;
-  }).join('')}</tbody>`;
+  var xScale = {ticks:{autoSkip:false,maxRotation:0,font:{size:9}}};
+  var yTiny   = {ticks:{font:{size:9}},grid:{color:'rgba(0,0,0,0.04)'}};
+
+  function lineDs(arr, color) {
+    return {datasets:[{data:arr,borderColor:color,backgroundColor:color+'11',fill:true,tension:.35,borderWidth:2,pointRadius:ptR,pointBackgroundColor:ptC}]};
+  }
+
+  mkChart('ch-dens-t','line',Object.assign({labels:yrs},lineDs(densArr,'#2C5F2E')),Object.assign({x:xScale,y:Object.assign({title:{display:true,text:'árb/ha',font:{size:9}}},yTiny)}),false);
+  mkChart('ch-ab-t','line',{labels:yrs,datasets:[
+    {data:abArr,borderColor:'#D97706',backgroundColor:'#D9770611',fill:true,tension:.35,borderWidth:2,pointRadius:ptR,pointBackgroundColor:ptC},
+    {data:yrs.map(function(){return 16;}),borderColor:'#D97706',borderWidth:1,borderDash:[5,3],pointRadius:0,label:'Umbral 16 m²'}
+  ]},Object.assign({x:xScale,y:Object.assign({title:{display:true,text:'m²/ha',font:{size:9}}},yTiny)}),true);
+  mkChart('ch-dap-t','line',Object.assign({labels:yrs},lineDs(dapArr,'#6B21A8')),Object.assign({x:xScale,y:Object.assign({title:{display:true,text:'DAP cm',font:{size:9}}},yTiny)}),false);
+  mkChart('ch-vol-t','line',Object.assign({labels:yrs},lineDs(volArr,'#2C5F2E')),Object.assign({x:xScale,y:Object.assign({title:{display:true,text:'m³/ha',font:{size:9}}},yTiny)}),false);
+
+  // Tabla comparativa
+  var pcts = [20,25,30,35,40,45,50];
+  var tblEl = document.getElementById('ral-compare');
+  if (!tblEl) return;
+  var html = '<thead><tr><th style="text-align:left">Intens.</th><th>Extr./ha</th><th>Rem./ha</th><th>Vol. raleo/ha m³</th><th>Rem. cosecha</th><th>Espac.</th><th>Rango</th></tr></thead><tbody>';
+  pcts.forEach(function(pct) {
+    var ext = Math.round(densBase*pct/100);
+    var rem = densBase-ext;
+    var rcos = Math.round(rem*Math.pow(1-mort,8));
+    var vol2 = fN(volF(st.mean)*ext,1);
+    var esp  = fN(1/Math.sqrt(rem),2);
+    var ok   = rcos>=250 && rcos<=380;
+    var isRec = pct>=33 && pct<=38;
+    html += '<tr'+(isRec?' style="background:var(--teca-lt);font-weight:600"':'')+'>'+
+      '<td>'+pct+'%'+(isRec?' ★':'')+'</td><td>'+ext+'</td><td>'+rem+'</td><td>'+vol2+'</td><td>'+rcos+'</td><td>'+esp+' m</td>'+
+      '<td style="color:'+(ok?'#27500A':'#991B1B')+'">'+(ok?'✓ óptimo':'fuera')+'</td></tr>';
+  });
+  html += '</tbody>';
+  tblEl.innerHTML = html;
 }
 
-// ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
 // TAB 2: FINANCIERO
-// ═══════════════════════════════════════════════════════════════════
-function renderFinTab(){
-  const rows=buildProjection();
-  const {events,tc,pcfCrc,pralCrc,tcN}=calcFin(rows);
-  const gastos=calcGastos();
-  const brutoCrc=events.reduce((s,e)=>s+e.ing,0);
-  const brutoUsd=events.reduce((s,e)=>s+e.ing/e.tc,0);
-  const costoUsd=events.reduce((s,e)=>s+e.costo/e.tc,0);
-  const vpnIngUsd=events.reduce((s,e)=>s+e.vpnU,0);
-  const vpnNeto=vpnIngUsd-gastos.vpnU-costoUsd;
-  const cfRow=rows.find(r=>r.lbl==='CF');
+// ═══════════════════════════════════════════════════
+function renderFinTab() {
+  var rows = buildProjection();
+  var fin  = calcFin(rows);
+  var events = fin.events;
+  var tc = fin.tc, tcN = fin.tcN;
+  var gastos = calcGastos();
 
-  document.getElementById('fin-kpis').innerHTML=`
-    <div class="kpi"><div class="kl">Cosecha año 15</div><div class="kv">${cfRow?fN(cfRow.ex):0} m³/ha</div><div class="ks2">${cfRow?fN(cfRow.ex*HA,0):0} m³ total</div></div>
-    <div class="kpi"><div class="kl">Ingreso bruto</div><div class="kv">${fU(brutoUsd)}</div><div class="ks2">${fC(brutoCrc)} CRC</div></div>
-    <div class="kpi hi"><div class="kl">VPN neto</div><div class="kv">${fU(vpnNeto)}</div><div class="ks2">Tasa ${S.tasa}% · ${S.infl}% inflación</div></div>
-    <div class="kpi"><div class="kl">Gastos 10 años</div><div class="kv">${fC(gastos.tot)}</div><div class="ks2">${fU(gastos.totU)} USD</div></div>`;
+  var brutoCrc = events.reduce(function(s,e){ return s+e.ing; }, 0);
+  var brutoUsd = events.reduce(function(s,e){ return s+e.ing/e.tc; }, 0);
+  var costoUsd = events.reduce(function(s,e){ return s+e.costo/e.tc; }, 0);
+  var vpnIngUsd = events.reduce(function(s,e){ return s+e.vpnU; }, 0);
+  var vpnNeto = vpnIngUsd - gastos.vpnU - costoUsd;
+  var cfRow = rows.filter(function(r){ return r.lbl==='CF'; })[0];
+
+  var fkEl = document.getElementById('fin-kpis');
+  if (fkEl) fkEl.innerHTML =
+    '<div class="kpi"><div class="kl">Cosecha año 15</div><div class="kv">'+(cfRow?fN(cfRow.ex):0)+' m³/ha</div><div class="ks2">'+(cfRow?fN(cfRow.ex*HA,0):0)+' m³ total</div></div>' +
+    '<div class="kpi"><div class="kl">Ingreso bruto</div><div class="kv">'+fU(brutoUsd)+'</div><div class="ks2">'+fC(brutoCrc)+' CRC</div></div>' +
+    '<div class="kpi hi"><div class="kl">VPN neto</div><div class="kv">'+fU(vpnNeto)+'</div><div class="ks2">Tasa '+S.tasa+'% · '+S.infl+'% infl.</div></div>' +
+    '<div class="kpi"><div class="kl">Gastos 10 años</div><div class="kv">'+fC(gastos.tot)+'</div><div class="ks2">'+fU(gastos.totU)+' USD</div></div>';
 
   // Vol chart
-  const yrs=rows.map(r=>r.y), vbs=rows.map(r=>r.vb);
-  const evtY=new Set(rows.filter(r=>r.lbl).map(r=>r.y));
-  const ptC2=rows.map(r=>r.y===15?'#3B6D11':evtY.has(r.y)?'#D97706':'#2C5F2E');
-  const ptR2=rows.map(r=>r.y===15||evtY.has(r.y)?6:3);
-  mkChart('ch-vol-f','line',{labels:yrs,datasets:[{data:vbs,borderColor:'#2C5F2E',backgroundColor:'rgba(44,95,46,.07)',fill:true,tension:.35,borderWidth:2,pointRadius:ptR2,pointBackgroundColor:ptC2}]},{scales:{x:{ticks:{autoSkip:false,maxRotation:0,font:{size:9}}},y:{ticks:{font:{size:9},callback:v=>v+' m³'},grid:{color:'rgba(0,0,0,0.04)'},min:50}}});
+  var yrs = rows.map(function(r){ return r.y; });
+  var vbs = rows.map(function(r){ return r.vb; });
+  var evtY = {};
+  rows.filter(function(r){ return r.lbl; }).forEach(function(r){ evtY[r.y]=true; });
+  var ptC2 = rows.map(function(r){ return r.y===15?'#3B6D11':evtY[r.y]?'#D97706':'#2C5F2E'; });
+  var ptR2 = rows.map(function(r){ return r.y===15||evtY[r.y] ? 6 : 3; });
+  mkChart('ch-vol-f','line',{labels:yrs,datasets:[{data:vbs,borderColor:'#2C5F2E',backgroundColor:'#2C5F2E11',fill:true,tension:.35,borderWidth:2,pointRadius:ptR2,pointBackgroundColor:ptC2}]},
+    {x:{ticks:{autoSkip:false,maxRotation:0,font:{size:9}}},y:{ticks:{font:{size:9},callback:function(v){return v+' m³';}},min:50}},false);
 
   // Fin bars
-  const cfC=S.mkt==='export'?'#6B21A8':'#C05020';
+  var cfC = S.mkt==='export' ? '#6B21A8' : '#C05020';
   mkChart('ch-fin-f','bar',{
-    labels:events.map(e=>e.lbl==='CF'?`Cosecha (${e.y})`:`Raleo ${e.lbl.slice(1)} (${e.y})`),
-    datasets:[{data:events.map(e=>e.ing/e.tc),backgroundColor:events.map(e=>e.lbl==='CF'?cfC+'BB':e.lbl==='R1'?'#D97706BB':'#6B4226BB'),borderRadius:4}]
-  },{scales:{x:{ticks:{font:{size:9}}},y:{ticks:{font:{size:9},callback:v=>`$${(v/1000).toFixed(0)}k`}}}});
+    labels:events.map(function(e){ return e.lbl==='CF'?'Cosecha ('+e.y+')':'Raleo '+e.lbl.slice(1)+' ('+e.y+')'; }),
+    datasets:[{data:events.map(function(e){ return e.ing/e.tc; }),
+      backgroundColor:events.map(function(e){ return e.lbl==='CF'?cfC+'BB':e.lbl==='R1'?'#D97706BB':'#6B4226BB'; }),
+      borderRadius:4}]
+  },{x:{ticks:{font:{size:9}}},y:{ticks:{font:{size:9},callback:function(v){ return '$'+(v/1000).toFixed(0)+'k'; }}}},false);
 
   // Fin cards
-  const fc=document.getElementById('fin-cards');
-  fc.innerHTML='';
-  events.forEach(ev=>{
-    const usd=ev.ing/ev.tc;
-    const cosU=ev.costo/ev.tc;
-    const col=ev.lbl==='CF'?cfC:ev.lbl==='R1'?'#D97706':'#6B4226';
-    const pDesc=ev.lbl==='CF'?(S.mkt==='export'?`$${S.pexp}/m³`:`${S.pnac} ₡/PMT`):`${S.pral} ₡/PMT`;
-    const d=document.createElement('div');d.className='card';
-    d.innerHTML=`<div style="display:flex;align-items:center;gap:6px;margin-bottom:7px"><span style="width:8px;height:8px;border-radius:50%;background:${col};display:inline-block"></span><span style="font-size:12px;font-weight:600">${ev.lbl==='CF'?'Cosecha final':'Raleo '+ev.lbl.slice(1)} — año ${ev.y}</span></div>
-      <div class="frow"><span class="fk">Volumen 2.24 ha</span><span class="fv">${fN(ev.vol,1)} m³</span></div>
-      <div class="frow"><span class="fk">Precio<span class="fksub">${pDesc}</span></span><span class="fv">—</span></div>
-      ${cosU>0?`<div class="frow"><span class="fk">Costo operativo</span><span class="fv" style="color:#B91C1C">-${fU(cosU)}</span></div>`:''}
-      <div class="frow"><span class="fk">Ingreso (CRC)</span><span class="fv">${fC(ev.ing)}</span></div>
-      <div class="frow"><span class="fk">VPN descontado</span><span class="fv">${fU(ev.vpnU)}</span></div>
-      <div class="ftot"><span style="font-size:12px;font-weight:600">Ingreso USD</span><span class="ftv" style="color:${col}">${fU(usd)}</span></div>`;
+  var fc = document.getElementById('fin-cards');
+  if (!fc) return;
+  fc.innerHTML = '';
+  events.forEach(function(ev) {
+    var usd = ev.ing/ev.tc;
+    var cosU = ev.costo/ev.tc;
+    var col = ev.lbl==='CF' ? cfC : ev.lbl==='R1' ? '#D97706' : '#6B4226';
+    var pDesc = ev.lbl==='CF' ? (S.mkt==='export'?'$'+S.pexp+'/m³':S.pnac+' ₡/PMT') : S.pral+' ₡/PMT';
+    var d = document.createElement('div');
+    d.className = 'card';
+    d.innerHTML = '<div style="display:flex;align-items:center;gap:6px;margin-bottom:7px"><span style="width:8px;height:8px;border-radius:50%;background:'+col+';display:inline-block"></span><span style="font-size:12px;font-weight:600">'+(ev.lbl==='CF'?'Cosecha final':'Raleo '+ev.lbl.slice(1))+' — año '+ev.y+'</span></div>' +
+      '<div class="frow"><span class="fk">Volumen 2.24 ha</span><span class="fv">'+fN(ev.vol,1)+' m³</span></div>' +
+      '<div class="frow"><span class="fk">Precio<span class="fksub">'+pDesc+'</span></span><span class="fv">—</span></div>' +
+      (cosU>0?'<div class="frow"><span class="fk">Costo operativo</span><span class="fv" style="color:#B91C1C">-'+fU(cosU)+'</span></div>':'') +
+      '<div class="frow"><span class="fk">Ingreso (CRC)</span><span class="fv">'+fC(ev.ing)+'</span></div>' +
+      '<div class="frow"><span class="fk">VPN descontado</span><span class="fv">'+fU(ev.vpnU)+'</span></div>' +
+      '<div class="ftot"><span style="font-size:12px;font-weight:600">Ingreso USD</span><span class="ftv" style="color:'+col+'">'+fU(usd)+'</span></div>';
     fc.appendChild(d);
   });
-  const dt=document.createElement('div');dt.className='card hi';dt.style.gridColumn='1/-1';
-  dt.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px"><div><div style="font-size:11px;color:var(--muted)">Total bruto · 2.24 ha</div><div style="font-size:12px;color:var(--muted)">${fC(brutoCrc)} · Costos: ${fU(costoUsd)}</div></div><div style="font-size:26px;font-weight:700;font-family:var(--mono);color:var(--teca)">${fU(brutoUsd)}</div></div>`;
+  var dt = document.createElement('div');
+  dt.className = 'card hi';
+  dt.style.gridColumn = '1/-1';
+  dt.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px"><div><div style="font-size:11px;color:var(--muted)">Total bruto · '+HA+' ha</div><div style="font-size:12px;color:var(--muted)">'+fC(brutoCrc)+' · Costos: '+fU(costoUsd)+'</div></div><div style="font-size:26px;font-weight:700;font-family:var(--mono);color:var(--teca)">'+fU(brutoUsd)+'</div></div>';
   fc.appendChild(dt);
 
   // VPN table
-  const vtEl=document.getElementById('vpn-tbl');
-  let vpnAc=0;
-  const gAnualUsd=gastos.anual/tc;
-  vtEl.innerHTML=`<div class="tw" style="margin-top:8px"><table style="width:100%;border-collapse:collapse;font-size:11px;min-width:500px">
-    <thead><tr style="background:var(--teca-lt)">${['Año','Ingreso $','Costos $','Gastos $','Flujo neto $','VPN flujo','VPN acum.'].map(h=>`<th style="padding:4px 6px;font-weight:600;border-bottom:1px solid var(--border);text-align:right;font-size:10px;color:var(--muted)">${h}</th>`).join('')}</tr></thead>
-    <tbody>${rows.map(r=>{
-      const yF=r.y-5;const df=Math.pow(1+S.tasa/100,yF);
-      const ev=events.find(e=>e.y===r.y);
-      const evTc=ev?(ev.lbl==='CF'?tc:tcN):tc;
-      const ing=ev?ev.ing/evTc:0;const cst=ev?ev.costo/evTc:0;
-      const fl=ing-cst-gAnualUsd;const fpvn=fl/df;vpnAc+=fpvn;
-      return `<tr style="${vpnAc>0?'background:#F0FDF4':''}border-bottom:1px solid var(--border)">
-        <td style="padding:4px 6px;font-weight:${ing>0?600:400}">${r.y}${ing>0?' ★':''}</td>
-        <td style="padding:4px 6px;text-align:right;color:${ing>0?'#2C5F2E':'var(--muted)'}">${ing>0?fU(ing):'—'}</td>
-        <td style="padding:4px 6px;text-align:right;color:#B91C1C">${cst>0?`-${fU(cst)}`:'—'}</td>
-        <td style="padding:4px 6px;text-align:right;color:#B91C1C">-${fU(gAnualUsd)}</td>
-        <td style="padding:4px 6px;text-align:right;font-weight:600;color:${fl>0?'#2C5F2E':'#B91C1C'}">${fU(fl)}</td>
-        <td style="padding:4px 6px;text-align:right">${fU(fpvn)}</td>
-        <td style="padding:4px 6px;text-align:right;font-weight:600;color:${vpnAc>0?'#2C5F2E':'#B91C1C'}">${fU(vpnAc)}</td>
-      </tr>`;
-    }).join('')}</tbody></table></div>`;
+  var vtEl = document.getElementById('vpn-tbl');
+  if (!vtEl) return;
+  var gAnualUsd = gastos.anual/tc;
+  var vpnAc = 0;
+  var tHead = '<div class="tw"><table style="width:100%;border-collapse:collapse;font-size:11px;min-width:500px"><thead><tr style="background:var(--teca-lt)">';
+  ['Año','Ingreso $','Costos $','Gastos $','Flujo neto $','VPN flujo','VPN acum.'].forEach(function(h){
+    tHead += '<th style="padding:4px 6px;font-weight:600;border-bottom:1px solid var(--border);text-align:right;font-size:10px;color:var(--muted)">'+h+'</th>';
+  });
+  tHead += '</tr></thead><tbody>';
+  var tBody = '';
+  rows.forEach(function(r) {
+    var yF = r.y-5;
+    var df = Math.pow(1+S.tasa/100, yF);
+    var ev = events.filter(function(e){ return e.y===r.y; })[0];
+    var evTc = ev ? (ev.lbl==='CF'?tc:tcN) : tc;
+    var ing = ev ? ev.ing/evTc : 0;
+    var cst = ev ? ev.costo/evTc : 0;
+    var fl = ing-cst-gAnualUsd;
+    var fpvn = fl/df;
+    vpnAc += fpvn;
+    tBody += '<tr style="'+(vpnAc>0?'background:#F0FDF4;':'')+'border-bottom:1px solid var(--border)">' +
+      '<td style="padding:4px 6px;font-weight:'+(ing>0?600:400)+'">'+r.y+(ing>0?' ★':'')+'</td>' +
+      '<td style="padding:4px 6px;text-align:right;color:'+(ing>0?'#2C5F2E':'var(--muted)'+'">')+(ing>0?fU(ing):'—')+'</td>' +
+      '<td style="padding:4px 6px;text-align:right;color:#B91C1C">'+(cst>0?'-'+fU(cst):'—')+'</td>' +
+      '<td style="padding:4px 6px;text-align:right;color:#B91C1C">-'+fU(gAnualUsd)+'</td>' +
+      '<td style="padding:4px 6px;text-align:right;font-weight:600;color:'+(fl>0?'#2C5F2E':'#B91C1C')+'">'+fU(fl)+'</td>' +
+      '<td style="padding:4px 6px;text-align:right">'+fU(fpvn)+'</td>' +
+      '<td style="padding:4px 6px;text-align:right;font-weight:600;color:'+(vpnAc>0?'#2C5F2E':'#B91C1C')+'">'+fU(vpnAc)+'</td></tr>';
+  });
+  vtEl.innerHTML = tHead+tBody+'</tbody></table></div>';
 
-  // Gastos
-  const gc=document.getElementById('gastos-card');
-  gc.innerHTML=`<div class="ctitle">Gastos operativos 10 años</div><div class="csub">Años 5–15, no incluye intervenciones</div>
-    <div class="gasto-r"><span>Cuidador anual</span><span style="font-family:var(--mono);font-weight:600">${fC(S.cuid*12)}</span></div>
-    <div class="gasto-r"><span>Electricidad + agua anual</span><span style="font-family:var(--mono);font-weight:600">${fC(S.elec*12)}</span></div>
-    <div class="gasto-r"><span>Impuestos municipales anual</span><span style="font-family:var(--mono);font-weight:600">${fC(S.imp)}</span></div>
-    <div class="gasto-r"><span>Otros anual</span><span style="font-family:var(--mono);font-weight:600">${fC(S.otros)}</span></div>
-    <div class="gasto-r" style="font-weight:600;padding-top:8px;border-top:2px solid var(--border);margin-top:4px"><span>Total anual</span><span style="font-family:var(--mono)">${fC(gastos.anual)}</span></div>
-    <div class="gasto-r" style="font-weight:600"><span>Total nominal 10 años</span><span style="font-family:var(--mono)">${fC(gastos.tot)} · ${fU(gastos.totU)}</span></div>
-    <div class="gasto-r" style="font-weight:600;color:var(--teca)"><span>Total VPN (descontado)</span><span style="font-family:var(--mono)">${fC(gastos.vpn)} · ${fU(gastos.vpnU)}</span></div>`;
+  // Gastos card
+  var gc = document.getElementById('gastos-card');
+  if (gc) gc.innerHTML =
+    '<div class="ctitle">Gastos operativos 10 años</div><div class="csub">Años 5–15</div>' +
+    '<div class="gasto-r"><span>Cuidador anual</span><span style="font-family:var(--mono);font-weight:600">'+fC(S.cuid*12)+'</span></div>' +
+    '<div class="gasto-r"><span>Electricidad + agua anual</span><span style="font-family:var(--mono);font-weight:600">'+fC(S.elec*12)+'</span></div>' +
+    '<div class="gasto-r"><span>Impuestos anual</span><span style="font-family:var(--mono);font-weight:600">'+fC(S.imp)+'</span></div>' +
+    '<div class="gasto-r"><span>Otros anual</span><span style="font-family:var(--mono);font-weight:600">'+fC(S.otros)+'</span></div>' +
+    '<div class="gasto-r" style="font-weight:600;padding-top:6px;border-top:2px solid var(--border);margin-top:4px"><span>Total anual</span><span style="font-family:var(--mono)">'+fC(gastos.anual)+'</span></div>' +
+    '<div class="gasto-r" style="font-weight:600"><span>Total 10 años (nominal)</span><span style="font-family:var(--mono)">'+fC(gastos.tot)+' · '+fU(gastos.totU)+'</span></div>' +
+    '<div class="gasto-r" style="font-weight:600;color:var(--teca)"><span>Total 10 años (VPN)</span><span style="font-family:var(--mono)">'+fC(gastos.vpn)+' · '+fU(gastos.vpnU)+'</span></div>';
 }
 
-// ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
 // TAB 3: CONSTRUCCIÓN
-// ═══════════════════════════════════════════════════════════════════
-function renderCasaTab(){
-  const tc=S.mkt==='export'?S.tc:S.tc2;
-  const pralCrc=S.pral/PMT;
-  const r1Row=buildProjection().find(r=>r.lbl==='R1');
-  const trozaDisp=r1Row?r1Row.ex*HA:0;
-  const calcCasa=c=>{
-    const r=Math.sqrt(c.area/40);
-    const pared=2*(8*r+5*r)*c.alto*0.80;
-    const at=c.area+pared;
-    const vt=at*c.grosor*0.0254*1.15/0.50;
-    return{at:Math.round(at),vt};
-  };
-  const totalTroza=S.casas.reduce((s,c)=>s+calcCasa(c).vt,0);
-  const totalArea=S.casas.reduce((s,c)=>s+c.area,0);
-  const pct=trozaDisp>0?totalTroza/trozaDisp*100:0;
-  const sob=trozaDisp-totalTroza;
+// ═══════════════════════════════════════════════════
+function renderCasaTab() {
+  var tc = S.mkt==='export' ? S.tc : S.tc2;
+  var pralCrc = S.pral/PMT;
+  var projRows = buildProjection();
+  var r1Row = projRows.filter(function(r){ return r.lbl==='R1'; })[0];
+  var trozaDisp = r1Row ? r1Row.ex*HA : 0;
 
-  document.getElementById('casa-kpis').innerHTML=`
-    <div class="kpi"><div class="kl">Casas</div><div class="kv">${S.casas.length}</div><div class="ks2">${totalArea} m² total</div></div>
-    <div class="kpi"><div class="kl">Troza necesaria</div><div class="kv">${fN(totalTroza,1)} m³</div><div class="ks2">${pct.toFixed(1)}% del raleo</div></div>
-    <div class="kpi hi"><div class="kl">Disponible raleo 1</div><div class="kv">${fN(trozaDisp,1)} m³</div><div class="ks2">${sob>=0?'✓ suficiente':'⚠ insuficiente'}</div></div>
-    <div class="kpi"><div class="kl">Sobrante para venta</div><div class="kv">${fN(Math.max(sob,0)*0.5,1)} m³</div><div class="ks2">madera procesada</div></div>`;
+  function calcCasa(c) {
+    var r = Math.sqrt(c.area/40);
+    var pared = 2*(8*r+5*r)*c.alto*0.80;
+    var at = c.area+pared;
+    var vt = at*c.grosor*0.0254*1.15/0.50;
+    return {at:Math.round(at), vt:vt};
+  }
 
-  const maxB=Math.max(trozaDisp*1.1,totalTroza*1.5,5);
-  const barsEl=document.getElementById('casa-bars');
-  barsEl.innerHTML='';
-  const mkBar=(lbl,v,col)=>{
-    const pct2=Math.min(v/maxB*100,100);
-    const d=document.createElement('div');d.className='brow';
-    d.innerHTML=`<div class="blbl">${lbl}</div><div class="bbg"><div class="bfill" style="width:${pct2.toFixed(1)}%;background:${col}"><span>${fN(v,1)} m³</span></div></div><div class="bnum">${(v/maxB*100).toFixed(0)}%</div>`;
+  var totalTroza = S.casas.reduce(function(s,c){ return s+calcCasa(c).vt; }, 0);
+  var totalArea  = S.casas.reduce(function(s,c){ return s+c.area; }, 0);
+  var pct = trozaDisp>0 ? totalTroza/trozaDisp*100 : 0;
+  var sob = trozaDisp-totalTroza;
+
+  var ck = document.getElementById('casa-kpis');
+  if (ck) ck.innerHTML =
+    '<div class="kpi"><div class="kl">Casas</div><div class="kv">'+S.casas.length+'</div><div class="ks2">'+totalArea+' m² total</div></div>' +
+    '<div class="kpi"><div class="kl">Troza necesaria</div><div class="kv">'+fN(totalTroza,1)+' m³</div><div class="ks2">'+pct.toFixed(1)+'% del raleo</div></div>' +
+    '<div class="kpi hi"><div class="kl">Disponible raleo 1</div><div class="kv">'+fN(trozaDisp,1)+' m³</div><div class="ks2">'+(sob>=0?'✓ suficiente':'⚠ insuficiente')+'</div></div>' +
+    '<div class="kpi"><div class="kl">Sobrante venta</div><div class="kv">'+fN(Math.max(sob,0)*0.5,1)+' m³</div><div class="ks2">madera procesada</div></div>';
+
+  var maxB = Math.max(trozaDisp*1.1, totalTroza*1.5, 5);
+  var barsEl = document.getElementById('casa-bars');
+  if (!barsEl) return;
+  barsEl.innerHTML = '';
+  function mkBar(lbl, v, col) {
+    var p2 = Math.min(v/maxB*100, 100);
+    var d = document.createElement('div');
+    d.className = 'brow';
+    d.innerHTML = '<div class="blbl">'+lbl+'</div><div class="bbg"><div class="bfill" style="width:'+p2.toFixed(1)+'%;background:'+col+'"><span>'+fN(v,1)+' m³</span></div></div><div class="bnum">'+fN(v/maxB*100,0)+'%</div>';
     barsEl.appendChild(d);
-  };
-  mkBar('Disponible raleo',trozaDisp,'#B4B2A9');
-  S.casas.forEach((c,i)=>mkBar(`Casa ${i+1} (${c.area}m², ${c.grosor}")`,calcCasa(c).vt,'#2C5F2E'));
-  if(S.casas.length>1)mkBar('Total casas',totalTroza,'#4A8A4D');
+  }
+  mkBar('Disponible raleo', trozaDisp, '#B4B2A9');
+  S.casas.forEach(function(c,i){ mkBar('Casa '+(i+1)+' ('+c.area+'m², '+c.grosor+'")', calcCasa(c).vt, '#2C5F2E'); });
+  if (S.casas.length>1) mkBar('Total casas', totalTroza, '#4A8A4D');
 
-  const noteEl=document.getElementById('casa-note');
-  noteEl.className='note '+(sob>=0?'ok':'warn');
-  noteEl.innerHTML=sob>=0?`✓ Todas las casas usan <b>${fN(totalTroza,1)} m³</b> (${pct.toFixed(1)}% del raleo). Sobran <b>${fN(sob,1)} m³</b> en troza → <b>${fN(sob*0.5,1)} m³</b> procesados para venta.`:`⚠ Las casas necesitan <b>${fN(totalTroza,1)} m³</b> pero el raleo disponible es <b>${fN(trozaDisp,1)} m³</b>. Faltan ${fN(-sob,1)} m³.`;
+  var noteEl = document.getElementById('casa-note');
+  if (noteEl) {
+    noteEl.className = 'note '+(sob>=0?'ok':'warn');
+    noteEl.innerHTML = sob>=0 ?
+      '✓ Todas las casas usan <b>'+fN(totalTroza,1)+' m³</b> ('+pct.toFixed(1)+'% del raleo). Sobran <b>'+fN(sob,1)+' m³</b> → <b>'+fN(sob*0.5,1)+' m³</b> procesados para venta.' :
+      '⚠ Las casas necesitan <b>'+fN(totalTroza,1)+' m³</b> pero el raleo disponible es <b>'+fN(trozaDisp,1)+' m³</b>. Faltan '+fN(-sob,1)+' m³.';
+  }
 
-  const cc=document.getElementById('casa-cost-cards');
-  cc.innerHTML='';
-  S.casas.forEach((c,i)=>{
-    const cCrc=c.area*(S.mo+S.mat);
-    const d=document.createElement('div');d.className='card';
-    d.innerHTML=`<div class="ctitle">Casa ${i+1} — ${c.area} m²</div>
-      <div class="frow"><span class="fk">Área construcción</span><span class="fv">${c.area} m²</span></div>
-      <div class="frow"><span class="fk">Tablas</span><span class="fv">${c.grosor}" · alto ${c.alto}m</span></div>
-      <div class="frow"><span class="fk">Mano de obra</span><span class="fv">${fC(c.area*S.mo)}</span></div>
-      <div class="frow"><span class="fk">Otros materiales</span><span class="fv">${fC(c.area*S.mat)}</span></div>
-      <div class="ftot"><span style="font-size:12px;font-weight:600">Total construcción</span><span class="ftv">${fC(cCrc)}</span></div>`;
+  var cc = document.getElementById('casa-cost-cards');
+  if (!cc) return;
+  cc.innerHTML = '';
+  S.casas.forEach(function(c,i) {
+    var cCrc = c.area*(S.mo+S.mat);
+    var d = document.createElement('div');
+    d.className = 'card';
+    d.innerHTML = '<div class="ctitle">Casa '+(i+1)+' — '+c.area+' m²</div>' +
+      '<div class="frow"><span class="fk">Área</span><span class="fv">'+c.area+' m²</span></div>' +
+      '<div class="frow"><span class="fk">Tablas</span><span class="fv">'+c.grosor+'" · '+c.alto+'m alto</span></div>' +
+      '<div class="frow"><span class="fk">Mano de obra</span><span class="fv">'+fC(c.area*S.mo)+'</span></div>' +
+      '<div class="frow"><span class="fk">Otros materiales</span><span class="fv">'+fC(c.area*S.mat)+'</span></div>' +
+      '<div class="ftot"><span style="font-size:12px;font-weight:600">Total construcción</span><span class="ftv">'+fC(cCrc)+'</span></div>';
     cc.appendChild(d);
   });
 }
 
-// ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
 // TAB 4: CAMPO
-// ═══════════════════════════════════════════════════════════════════
-function renderCampoTab(){
-  const el=document.getElementById('inv-list');
-  el.innerHTML='';
-  inventarios.forEach((inv,i)=>{
-    const st=invStats(inv);
-    const d=document.createElement('div');d.className='inv-item'+(activeInvs.has(inv.id)?' cur':'');
-    d.innerHTML=`<div class="inv-item-left">
-      <div class="inv-name">${inv.name} <span style="font-size:10px;font-weight:400;color:var(--muted)">${inv.date}</span></div>
-      <div class="inv-meta">${st.n} árboles · DAP prom: ${fN(st.mean)} cm · ${fN(st.densHa,0)} árb/ha · AB: ${fN(st.abHa)} m²/ha</div>
-    </div>
-    <div style="display:flex;gap:5px;align-items:center">
-      <button class="btn btn-sm ${activeInvs.has(inv.id)?'btn-p':'btn-s'}" onclick="toggleInv('${inv.id}')">${activeInvs.has(inv.id)?'✓ Activo':'Activar'}</button>
-      ${i>0?`<button class="btn btn-sm btn-d" onclick="deleteInv('${inv.id}')">✕</button>`:''}
-    </div>`;
+// ═══════════════════════════════════════════════════
+function renderCampoTab() {
+  var el = document.getElementById('inv-list');
+  if (!el) return;
+  el.innerHTML = '';
+  inventarios.forEach(function(inv, i) {
+    var st = invStats(inv);
+    var d = document.createElement('div');
+    d.className = 'inv-item'+(activeInvs.has(inv.id)?' cur':'');
+    d.innerHTML =
+      '<div class="inv-item-left"><div class="inv-name">'+inv.name+' <span style="font-size:10px;font-weight:400;color:var(--muted)">'+inv.date+'</span></div>' +
+      '<div class="inv-meta">'+st.n+' árboles · DAP: '+fN(st.mean)+' cm · '+Math.round(st.densHa)+' árb/ha · AB: '+fN(st.abHa)+' m²/ha</div></div>' +
+      '<div style="display:flex;gap:5px;align-items:center">' +
+      '<button class="btn btn-sm '+(activeInvs.has(inv.id)?'btn-p':'btn-s')+'" onclick="toggleInv(\''+inv.id+'\')">'+(activeInvs.has(inv.id)?'✓ Activo':'Activar')+'</button>' +
+      (i>0?'<button class="btn btn-sm btn-d" onclick="deleteInv(\''+inv.id+'\')">✕</button>':'') +
+      '</div>';
     el.appendChild(d);
   });
 }
 
-function toggleInv(id){
-  if(activeInvs.has(id)){if(activeInvs.size>1)activeInvs.delete(id);}
+function toggleInv(id) {
+  if (activeInvs.has(id)) { if (activeInvs.size>1) activeInvs.delete(id); }
   else activeInvs.add(id);
-  renderChips();update();
+  renderChips();
+  update();
 }
-function deleteInv(id){
-  inventarios=inventarios.filter(i=>i.id!==id);
+function deleteInv(id) {
+  inventarios = inventarios.filter(function(i){ return i.id!==id; });
   activeInvs.delete(id);
-  renderChips();update();renderCampoTab();
+  renderChips();
+  renderCampoTab();
+  update();
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// CHIPS
-// ═══════════════════════════════════════════════════════════════════
-function renderChips(){
-  const el=document.getElementById('inv-chips');
-  el.innerHTML='<span style="font-size:10px;color:rgba(255,255,255,.4);margin-right:2px">VER:</span>'+
-    inventarios.map(inv=>`<span class="inv-chip ${activeInvs.has(inv.id)?'on':''}" onclick="toggleInv('${inv.id}')">${inv.name.replace('Inventario','Inv.')}</span>`).join('');
+// ═══════════════════════════════════════════════════
+// CHIPS TOPBAR
+// ═══════════════════════════════════════════════════
+function renderChips() {
+  var el = document.getElementById('inv-chips');
+  if (!el) return;
+  el.innerHTML = '<span style="font-size:10px;color:rgba(255,255,255,.4);margin-right:2px">VER:</span>' +
+    inventarios.map(function(inv) {
+      return '<span class="inv-chip '+(activeInvs.has(inv.id)?'on':'')+'" onclick="toggleInv(\''+inv.id+'\')">'+inv.name.replace('Inventario','Inv.')+'</span>';
+    }).join('');
 }
 
-// ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
 // CAMPO — FORMULARIO
-// ═══════════════════════════════════════════════════════════════════
-function setMetodo(m){
-  S.metodo=m;
-  document.getElementById('btn-metodo-res').classList.toggle('active',m==='resumen');
-  document.getElementById('btn-metodo-arb').classList.toggle('active',m==='arboles');
-  document.getElementById('panel-resumen').style.display=m==='resumen'?'':'none';
-  document.getElementById('panel-arboles').style.display=m==='arboles'?'':'none';
-  if(m==='arboles')buildTreeTable();
+// ═══════════════════════════════════════════════════
+function setMetodo(m) {
+  S.metodo = m;
+  document.getElementById('btn-metodo-res').classList.toggle('active', m==='resumen');
+  document.getElementById('btn-metodo-arb').classList.toggle('active', m==='arboles');
+  document.getElementById('panel-resumen').style.display = m==='resumen' ? '' : 'none';
+  document.getElementById('panel-arboles').style.display = m==='arboles' ? '' : 'none';
+  if (m==='arboles') buildTreeTable();
 }
 
-function updateResumenUI(){
-  const n=+document.getElementById('ni-narboles').value||0;
-  const nparcelas=+document.getElementById('ni-nparcelas').value||1;
-  const areaParcela=+document.getElementById('ni-area-parcela').value||200;
-  const dapMean=+document.getElementById('ni-dap-mean').value||0;
-  const pr=document.getElementById('resumen-preview');
-  if(!dapMean||!n){pr.textContent='';return;}
-  const totalArea=nparcelas*areaParcela;
-  const densHa=n*(10000/totalArea);
-  const volHa=volF(dapMean)*(10000/(totalArea/n));
-  const abHa=(Math.PI/4*(dapMean/100)**2)*densHa;
-  pr.innerHTML=`<b>Preview:</b> Densidad estimada: <b>${Math.round(densHa)} árb/ha</b> · AB estimada: <b>${fN(abHa)} m²/ha</b> · Vol estimado: <b>${fN(volHa,1)} m³/ha</b>`;
+function updateResumenUI() {
+  var n = +document.getElementById('ni-narboles').value||0;
+  var np = +document.getElementById('ni-nparcelas').value||1;
+  var ap = +document.getElementById('ni-area-parcela').value||200;
+  var dapMean = +document.getElementById('ni-dap-mean').value||0;
+  var pr = document.getElementById('resumen-preview');
+  if (!dapMean||!n||!pr) return;
+  var totalArea = np*ap;
+  var densHa = n*(10000/totalArea);
+  var abHa = abF(dapMean)*densHa;
+  pr.innerHTML = '<b>Preview:</b> Densidad: <b>'+Math.round(densHa)+' árb/ha</b> · AB: <b>'+fN(abHa)+' m²/ha</b> · Vol: <b>'+fN(volF(dapMean)*(10000/(totalArea/n)),1)+' m³/ha</b>';
 }
 
-function buildTreeTable(){
-  const np=+document.getElementById('ni-nparcelas-arb').value||3;
-  const tb=document.getElementById('tree-rows');
-  if(treeRows.length===0){
-    treeRows=[];
-    for(let p=1;p<=np;p++)treeRows.push({parc:`P${p}`,n:1,dap:'',h:''});
+function buildTreeTable() {
+  if (treeRows.length===0) {
+    var np = +document.getElementById('ni-nparcelas-arb').value||3;
+    for (var p=1; p<=np; p++) treeRows.push({parc:'P'+p, n:1, dap:'', h:''});
   }
   renderTreeRows();
 }
-function renderTreeRows(){
-  const tb=document.getElementById('tree-rows');
-  tb.innerHTML=treeRows.map((r,i)=>`<tr>
-    <td style="padding:3px 6px"><select style="width:55px;padding:3px;border:1px solid var(--border);border-radius:4px;font-size:11px" onchange="treeRows[${i}].parc=this.value">
-      ${[...Array(+document.getElementById('ni-nparcelas-arb').value||3)].map((_,p)=>`<option${r.parc===`P${p+1}`?' selected':''}>P${p+1}</option>`).join('')}
-    </select></td>
-    <td style="padding:3px 6px;text-align:right"><input type="number" style="width:55px;padding:3px 5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:right" value="${r.n}" onchange="treeRows[${i}].n=+this.value"></td>
-    <td style="padding:3px 6px;text-align:right"><input type="number" step="0.1" style="width:65px;padding:3px 5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:right" value="${r.dap}" placeholder="cm" oninput="treeRows[${i}].dap=+this.value;updateArbPreview()"></td>
-    <td style="padding:3px 6px;text-align:right"><input type="number" step="0.1" style="width:60px;padding:3px 5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:right" value="${r.h}" placeholder="m" oninput="treeRows[${i}].h=+this.value"></td>
-    <td style="padding:3px 6px"><button onclick="rmTreeRow(${i})" style="border:none;background:#FEF2F2;color:#B91C1C;border-radius:4px;padding:2px 6px;cursor:pointer;font-size:10px">✕</button></td>
-  </tr>`).join('');
+function renderTreeRows() {
+  var np = +document.getElementById('ni-nparcelas-arb').value||3;
+  var tb = document.getElementById('tree-rows');
+  if (!tb) return;
+  tb.innerHTML = treeRows.map(function(r,i) {
+    var opts = '';
+    for (var p=1; p<=np; p++) opts += '<option'+(r.parc==='P'+p?' selected':'')+'>P'+p+'</option>';
+    return '<tr>' +
+      '<td style="padding:3px 6px"><select style="width:55px;padding:3px;border:1px solid var(--border);border-radius:4px;font-size:11px" onchange="treeRows['+i+'].parc=this.value">'+opts+'</select></td>' +
+      '<td style="padding:3px 6px;text-align:right"><input type="number" style="width:50px;padding:3px 5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:right" value="'+r.n+'" onchange="treeRows['+i+'].n=+this.value"></td>' +
+      '<td style="padding:3px 6px;text-align:right"><input type="number" step="0.1" style="width:60px;padding:3px 5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:right" value="'+r.dap+'" placeholder="cm" oninput="treeRows['+i+'].dap=+this.value;updateArbPreview()"></td>' +
+      '<td style="padding:3px 6px;text-align:right"><input type="number" step="0.1" style="width:55px;padding:3px 5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:right" value="'+r.h+'" placeholder="m" oninput="treeRows['+i+'].h=+this.value"></td>' +
+      '<td style="padding:3px 6px"><button onclick="rmTreeRow('+i+')" style="border:none;background:#FEF2F2;color:#B91C1C;border-radius:4px;padding:2px 6px;cursor:pointer;font-size:10px">✕</button></td>' +
+      '</tr>';
+  }).join('');
 }
-function addTreeRow(){
-  const np=+document.getElementById('ni-nparcelas-arb').value||3;
-  const lastN=treeRows.length?treeRows[treeRows.length-1].n+1:1;
-  treeRows.push({parc:'P1',n:lastN,dap:'',h:''});renderTreeRows();
+function addTreeRow() {
+  var np = +document.getElementById('ni-nparcelas-arb').value||3;
+  var lastN = treeRows.length ? treeRows[treeRows.length-1].n+1 : 1;
+  treeRows.push({parc:'P1', n:lastN, dap:'', h:''});
+  renderTreeRows();
 }
-function rmTreeRow(i){treeRows.splice(i,1);renderTreeRows();}
-function clearTreeTable(){treeRows=[];renderTreeRows();}
-function updateArbPreview(){
-  const daps=treeRows.filter(r=>r.dap>0).map(r=>r.dap);
-  if(!daps.length){document.getElementById('arb-preview').textContent='';return;}
-  const mean=daps.reduce((a,b)=>a+b,0)/daps.length;
-  const np=+document.getElementById('ni-nparcelas-arb').value||1;
-  const ap=+document.getElementById('ni-area-arb').value||200;
-  const totalArea=np*ap;
-  const densHa=daps.length*(10000/totalArea);
-  document.getElementById('arb-preview').innerHTML=`<b>${daps.length} árboles</b> · DAP prom: <b>${fN(mean)} cm</b> · Densidad: <b>${Math.round(densHa)} árb/ha</b>`;
+function rmTreeRow(i) { treeRows.splice(i,1); renderTreeRows(); }
+function clearTreeTable() { treeRows=[]; renderTreeRows(); }
+function updateArbPreview() {
+  var daps = treeRows.filter(function(r){ return r.dap>0; }).map(function(r){ return r.dap; });
+  if (!daps.length) return;
+  var mean = daps.reduce(function(a,b){ return a+b; }, 0)/daps.length;
+  var np = +document.getElementById('ni-nparcelas-arb').value||1;
+  var ap = +document.getElementById('ni-area-arb').value||200;
+  var el = document.getElementById('arb-preview');
+  if (el) el.innerHTML = '<b>'+daps.length+' árboles</b> · DAP prom: <b>'+fN(mean)+' cm</b> · Densidad: <b>'+Math.round(daps.length*(10000/(np*ap)))+' árb/ha</b>';
 }
 
-function buildInvFromForm(){
-  const nombre=document.getElementById('ni-nombre').value||`Inventario ${inventarios.length+1}`;
-  const fecha=document.getElementById('ni-fecha').value||new Date().toISOString().slice(0,10);
-  const edad=+document.getElementById('ni-edad').value||(new Date(fecha)-ESTAB)/(365.25*86400000);
-  const densidad=+document.getElementById('ni-dens').value||512;
-  const ha=+document.getElementById('ni-ha').value||2.24;
-  const notas=document.getElementById('ni-notas').value||'';
-  const id='inv'+(Date.now());
+function buildInvFromForm() {
+  var nombre = document.getElementById('ni-nombre').value || ('Inventario '+(inventarios.length+1));
+  var fecha  = document.getElementById('ni-fecha').value || new Date().toISOString().slice(0,10);
+  var edad   = +document.getElementById('ni-edad').value || (new Date(fecha)-ESTAB)/(365.25*86400000);
+  var id = 'inv'+Date.now();
+  var notas = document.getElementById('ni-notas').value||'';
 
-  if(S.metodo==='resumen'){
-    const nparcelas=+document.getElementById('ni-nparcelas').value||3;
-    const areaP=+document.getElementById('ni-area-parcela').value||200;
-    const nArboles=+document.getElementById('ni-narboles').value||0;
-    const dapMean=+document.getElementById('ni-dap-mean').value||0;
-    const dapSd=+document.getElementById('ni-dap-sd').value||0;
-    const altura=+document.getElementById('ni-altura').value||null;
-    // Generar árboles sintéticos con distribución normal aproximada
-    const trees=[];
-    const nPerP=Math.round(nArboles/nparcelas);
-    const parcelas=[];
-    for(let p=0;p<nparcelas;p++){
-      const pts=[];
-      for(let i=0;i<nPerP;i++){
-        // Box-Muller
-        const u1=Math.random(),u2=Math.random();
-        const z=Math.sqrt(-2*Math.log(u1))*Math.cos(2*Math.PI*u2);
-        const dap=Math.max(dapMean+z*dapSd,5);
-        pts.push({n:i+1,dap:Math.round(dap*10)/10,h:altura});
+  if (S.metodo==='resumen') {
+    var nparcelas = +document.getElementById('ni-nparcelas').value||3;
+    var areaP     = +document.getElementById('ni-area-parcela').value||200;
+    var nArboles  = +document.getElementById('ni-narboles').value||0;
+    var dapMean   = +document.getElementById('ni-dap-mean').value||0;
+    var dapSd     = +document.getElementById('ni-dap-sd').value||0;
+    var altura    = +document.getElementById('ni-altura').value||null;
+    var nPerP = Math.round(nArboles/nparcelas);
+    var parcelas = [];
+    for (var p=0; p<nparcelas; p++) {
+      var pts = [];
+      for (var i=0; i<nPerP; i++) {
+        var u1=Math.random(), u2=Math.random();
+        var z = Math.sqrt(-2*Math.log(u1))*Math.cos(2*Math.PI*u2);
+        var dap = Math.max(dapMean+z*dapSd, 5);
+        pts.push({n:i+1, dap:Math.round(dap*10)/10, h:altura});
       }
-      parcelas.push({id:`P${p+1}`,area:areaP,trees:pts});
+      parcelas.push({id:'P'+(p+1), area:areaP, trees:pts});
     }
-    return {id,name:nombre,date:fecha,age:edad,method:'resumen',notas,parcelas};
+    return {id:id, name:nombre, date:fecha, age:edad, method:'resumen', notas:notas, parcelas:parcelas};
   } else {
-    // Árbol por árbol
-    const np=+document.getElementById('ni-nparcelas-arb').value||3;
-    const ap=+document.getElementById('ni-area-arb').value||200;
-    const parcMap={};
-    treeRows.filter(r=>r.dap>0).forEach(r=>{
-      if(!parcMap[r.parc])parcMap[r.parc]=[];
-      parcMap[r.parc].push({n:r.n,dap:r.dap,h:r.h||null});
+    var np2 = +document.getElementById('ni-nparcelas-arb').value||3;
+    var ap2 = +document.getElementById('ni-area-arb').value||200;
+    var parcMap = {};
+    treeRows.filter(function(r){ return r.dap>0; }).forEach(function(r) {
+      if (!parcMap[r.parc]) parcMap[r.parc]=[];
+      parcMap[r.parc].push({n:r.n, dap:r.dap, h:r.h||null});
     });
-    const parcelas=Object.entries(parcMap).map(([pid,trees])=>({id:pid,area:ap,trees}));
-    return {id,name:nombre,date:fecha,age:edad,method:'trees',notas,parcelas};
+    var parcelas2 = Object.keys(parcMap).map(function(pid){ return {id:pid, area:ap2, trees:parcMap[pid]}; });
+    return {id:id, name:nombre, date:fecha, age:edad, method:'trees', notas:notas, parcelas:parcelas2};
   }
 }
 
-function previewInventario(){
-  const inv=buildInvFromForm();
-  const st=invStats(inv);
-  const el=document.getElementById('gh-status');
-  el.className='gh-st ok';el.style.display='block';
-  el.innerHTML=`Preview: <b>${inv.name}</b> · ${st.n} árboles · DAP prom ${fN(st.mean)} cm · ${Math.round(st.densHa)} árb/ha · AB ${fN(st.abHa)} m²/ha · Vol ${fN(st.volHa,1)} m³/ha`;
+function previewInventario() {
+  var inv = buildInvFromForm();
+  var st  = invStats(inv);
+  var el  = document.getElementById('gh-status');
+  if (!el) return;
+  el.className='gh-st ok'; el.style.display='block';
+  el.innerHTML = 'Preview: <b>'+inv.name+'</b> · '+st.n+' árboles · DAP '+fN(st.mean)+' cm · '+Math.round(st.densHa)+' árb/ha · AB '+fN(st.abHa)+' m²/ha · Vol '+fN(st.volHa,1)+' m³/ha';
 }
 
-async function guardarInventario(){
-  const inv=buildInvFromForm();
-  const user=document.getElementById('gh-user').value.trim();
-  const repo=document.getElementById('gh-repo').value.trim();
-  const token=document.getElementById('gh-token').value.trim()||localStorage.getItem('gh-token');
-  const el=document.getElementById('gh-status');
-  if(!token){el.className='gh-st err';el.style.display='block';el.textContent='Falta el token de GitHub. Configuralo arriba.';return;}
-  el.className='gh-st loading';el.style.display='block';el.textContent='Guardando en GitHub...';
-  try{
-    const fname=`inventarios/${inv.id}_${inv.date}.json`;
-    const content=btoa(unescape(encodeURIComponent(JSON.stringify(inv,null,2))));
-    // Verificar si ya existe
-    let sha=null;
-    try{const r=await fetch(`https://api.github.com/repos/${user}/${repo}/contents/${fname}`,{headers:{'Authorization':`Bearer ${token}`}});if(r.ok){const d=await r.json();sha=d.sha;}}catch{}
-    const body={message:`Inventario: ${inv.name} (${inv.date})`,content,...(sha?{sha}:{})};
-    const res=await fetch(`https://api.github.com/repos/${user}/${repo}/contents/${fname}`,{method:'PUT',headers:{'Authorization':`Bearer ${token}`,'Content-Type':'application/json'},body:JSON.stringify(body)});
-    if(res.ok){
-      el.className='gh-st ok';el.textContent=`✓ Guardado en ${user}/${repo}/${fname}`;
+async function guardarInventario() {
+  var inv   = buildInvFromForm();
+  var user  = document.getElementById('gh-user').value.trim();
+  var repo  = document.getElementById('gh-repo').value.trim();
+  var token = document.getElementById('gh-token').value.trim() || localStorage.getItem('gh-token');
+  var el    = document.getElementById('gh-status');
+  if (!token) { el.className='gh-st err'; el.style.display='block'; el.textContent='Falta el token de GitHub.'; return; }
+  el.className='gh-st loading'; el.style.display='block'; el.textContent='Guardando en GitHub...';
+  try {
+    var fname = 'inventarios/'+inv.id+'_'+inv.date+'.json';
+    var content = btoa(unescape(encodeURIComponent(JSON.stringify(inv,null,2))));
+    var sha = null;
+    try {
+      var r0 = await fetch('https://api.github.com/repos/'+user+'/'+repo+'/contents/'+fname, {headers:{Authorization:'Bearer '+token}});
+      if (r0.ok) { var d0=await r0.json(); sha=d0.sha; }
+    } catch(e) {}
+    var body = {message:'Inventario: '+inv.name+' ('+inv.date+')', content:content};
+    if (sha) body.sha = sha;
+    var res = await fetch('https://api.github.com/repos/'+user+'/'+repo+'/contents/'+fname, {method:'PUT', headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'}, body:JSON.stringify(body)});
+    if (res.ok) {
+      el.className='gh-st ok'; el.textContent='✓ Guardado en '+user+'/'+repo+'/'+fname;
       addInventarioLocal(inv);
     } else {
-      const err=await res.json();
-      el.className='gh-st err';el.textContent=`Error GitHub: ${err.message}`;
+      var err = await res.json();
+      el.className='gh-st err'; el.textContent='Error GitHub: '+(err.message||'desconocido');
     }
-  }catch(e){el.className='gh-st err';el.textContent=`Error: ${e.message}`;}
+  } catch(e) { el.className='gh-st err'; el.textContent='Error: '+e.message; }
 }
 
-function guardarLocal(){
-  const inv=buildInvFromForm();
+function guardarLocal() {
+  var inv = buildInvFromForm();
   addInventarioLocal(inv);
-  const blob=new Blob([JSON.stringify(inv,null,2)],{type:'application/json'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`${inv.id}_${inv.date}.json`;a.click();
-  const el=document.getElementById('gh-status');
-  el.className='gh-st ok';el.style.display='block';el.textContent=`✓ Guardado localmente y descargado: ${inv.name}`;
+  var blob = new Blob([JSON.stringify(inv,null,2)], {type:'application/json'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = inv.id+'_'+inv.date+'.json';
+  a.click();
+  var el = document.getElementById('gh-status');
+  if (el) { el.className='gh-st ok'; el.style.display='block'; el.textContent='✓ Descargado: '+inv.name; }
 }
 
-function addInventarioLocal(inv){
-  if(!inventarios.find(i=>i.id===inv.id))inventarios.push(inv);
+function addInventarioLocal(inv) {
+  if (!inventarios.filter(function(i){ return i.id===inv.id; }).length) inventarios.push(inv);
   activeInvs.add(inv.id);
-  renderChips();renderCampoTab();update();
+  renderChips();
+  renderCampoTab();
+  update();
 }
 
-function saveGHConfig(){
-  const token=document.getElementById('gh-token').value.trim();
-  if(token)localStorage.setItem('gh-token',token);
-  localStorage.setItem('gh-user',document.getElementById('gh-user').value);
-  localStorage.setItem('gh-repo',document.getElementById('gh-repo').value);
-  L('gh-config-st','✓ Configuración guardada');
+function saveGHConfig() {
+  var token = document.getElementById('gh-token').value.trim();
+  if (token) localStorage.setItem('gh-token', token);
+  localStorage.setItem('gh-user', document.getElementById('gh-user').value);
+  localStorage.setItem('gh-repo', document.getElementById('gh-repo').value);
+  L('gh-config-st', '✓ Guardado');
 }
 
-async function loadFromGitHub(){
-  const user=localStorage.getItem('gh-user')||'vic-forestry';
-  const repo=localStorage.getItem('gh-repo')||'teca-dashboard';
-  const token=localStorage.getItem('gh-token');
-  if(!token)return;
-  try{
-    const r=await fetch(`https://api.github.com/repos/${user}/${repo}/contents/inventarios`,{headers:{Authorization:`Bearer ${token}`}});
-    if(!r.ok)return;
-    const files=await r.json();
-    for(const f of files.filter(f=>f.name.endsWith('.json'))){
-      try{
-        const rc=await fetch(f.download_url);
-        const inv=await rc.json();
-        if(!inventarios.find(i=>i.id===inv.id))inventarios.push(inv);
-      }catch{}
+async function loadFromGitHub() {
+  var user  = localStorage.getItem('gh-user') || 'vic-forestry';
+  var repo  = localStorage.getItem('gh-repo') || 'teca-dashboard';
+  var token = localStorage.getItem('gh-token');
+  if (!token) return;
+  try {
+    var r = await fetch('https://api.github.com/repos/'+user+'/'+repo+'/contents/inventarios', {headers:{Authorization:'Bearer '+token}});
+    if (!r.ok) return;
+    var files = await r.json();
+    for (var i=0; i<files.length; i++) {
+      var f = files[i];
+      if (!f.name.endsWith('.json')) continue;
+      try {
+        var rc = await fetch(f.download_url);
+        var inv = await rc.json();
+        if (!inventarios.filter(function(x){ return x.id===inv.id; }).length) inventarios.push(inv);
+      } catch(e) {}
     }
-    renderChips();renderCampoTab();
-  }catch{}
+    renderChips();
+    renderCampoTab();
+    update();
+  } catch(e) {}
 }
 
-// ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
 // SIDEBAR CASAS
-// ═══════════════════════════════════════════════════════════════════
-function renderCasasSb(){
-  const el=document.getElementById('casas-sb');el.innerHTML='';
-  S.casas.forEach((c,i)=>{
-    const d=document.createElement('div');
-    d.style.cssText='background:rgba(0,0,0,.15);border-radius:6px;padding:8px 9px;margin-bottom:7px;position:relative';
-    d.innerHTML=`<div style="font-size:10px;font-weight:600;color:rgba(255,255,255,.5);margin-bottom:6px">Casa ${i+1}${S.casas.length>1?`<button onclick="rmCasa(${i})" style="float:right;background:rgba(220,50,50,.3);border:none;color:#fca5a5;border-radius:3px;padding:1px 5px;font-size:9px;cursor:pointer">✕</button>`:''}
-</div>
-<div class="ctrl"><div class="clbl">Tamaño <span class="cval">${c.area} m²</span></div><input type="range" min="20" max="200" step="5" value="${c.area}" oninput="S.casas[${i}].area=+this.value;this.previousElementSibling.lastChild.textContent=this.value+' m²';update()"></div>
-<div class="ctrl"><div class="clbl">Grosor <span class="cval">${c.grosor}"</span></div><input type="range" min="0.75" max="2" step="0.25" value="${c.grosor}" oninput="S.casas[${i}].grosor=+this.value;this.previousElementSibling.lastChild.textContent=this.value+'&quot;';update()"></div>
-<div class="ctrl"><div class="clbl">Alto paredes <span class="cval">${c.alto.toFixed(1)} m</span></div><input type="range" min="2.0" max="3.5" step="0.1" value="${c.alto}" oninput="S.casas[${i}].alto=+this.value;this.previousElementSibling.lastChild.textContent=this.value+' m';update()"></div>`;
+// ═══════════════════════════════════════════════════
+function renderCasasSb() {
+  var el = document.getElementById('casas-sb');
+  if (!el) return;
+  el.innerHTML = '';
+  S.casas.forEach(function(c,i) {
+    var d = document.createElement('div');
+    d.style.cssText = 'background:rgba(0,0,0,.15);border-radius:6px;padding:8px 9px;margin-bottom:7px';
+    var rmBtn = S.casas.length>1 ? '<button onclick="rmCasa('+i+')" style="float:right;background:rgba(220,50,50,.3);border:none;color:#fca5a5;border-radius:3px;padding:1px 5px;font-size:9px;cursor:pointer">✕</button>' : '';
+    d.innerHTML =
+      '<div style="font-size:10px;font-weight:600;color:rgba(255,255,255,.5);margin-bottom:6px">Casa '+(i+1)+rmBtn+'</div>' +
+      '<div class="ctrl"><div class="clbl">Tamaño <span class="cval">'+c.area+' m²</span></div><input type="range" min="20" max="200" step="5" value="'+c.area+'" oninput="S.casas['+i+'].area=+this.value;this.previousElementSibling.lastChild.textContent=this.value+\' m²\';update()"></div>' +
+      '<div class="ctrl"><div class="clbl">Grosor <span class="cval">'+c.grosor+'"</span></div><input type="range" min="0.75" max="2" step="0.25" value="'+c.grosor+'" oninput="S.casas['+i+'].grosor=+this.value;this.previousElementSibling.lastChild.textContent=this.value+\'&quot;\';update()"></div>' +
+      '<div class="ctrl"><div class="clbl">Alto paredes <span class="cval">'+c.alto.toFixed(1)+' m</span></div><input type="range" min="2.0" max="3.5" step="0.1" value="'+c.alto+'" oninput="S.casas['+i+'].alto=+this.value;this.previousElementSibling.lastChild.textContent=this.value+\' m\';update()"></div>';
     el.appendChild(d);
   });
 }
-function addCasa(){S.casas.push({area:40,grosor:1.0,alto:2.5});renderCasasSb();update();}
-function rmCasa(i){if(S.casas.length>1){S.casas.splice(i,1);renderCasasSb();update();}}
+function addCasa() { S.casas.push({area:40,grosor:1.0,alto:2.5}); renderCasasSb(); update(); }
+function rmCasa(i) { if (S.casas.length>1) { S.casas.splice(i,1); renderCasasSb(); update(); } }
 
-// ═══════════════════════════════════════════════════════════════════
-// NAVIGATION
-// ═══════════════════════════════════════════════════════════════════
-let currentTab=0;
-function goTab(i){
-  currentTab=i;
-  document.querySelectorAll('.mtab').forEach((t,j)=>t.classList.toggle('active',j===i));
-  document.querySelectorAll('.tp').forEach((p,j)=>p.classList.toggle('active',j===i));
-  // Use rAF so canvas is visible before Chart.js tries to render
-  requestAnimationFrame(()=>{
-    if(i===0){updateFilters();renderInventarioTab();}
-    else if(i===1)renderRaleosTab();
-    else if(i===2)renderFinTab();
-    else if(i===3)renderCasaTab();
-    else if(i===4)renderCampoTab();
-  });
+// ═══════════════════════════════════════════════════
+// NAVEGACIÓN
+// ═══════════════════════════════════════════════════
+function goTab(i) {
+  currentTab = i;
+  document.querySelectorAll('.mtab').forEach(function(t,j){ t.classList.toggle('active',j===i); });
+  document.querySelectorAll('.tp').forEach(function(p,j){ p.classList.toggle('active',j===i); });
+  renderCurrentTab();
 }
-function sTab(i){
-  document.querySelectorAll('.stab').forEach((t,j)=>t.classList.toggle('active',j===i));
-  document.querySelectorAll('.sp').forEach((p,j)=>p.classList.toggle('active',j===i));
+
+function sTab(i) {
+  document.querySelectorAll('.stab').forEach(function(t,j){ t.classList.toggle('active',j===i); });
+  document.querySelectorAll('.sp').forEach(function(p,j){ p.classList.toggle('active',j===i); });
 }
-function ss(k,v){
+
+function ss(k,v) {
   S[k]=v;
-  if(k==='esc'){['C','O'].forEach(x=>document.getElementById('btn-'+x).classList.toggle('active',x===v));}
-  if(k==='mkt'){
-    ['exp','nac'].forEach(x=>document.getElementById('btn-mkt-'+x).classList.toggle('active',x===v.replace('export','exp')));
-    document.getElementById('pan-exp').style.display=v==='export'?'':'none';
-    document.getElementById('pan-nac').style.display=v==='nac'?'':'none';
+  if (k==='esc') {
+    document.getElementById('btn-C').classList.toggle('active',v==='C');
+    document.getElementById('btn-O').classList.toggle('active',v==='O');
   }
-  if(k==='mod'){
-    ['pie','pie2'].forEach(id=>{const e=document.getElementById('btn-'+id);if(e)e.classList.toggle('active',v==='pie');});
-    ['rollo','rollo2'].forEach(id=>{const e=document.getElementById('btn-'+id);if(e)e.classList.toggle('active',v==='rollo');});
+  if (k==='mkt') {
+    document.getElementById('btn-mkt-exp').classList.toggle('active',v==='export');
+    document.getElementById('btn-mkt-nac').classList.toggle('active',v==='nac');
+    document.getElementById('pan-exp').style.display = v==='export'?'':'none';
+    document.getElementById('pan-nac').style.display = v==='nac'?'':'none';
+  }
+  if (k==='mod') {
+    ['btn-pie','btn-pie2'].forEach(function(id){ var e=document.getElementById(id); if(e) e.classList.toggle('active',v==='pie'); });
+    ['btn-rollo','btn-rollo2'].forEach(function(id){ var e=document.getElementById(id); if(e) e.classList.toggle('active',v==='rollo'); });
   }
   update();
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// MAIN UPDATE
-// ═══════════════════════════════════════════════════════════════════
-function update(){
-  S.r1on=document.getElementById('chk-r1').checked;
-  S.r2on=document.getElementById('chk-r2').checked;
-  S.r1y=get('r1y',7);S.ri1=get('ri1',35);
-  S.r2y=get('r2y',10);S.ri2=get('ri2',25);
-  if(S.r2on&&S.r1on&&S.r2y<=S.r1y){S.r2y=S.r1y+1;document.getElementById('r2y').value=S.r2y;}
-  S.boost=get('boost',20);S.tasa=get('tasa',8);S.infl=get('infl',2);
-  S.pexp=get('pexp',300);S.tc=get('tc',520);S.pnac=get('pnac',200);
-  S.pral=get('pral',150);S.tc2=get('tc2',520);S.ccf=get('ccf',20);
-  S.cuid=get('cuid',300000);S.elec=get('elec',20000);S.imp=get('imp',150000);
-  S.otros=get('otros',0);S.cral=get('cral',1000);
-  S.mo=get('mo',80000);S.mat=get('mat',50000);
+// ═══════════════════════════════════════════════════
+// UPDATE PRINCIPAL
+// ═══════════════════════════════════════════════════
+function update() {
+  // Read sliders
+  S.r1on = document.getElementById('chk-r1').checked;
+  S.r2on = document.getElementById('chk-r2').checked;
+  S.r1y=get('r1y',7);  S.ri1=get('ri1',35);
+  S.r2y=get('r2y',10); S.ri2=get('ri2',25);
+  if (S.r2on && S.r1on && S.r2y<=S.r1y) {
+    S.r2y=S.r1y+1;
+    var el=document.getElementById('r2y'); if(el) el.value=S.r2y;
+  }
+  S.boost=get('boost',20); S.tasa=get('tasa',8); S.infl=get('infl',2);
+  S.pexp=get('pexp',300); S.tc=get('tc',520); S.pnac=get('pnac',200);
+  S.pral=get('pral',150); S.tc2=get('tc2',520); S.ccf=get('ccf',20);
+  S.cuid=get('cuid',300000); S.elec=get('elec',20000);
+  S.imp=get('imp',150000); S.otros=get('otros',0); S.cral=get('cral',1000);
+  S.mo=get('mo',80000); S.mat=get('mat',50000);
 
-  document.getElementById('r1b').style.display=S.r1on?'':'none';
-  document.getElementById('r2b').style.display=S.r2on?'':'none';
+  // Show/hide raleo blocks
+  var r1b = document.getElementById('r1b'); if(r1b) r1b.style.display=S.r1on?'':'none';
+  var r2b = document.getElementById('r2b'); if(r2b) r2b.style.display=S.r2on?'':'none';
 
-  L('r1y-l',S.r1y);L('ri1-l',S.ri1+'%');L('r2y-l',S.r2y);L('ri2-l',S.ri2+'%');
-  L('boost-l','+'+S.boost+'%');L('tasa-l',S.tasa+'%');L('infl-l',S.infl+'%');
-  L('pexp-l','$'+S.pexp+'/m³');L('tc-l',S.tc+' ₡/$');L('pnac-l',S.pnac+' ₡/PMT');
-  L('pral-l',S.pral+' ₡/PMT');L('tc2-l',S.tc2+' ₡/$');L('ccf-l','$'+S.ccf+'/m³');
-  L('cuid-l','₡'+Math.round(S.cuid/1000)+'k');L('elec-l','₡'+Math.round(S.elec/1000)+'k');
-  L('imp-l','₡'+Math.round(S.imp/1000)+'k');L('otros-l','₡'+Math.round(S.otros/1000)+'k');
-  L('cral-l','₡'+S.cral.toLocaleString());L('mo-l','₡'+Math.round(S.mo/1000)+'k');
-  L('mat-l','₡'+Math.round(S.mat/1000)+'k');
+  // Update labels
+  L('r1y-l',S.r1y); L('ri1-l',S.ri1+'%');
+  L('r2y-l',S.r2y); L('ri2-l',S.ri2+'%');
+  L('boost-l','+'+S.boost+'%'); L('tasa-l',S.tasa+'%'); L('infl-l',S.infl+'%');
+  L('pexp-l','$'+S.pexp+'/m³'); L('tc-l',S.tc+' ₡/$'); L('pnac-l',S.pnac+' ₡/PMT');
+  L('pral-l',S.pral+' ₡/PMT'); L('tc2-l',S.tc2+' ₡/$'); L('ccf-l','$'+S.ccf+'/m³');
+  L('cuid-l','₡'+Math.round(S.cuid/1000)+'k'); L('elec-l','₡'+Math.round(S.elec/1000)+'k');
+  L('imp-l','₡'+Math.round(S.imp/1000)+'k'); L('otros-l','₡'+Math.round(S.otros/1000)+'k');
+  L('cral-l','₡'+S.cral.toLocaleString());
+  L('mo-l','₡'+Math.round(S.mo/1000)+'k'); L('mat-l','₡'+Math.round(S.mat/1000)+'k');
 
-  requestAnimationFrame(()=>{
-    if(currentTab===0){updateFilters();renderInventarioTab();}
-    else if(currentTab===1)renderRaleosTab();
-    else if(currentTab===2)renderFinTab();
-    else if(currentTab===3)renderCasaTab();
-  });
+  renderCurrentTab();
 }
 
-// ═══════════════════════════════════════════════════════════════════
+function renderCurrentTab() {
+  if (currentTab===0) { updateFilters(); renderInventarioTab(); }
+  else if (currentTab===1) renderRaleosTab();
+  else if (currentTab===2) renderFinTab();
+  else if (currentTab===3) renderCasaTab();
+  else if (currentTab===4) renderCampoTab();
+}
+
+// ═══════════════════════════════════════════════════
 // INIT
-// ═══════════════════════════════════════════════════════════════════
-function init(){
-  document.getElementById('ni-fecha').value=new Date().toISOString().slice(0,10);
-  const ghToken=localStorage.getItem('gh-token');
-  const ghUser=localStorage.getItem('gh-user');
-  const ghRepo=localStorage.getItem('gh-repo');
-  if(ghToken){const el=document.getElementById('gh-token');if(el)el.value=ghToken;}
-  if(ghUser){const el=document.getElementById('gh-user');if(el)el.value=ghUser;}
-  if(ghRepo){const el=document.getElementById('gh-repo');if(el)el.value=ghRepo;}
+// ═══════════════════════════════════════════════════
+(function init() {
+  var fd = document.getElementById('ni-fecha');
+  if (fd) fd.value = new Date().toISOString().slice(0,10);
+  var ghT=localStorage.getItem('gh-token'), ghU=localStorage.getItem('gh-user'), ghR=localStorage.getItem('gh-repo');
+  if (ghT) { var e=document.getElementById('gh-token'); if(e) e.value=ghT; }
+  if (ghU) { var e=document.getElementById('gh-user'); if(e) e.value=ghU; }
+  if (ghR) { var e=document.getElementById('gh-repo'); if(e) e.value=ghR; }
   renderCasasSb();
   renderChips();
   updateFilters();
-  // Give DOM time to paint before rendering charts
-  requestAnimationFrame(()=>{
-    requestAnimationFrame(()=>{
-      update();
-      loadFromGitHub();
-    });
-  });
-}
-if(document.readyState==='loading'){
-  document.addEventListener('DOMContentLoaded',init);
-} else {
-  init();
-}
+  update();
+  loadFromGitHub();
+})();
+
 </script>
 </body>
 </html>
