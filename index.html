@@ -51,15 +51,17 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
 .sp.active{display:block}
 .csec{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.35);margin:10px 0 6px;padding-bottom:3px;border-bottom:1px solid rgba(255,255,255,.08)}
 .ctrl{margin-bottom:9px}
-.clbl{font-size:11px;color:rgba(255,255,255,.7);margin-bottom:3px;display:flex;justify-content:space-between}
-.cval{font-size:11px;color:var(--gold-lt);font-weight:600;font-family:var(--mono)}
-.ctip{font-size:10px;color:rgba(255,255,255,.38);line-height:1.5;background:rgba(0,0,0,.15);border-radius:5px;padding:6px 8px;margin-bottom:8px}
-.ctip b{color:rgba(255,255,255,.6)}
-input[type=range]{-webkit-appearance:none;width:100%;height:4px;background:rgba(255,255,255,.2);border-radius:2px;outline:none;cursor:pointer}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--gold-lt);cursor:pointer;border:2px solid var(--teca)}
-.ipt{width:100%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:#fff;border-radius:5px;padding:5px 8px;font-size:12px;font-family:var(--sans)}
-.ipt:focus{outline:none;border-color:var(--gold-lt)}
-.sel{width:100%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:#fff;border-radius:5px;padding:5px 8px;font-size:12px;font-family:var(--sans);appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='rgba(255,255,255,.4)'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center}
+.clbl{font-size:11px;color:var(--muted);margin-bottom:3px;display:flex;justify-content:space-between}
+.cval{font-size:11px;color:var(--teca);font-weight:600;font-family:var(--mono)}
+.ctip{font-size:10px;color:var(--muted);line-height:1.5;background:rgba(0,0,0,.04);border-radius:5px;padding:6px 8px;margin-bottom:8px}
+.ctip b{color:var(--text)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:5px;background:#d8d2c4;border-radius:3px;outline:none;cursor:pointer;accent-color:var(--teca)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;border-radius:50%;background:var(--teca);cursor:pointer;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;background:var(--teca);cursor:pointer;border:2px solid #fff}
+input[type=range]::-moz-range-track{height:5px;background:#d8d2c4;border-radius:3px}
+.ipt{width:100%;background:#fff;border:1px solid var(--border);color:var(--text);border-radius:5px;padding:5px 8px;font-size:12px;font-family:var(--sans)}
+.ipt:focus{outline:none;border-color:var(--teca)}
+.sel{width:100%;background:#fff;border:1px solid var(--border);color:var(--text);border-radius:5px;padding:5px 8px;font-size:12px;font-family:var(--sans)}
 .sel option{background:#1e4620}
 .tog{display:flex;gap:3px}
 .tog button{flex:1;padding:5px 3px;font-size:11px;border-radius:4px;cursor:pointer;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);color:rgba(255,255,255,.55);font-family:var(--sans);transition:all .15s}
@@ -81,6 +83,20 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;heigh
 .ctitle{font-size:12px;font-weight:600;margin-bottom:2px}
 .csub{font-size:11px;color:var(--muted);margin-bottom:10px}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:.9rem}
+.cx-layout{display:grid;grid-template-columns:280px 1fr;gap:12px;margin-bottom:.9rem}
+@media(max-width:820px){.cx-layout{grid-template-columns:1fr}}
+.cx-controls{max-height:640px;overflow-y:auto}
+.cx-views{display:flex;flex-direction:column;gap:10px}
+.cx-ctrl{margin-bottom:10px}
+.cx-ctrl label{display:block;font-size:11px;color:var(--muted);margin-bottom:3px}
+.cx-ctrl .cxrow{display:flex;align-items:center;gap:8px}
+.cx-ctrl input[type=range]{flex:1}
+.cx-ctrl .cxval{font-size:11px;font-weight:600;color:var(--teca);min-width:46px;text-align:right}
+.cx-sec{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--teca);margin:12px 0 6px;padding-bottom:3px;border-bottom:1px solid var(--border)}
+.casa-tab{padding:.3rem .7rem;font-size:12px;border:1px solid var(--border);background:var(--surface);border-radius:6px;cursor:pointer;color:var(--muted)}
+.casa-tab.active{background:var(--teca);color:#fff;border-color:var(--teca);font-weight:600}
+.amb-rect{cursor:move}
+.amb-handle{cursor:nwse-resize}
 .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:.9rem}
 .note{font-size:11px;color:var(--muted);background:var(--bg);border-radius:6px;padding:7px 11px;line-height:1.6;margin-top:8px}
 .note.ok{background:var(--teca-lt);color:#27500A;border-left:3px solid var(--teca)}
@@ -188,9 +204,10 @@ tbody tr:hover{background:var(--teca-lt)}
   <div class="main-tabs" id="main-tabs">
     <button class="mtab active" onclick="goTab(0)">📋 Inventario</button>
     <button class="mtab" onclick="goTab(1)">✂️ Raleos</button>
-    <button class="mtab" onclick="goTab(2)">💰 Financiero</button>
-    <button class="mtab" onclick="goTab(3)">🏠 Construcción</button>
-    <button class="mtab" onclick="goTab(4)">📍 Campo</button>
+    <button class="mtab" onclick="goTab(2)">📈 Proyecciones</button>
+    <button class="mtab" onclick="goTab(3)">💰 Financiero</button>
+    <button class="mtab" onclick="goTab(4)">🏠 Construcción</button>
+    <button class="mtab" onclick="goTab(5)">📍 Campo</button>
   </div>
   <div class="tc">
 
@@ -211,27 +228,6 @@ tbody tr:hover{background:var(--teca-lt)}
       <div class="g2">
         <div class="card"><div class="ctitle">Área basal por parcela (m²/ha)</div><div class="csub">Extrapolada a hectárea</div><div style="height:180px"><canvas id="ch-ab"></canvas></div></div>
         <div class="card"><div class="ctitle">Densidad estimada (árb/ha)</div><div class="csub">Por inventario activo</div><div style="height:180px"><canvas id="ch-dens"></canvas></div></div>
-      </div>
-
-      <div class="sl">Proyección de crecimiento año por año</div>
-      <div class="card">
-        <div class="ctitle">Basada en el crecimiento observado entre inventarios</div>
-        <div class="csub" id="proj-sub">ICA DAP observado inv1→inv2, con desaceleración gradual. Ajustá la mortalidad anual.</div>
-        <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin:10px 0">
-          <label style="font-size:12px;color:var(--muted)">Mortalidad anual:
-            <input type="range" id="proj-mort" min="0" max="5" step="0.25" value="3" oninput="renderInventarioTab()" style="vertical-align:middle;width:120px">
-            <span id="proj-mort-lbl" style="font-weight:600;color:var(--teca)">3.0%</span>
-          </label>
-        </div>
-        <div class="g2">
-          <div><div class="csub">DAP promedio (cm)</div><div style="height:170px"><canvas id="ch-proj-dap"></canvas></div></div>
-          <div><div class="csub">Área basal (m²/ha)</div><div style="height:170px"><canvas id="ch-proj-ab"></canvas></div></div>
-        </div>
-        <div class="g2" style="margin-top:8px">
-          <div><div class="csub">Volumen en pie (m³/ha)</div><div style="height:170px"><canvas id="ch-proj-vol"></canvas></div></div>
-          <div><div class="csub">Densidad (árb/ha)</div><div style="height:170px"><canvas id="ch-proj-dens"></canvas></div></div>
-        </div>
-        <div class="tw" style="margin-top:10px"><table class="rtbl" id="proj-table"></table></div>
       </div>
 
       <div class="sl">Análisis de mortalidad</div>
@@ -271,11 +267,19 @@ tbody tr:hover{background:var(--teca-lt)}
       <div class="ks" id="ral-kpis"></div>
 
       <div class="card" style="margin-bottom:12px">
-        <div class="ctitle">Año del raleo</div>
+        <div class="ctitle">Raleo 1 — año e impulso post-raleo</div>
         <div class="csub">Aplica a ambas zonas. La plantación está en año ~7 (edad 6.9).</div>
-        <div style="display:flex;align-items:center;gap:12px;margin-top:8px">
-          <input type="range" id="ral-year" min="7" max="12" step="1" value="7" oninput="onZoneInput()" style="flex:1;max-width:300px">
-          <span id="ral-year-lbl" style="font-weight:700;color:var(--teca);font-size:16px">Año 7</span>
+        <div style="display:flex;align-items:center;gap:16px;margin-top:8px;flex-wrap:wrap">
+          <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:220px">
+            <span style="font-size:12px;color:var(--muted);min-width:34px">Año</span>
+            <input type="range" id="ral-year" min="7" max="12" step="1" value="7" oninput="onZoneInput()" style="flex:1">
+            <span id="ral-year-lbl" style="font-weight:700;color:var(--teca);font-size:15px;min-width:52px">Año 7</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:220px">
+            <span style="font-size:12px;color:var(--muted)">Boost ICA</span>
+            <input type="range" id="boost1" min="0" max="40" step="5" value="20" oninput="onZoneInput()" style="flex:1">
+            <span id="boost1-lbl" style="font-weight:700;color:var(--teca);min-width:42px">+20%</span>
+          </div>
         </div>
       </div>
 
@@ -286,9 +290,14 @@ tbody tr:hover{background:var(--teca-lt)}
           <div class="ctitle" style="color:#2C5F2E">🌳 Zona general (sana)</div>
           <div class="csub" id="zg-sub">1.83 ha · 520 árb/ha</div>
           <div style="display:flex;align-items:center;gap:10px;margin:10px 0">
-            <span style="font-size:12px;color:var(--muted)">Intensidad:</span>
+            <span style="font-size:12px;color:var(--muted);min-width:52px">Raleo 1:</span>
             <input type="range" id="zg-int" min="0" max="45" step="1" value="35" oninput="onZoneInput()" style="flex:1">
             <span id="zg-int-lbl" style="font-weight:700;color:#2C5F2E;min-width:38px">35%</span>
+          </div>
+          <div class="zg2-row" style="display:none;align-items:center;gap:10px;margin:10px 0">
+            <span style="font-size:12px;color:var(--muted);min-width:52px">Raleo 2:</span>
+            <input type="range" id="zg-int2" min="0" max="40" step="1" value="20" oninput="onZoneInput()" style="flex:1">
+            <span id="zg-int2-lbl" style="font-weight:700;color:#5B8C3E;min-width:38px">20%</span>
           </div>
           <div id="zg-rec" style="font-size:12px;margin-bottom:8px"></div>
           <div class="tw"><table class="rtbl" id="zg-table"></table></div>
@@ -298,32 +307,133 @@ tbody tr:hover{background:var(--teca-lt)}
           <div class="ctitle" style="color:#B45309">💨 Zona de viento</div>
           <div class="csub" id="zv-sub">0.26 ha · 350 árb/ha</div>
           <div style="display:flex;align-items:center;gap:10px;margin:10px 0">
-            <span style="font-size:12px;color:var(--muted)">Intensidad:</span>
+            <span style="font-size:12px;color:var(--muted);min-width:52px">Raleo 1:</span>
             <input type="range" id="zv-int" min="0" max="45" step="1" value="0" oninput="onZoneInput()" style="flex:1">
             <span id="zv-int-lbl" style="font-weight:700;color:#B45309;min-width:38px">0%</span>
+          </div>
+          <div class="zg2-row" style="display:none;align-items:center;gap:10px;margin:10px 0">
+            <span style="font-size:12px;color:var(--muted);min-width:52px">Raleo 2:</span>
+            <input type="range" id="zv-int2" min="0" max="40" step="1" value="0" oninput="onZoneInput()" style="flex:1">
+            <span id="zv-int2-lbl" style="font-weight:700;color:#D97706;min-width:38px">0%</span>
           </div>
           <div id="zv-rec" style="font-size:12px;margin-bottom:8px"></div>
           <div class="tw"><table class="rtbl" id="zv-table"></table></div>
         </div>
       </div>
 
+      <div class="card" style="margin-top:12px">
+        <label style="font-size:13px;display:flex;align-items:center;gap:8px;cursor:pointer">
+          <input type="checkbox" id="chk-ral2" onchange="onZoneInput()"> <b>Hacer un segundo raleo</b>
+        </label>
+        <div id="ral2-ctrl" style="display:none;margin-top:10px">
+          <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+            <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:220px">
+              <span style="font-size:12px;color:var(--muted);min-width:34px">Año</span>
+              <input type="range" id="ral2-year" min="9" max="14" step="1" value="11" oninput="onZoneInput()" style="flex:1">
+              <span id="ral2-year-lbl" style="font-weight:700;color:var(--teca);min-width:52px">Año 11</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:220px">
+              <span style="font-size:12px;color:var(--muted)">Boost ICA</span>
+              <input type="range" id="boost2" min="0" max="40" step="5" value="20" oninput="onZoneInput()" style="flex:1">
+              <span id="boost2-lbl" style="font-weight:700;color:var(--teca);min-width:42px">+20%</span>
+            </div>
+          </div>
+          <div class="csub" style="margin-top:6px">Al activarlo aparece un slider de "Raleo 2" en cada zona. El segundo raleo suele ser más ligero (15–25%).</div>
+        </div>
+      </div>
+
       <div class="card" id="ral-resumen" style="margin-top:12px"></div>
 
-      <div class="sl">Proyección — ambas zonas</div>
-      <div class="g2">
-        <div class="card"><div class="ctitle">Densidad (árb/ha)</div><div class="csub">Verde = general · Naranja = viento</div><div style="height:190px"><canvas id="ch-dens-t"></canvas></div></div>
-        <div class="card"><div class="ctitle">Área basal (m²/ha)</div><div class="csub">Umbral 16 m²/ha (línea punteada)</div><div style="height:190px"><canvas id="ch-ab-t"></canvas></div></div>
-      </div>
-      <div class="g2">
-        <div class="card"><div class="ctitle">DAP promedio (cm)</div><div class="csub">Con boost post-raleo</div><div style="height:190px"><canvas id="ch-dap-t"></canvas></div></div>
-        <div class="card"><div class="ctitle">Volumen en pie (m³/ha)</div><div class="csub">Con efecto post-raleo</div><div style="height:190px"><canvas id="ch-vol-t"></canvas></div></div>
-      </div>
-
-      <div class="note info" style="margin-top:10px">Para un <b>raleo único en teca clonal</b> se recomienda <b>33–38%</b> en rodal sano. La <b>zona de viento</b> ya está cerca de la densidad final (250–350 árb/ha) y expuesta; por eso su default es <b>0% (solo sanitario)</b>. Lo que definís aquí alimenta el tab <b>Financiero</b> (suma de ambas zonas).</div>
+      <div class="note info" style="margin-top:10px">Para un <b>raleo único en teca clonal</b> se recomienda <b>33–38%</b> en rodal sano. La <b>zona de viento</b> ya está cerca de la densidad final y expuesta; por eso su default es <b>0% (solo sanitario)</b>. Las proyecciones año a año están en el tab <b>Proyecciones</b>; los ingresos por raleo van al tab <b>Financiero</b>.</div>
     </div>
 
-    <!-- ═══ TAB 2: FINANCIERO ════════════════════════════════════ -->
+    <!-- ═══ TAB 2: PROYECCIONES ══════════════════════════════════ -->
     <div class="tp" id="tp2">
+      <div class="card" style="margin-bottom:12px">
+        <div class="ctitle">Modelo de mortalidad futura</div>
+        <div class="csub">La mortalidad histórica (~3%/año) incluye los años de establecimiento. Un rodal ya raleado pierde cada vez menos árboles.</div>
+        <div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap;margin-top:10px">
+          <label style="font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px">
+            <input type="checkbox" id="mort-decline" checked onchange="renderProyeccionesTab()">
+            Mortalidad decreciente (realista)
+          </label>
+          <div id="mort-fixed-ctrl" style="display:none">
+            <label style="font-size:12px;color:var(--muted)">Mortalidad fija anual:
+              <input type="range" id="proj-mort" min="0" max="5" step="0.25" value="3" oninput="renderProyeccionesTab()" style="vertical-align:middle;width:120px">
+              <span id="proj-mort-lbl" style="font-weight:600;color:var(--teca)">3.0%</span>
+            </label>
+          </div>
+          <div id="mort-decline-info" style="font-size:12px;color:var(--muted)">
+            Decae de <b id="md-start">3%</b> hoy hasta <b>1%</b> en los años finales.
+          </div>
+        </div>
+      </div>
+
+      <div class="ks" id="proy-kpis"></div>
+
+      <div class="sl">Proyección año a año — ambas zonas</div>
+      <div class="g2">
+        <div class="card"><div class="ctitle">DAP promedio (cm)</div><div class="csub">Verde = general · Naranja = viento</div><div style="height:190px"><canvas id="ch-proj-dap"></canvas></div></div>
+        <div class="card"><div class="ctitle">Área basal (m²/ha)</div><div class="csub">Umbral 16 m²/ha</div><div style="height:190px"><canvas id="ch-proj-ab"></canvas></div></div>
+      </div>
+      <div class="g2">
+        <div class="card"><div class="ctitle">Volumen en pie (m³/ha)</div><div class="csub">Con efecto post-raleo</div><div style="height:190px"><canvas id="ch-proj-vol"></canvas></div></div>
+        <div class="card"><div class="ctitle">Densidad (árb/ha)</div><div class="csub">Con mortalidad aplicada</div><div style="height:190px"><canvas id="ch-proj-dens"></canvas></div></div>
+      </div>
+
+      <div class="sl">Tabla de proyección — finca completa</div>
+      <div class="card"><div class="tw"><table class="rtbl" id="proj-table"></table></div>
+        <div class="csub" style="margin-top:8px">Valores ponderados por área de las dos zonas (general 1.83 ha + viento 0.26 ha), con los raleos definidos en el tab Raleos.</div>
+      </div>
+    </div>
+
+    <!-- ═══ TAB 3: FINANCIERO ════════════════════════════════════ -->
+    <div class="tp" id="tp3">
+
+      <div class="sl">Parámetros de precios e ingresos</div>
+      <div class="g2">
+        <div class="card">
+          <div class="ctitle">Cosecha final</div>
+          <div class="ctrl"><div class="clbl">Mercado</div><div class="tog"><button id="btn-mkt-exp" class="active" onclick="ss('mkt','export')">Exportación</button><button id="btn-mkt-nac" onclick="ss('mkt','nac')">Nacional</button></div></div>
+          <div id="pan-exp">
+            <div class="ctrl"><div class="clbl">Modalidad</div><div class="tog"><button id="btn-pie" class="active" onclick="ss('mod','pie')">En pie</button><button id="btn-rollo" onclick="ss('mod','rollo')">Rollo patio</button></div></div>
+            <div class="ctrl"><div class="clbl">Precio export <span class="cval" id="pexp-l">$300/m³</span></div><input type="range" id="pexp" min="100" max="700" step="25" value="300" oninput="update()"></div>
+            <div class="ctrl"><div class="clbl">Tipo cambio <span class="cval" id="tc-l">520 ₡/$</span></div><input type="range" id="tc" min="460" max="650" step="5" value="520" oninput="update()"></div>
+          </div>
+          <div id="pan-nac" style="display:none">
+            <div class="ctrl"><div class="clbl">Modalidad</div><div class="tog"><button id="btn-pie2" class="active" onclick="ss('mod','pie')">En pie</button><button id="btn-rollo2" onclick="ss('mod','rollo')">Rollo patio</button></div></div>
+            <div class="ctrl"><div class="clbl">Precio cosecha <span class="cval" id="pnac-l">200 ₡/PMT</span></div><input type="range" id="pnac" min="80" max="500" step="10" value="200" oninput="update()"></div>
+          </div>
+          <div class="ctrl"><div class="clbl">Costo extracción <span class="cval" id="ccf-l">$20/m³</span></div><input type="range" id="ccf" min="0" max="60" step="5" value="20" oninput="update()"></div>
+          <div class="csub">El costo de extracción solo aplica en <b>rollo en patio</b>.</div>
+        </div>
+        <div class="card">
+          <div class="ctitle">Raleo (mercado nacional)</div>
+          <div class="ctrl"><div class="clbl">Precio raleo <span class="cval" id="pral-l">150 ₡/PMT</span></div><input type="range" id="pral" min="50" max="300" step="10" value="150" oninput="update()"></div>
+          <div class="ctrl"><div class="clbl">Tipo cambio raleo <span class="cval" id="tc2-l">520 ₡/$</span></div><input type="range" id="tc2" min="460" max="650" step="5" value="520" oninput="update()"></div>
+          <div class="ctitle" style="margin-top:12px">Descuento e inflación</div>
+          <div class="ctrl"><div class="clbl">Tasa descuento <span class="cval" id="tasa-l">8%</span></div><input type="range" id="tasa" min="3" max="20" value="8" oninput="update()"></div>
+          <div class="ctrl"><div class="clbl">Inflación USD/año <span class="cval" id="infl-l">2%</span></div><input type="range" id="infl" min="0" max="8" step="0.5" value="2" oninput="update()"></div>
+          <div class="csub">Precios en PMT (1 PMT = 0.002360 m³); resultados en $ y m³.</div>
+        </div>
+      </div>
+
+      <div class="sl">Parámetros de gastos</div>
+      <div class="card">
+        <div class="g2">
+          <div>
+            <div class="ctrl"><div class="clbl">Cuidador (₡/mes) <span class="cval" id="cuid-l">₡300k</span></div><input type="range" id="cuid" min="100000" max="700000" step="25000" value="300000" oninput="update()"></div>
+            <div class="ctrl"><div class="clbl">Electricidad (₡/mes) <span class="cval" id="elec-l">₡20k</span></div><input type="range" id="elec" min="0" max="100000" step="5000" value="20000" oninput="update()"></div>
+            <div class="ctrl"><div class="clbl">Imp. municipales (₡/año) <span class="cval" id="imp-l">₡150k</span></div><input type="range" id="imp" min="0" max="500000" step="25000" value="150000" oninput="update()"></div>
+          </div>
+          <div>
+            <div class="ctrl"><div class="clbl">Otros (₡/año) <span class="cval" id="otros-l">₡0</span></div><input type="range" id="otros" min="0" max="1000000" step="50000" value="0" oninput="update()"></div>
+            <div class="ctrl"><div class="clbl">Costo raleo (₡/árbol) <span class="cval" id="cral-l">₡1,000</span></div><input type="range" id="cral" min="500" max="2500" step="100" value="1000" oninput="update()"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sl">Resultados</div>
       <div class="ks" id="fin-kpis"></div>
       <div class="g2">
         <div class="card"><div class="ctitle">Volumen en pie (m³/ha)</div><div class="csub" id="vol-sub-fin">Años 5–15</div><div style="height:190px"><canvas id="ch-vol-f"></canvas></div></div>
@@ -337,21 +447,56 @@ tbody tr:hover{background:var(--teca-lt)}
       <div class="card" id="gastos-card"></div>
     </div>
 
-    <!-- ═══ TAB 3: CONSTRUCCIÓN ══════════════════════════════════ -->
-    <div class="tp" id="tp3">
-      <div class="ks" id="casa-kpis"></div>
-      <div class="card" id="casa-bars-card">
-        <div class="ctitle">Madera del raleo 1 vs necesidades</div>
-        <div class="csub">Volumen en troza · factor aserradero 50%</div>
-        <div id="casa-bars" style="margin-top:10px"></div>
-        <div id="casa-note" class="note ok" style="margin-top:8px"></div>
+    <!-- ═══ TAB 4: CONSTRUCCIÓN ══════════════════════════════════ -->
+    <div class="tp" id="tp4">
+      <!-- Selector de casa -->
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px">
+        <span style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">Casa:</span>
+        <div id="casa-tabs" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+        <button class="btn btn-s btn-sm" onclick="addCasa()">+ Casa</button>
+        <button class="btn btn-s btn-sm" onclick="rmCasaActiva()">− Quitar</button>
       </div>
+
+      <div class="ks" id="casa-kpis"></div>
+
+      <div class="cx-layout">
+        <!-- Panel de controles -->
+        <div class="cx-controls card">
+          <div class="ctitle">Parámetros de la casa</div>
+          <div id="casa-params"></div>
+        </div>
+        <!-- Vistas -->
+        <div class="cx-views">
+          <div class="card">
+            <div class="ctitle">Planta <span style="font-weight:400;color:var(--muted);font-size:11px">— arrastrá los ambientes y el borde para redimensionar</span></div>
+            <div id="view-plan" style="width:100%;overflow:auto"></div>
+          </div>
+          <div class="g2">
+            <div class="card"><div class="ctitle">Alzado frontal</div><div id="view-elev"></div></div>
+            <div class="card"><div class="ctitle">Corte transversal</div><div id="view-sect"></div></div>
+          </div>
+          <div class="card"><div class="ctitle">Vista 3D isométrica</div><div id="view-iso"></div></div>
+        </div>
+      </div>
+
+      <div class="sl">Madera por componente</div>
+      <div class="card">
+        <div class="tw"><table class="rtbl" id="madera-tbl"></table></div>
+        <div id="madera-cruce" class="note ok" style="margin-top:10px"></div>
+      </div>
+
       <div class="sl">Costos de construcción</div>
+      <div class="card">
+        <div class="g2">
+          <div class="ctrl"><div class="clbl">Mano de obra (₡/m²) <span class="cval" id="mo-l">₡80k</span></div><input type="range" id="mo" min="20000" max="200000" step="5000" value="80000" oninput="update()"></div>
+          <div class="ctrl"><div class="clbl">Otros materiales (₡/m²) <span class="cval" id="mat-l">₡50k</span></div><input type="range" id="mat" min="0" max="150000" step="5000" value="50000" oninput="update()"></div>
+        </div>
+      </div>
       <div class="g2" id="casa-cost-cards"></div>
     </div>
 
     <!-- ═══ TAB 4: CAMPO ═════════════════════════════════════════ -->
-    <div class="tp" id="tp4">
+    <div class="tp" id="tp5">
       <div class="sl">Inventarios guardados</div>
       <div id="inv-list"></div>
       <div class="sl">Nuevo inventario</div>
@@ -523,79 +668,7 @@ tbody tr:hover{background:var(--teca-lt)}
   </div><!-- tc -->
 </div><!-- main-area -->
 
-<!-- SIDEBAR -->
-<aside class="sidebar">
-  <div class="s-tabs">
-    <button class="stab active" onclick="sTab(0)">🌱 Silvic.</button>
-    <button class="stab" onclick="sTab(1)">💰 Precios</button>
-    <button class="stab" onclick="sTab(2)">📋 Gastos</button>
-    <button class="stab" onclick="sTab(3)">🏠 Casas</button>
-    <button class="sb-toggle-btn" id="sb-toggle" onclick="toggleSidebar()">▲</button>
-  </div>
-
-  <!-- s0: Silvicultura -->
-  <div class="sp active" id="sp0">
-    <div class="csec">Modelo base</div>
-    <div class="ctrl">
-      <div class="clbl">Crecimiento</div>
-      <div class="tog"><button id="btn-C" class="active" onclick="ss('esc','C')">Conserv.</button><button id="btn-O" onclick="ss('esc','O')">Optimista</button></div>
-    </div>
-    <div class="ctip" style="margin-top:6px"><b>Raleos:</b> los controles de raleo por zona (general y viento) están ahora en el tab <b>✂️ Raleos</b>. Lo que definas ahí alimenta el análisis financiero.</div>
-    <div class="csec">Post-raleo</div>
-    <div class="ctrl"><div class="clbl">Boost ICA <span class="cval" id="boost-l">+20%</span></div><input type="range" id="boost" min="0" max="50" step="5" value="20" oninput="update()"></div>
-    <div class="csec">Análisis financiero</div>
-    <div class="ctrl"><div class="clbl">Tasa descuento <span class="cval" id="tasa-l">8%</span></div><input type="range" id="tasa" min="3" max="20" value="8" oninput="update()"></div>
-    <div class="ctrl"><div class="clbl">Inflación USD/año <span class="cval" id="infl-l">2%</span></div><input type="range" id="infl" min="0" max="8" step="0.5" value="2" oninput="update()"></div>
-    <div class="ctip"><b>Boost post-raleo:</b> Árboles remanentes crecen 15–30% más rápido por 3 años (Murillo & Badilla 2004). 20% es conservador. <b>Raleo único en clones:</b> 33–38% es óptimo (no hay árbol "malo" que eliminar, solo liberás espacio).</div>
-  </div>
-
-  <!-- s1: Precios -->
-  <div class="sp" id="sp1">
-    <div class="csec">Mercado cosecha</div>
-    <div class="ctrl">
-      <div class="tog"><button id="btn-mkt-exp" class="active" onclick="ss('mkt','export')">Exportación</button><button id="btn-mkt-nac" onclick="ss('mkt','nac')">Nacional</button></div>
-    </div>
-    <div id="pan-exp">
-      <div class="ctrl"><div class="clbl">Modalidad</div><div class="tog"><button id="btn-pie" class="active" onclick="ss('mod','pie')">En pie</button><button id="btn-rollo" onclick="ss('mod','rollo')">Rollo patio</button></div></div>
-      <div class="ctrl"><div class="clbl">Precio export <span class="cval" id="pexp-l">$300/m³</span></div><input type="range" id="pexp" min="100" max="700" step="25" value="300" oninput="update()"></div>
-      <div class="ctrl"><div class="clbl">Tipo cambio <span class="cval" id="tc-l">520 ₡/$</span></div><input type="range" id="tc" min="460" max="650" step="5" value="520" oninput="update()"></div>
-    </div>
-    <div id="pan-nac" style="display:none">
-      <div class="ctrl"><div class="clbl">Modalidad</div><div class="tog"><button id="btn-pie2" class="active" onclick="ss('mod','pie')">En pie</button><button id="btn-rollo2" onclick="ss('mod','rollo')">Rollo patio</button></div></div>
-      <div class="ctrl"><div class="clbl">Precio cosecha <span class="cval" id="pnac-l">200 ₡/PMT</span></div><input type="range" id="pnac" min="80" max="500" step="10" value="200" oninput="update()"></div>
-    </div>
-    <div class="csec">Raleo (siempre nacional)</div>
-    <div class="ctrl"><div class="clbl">Precio raleo <span class="cval" id="pral-l">150 ₡/PMT</span></div><input type="range" id="pral" min="50" max="300" step="10" value="150" oninput="update()"></div>
-    <div class="ctrl"><div class="clbl">Tipo cambio raleo <span class="cval" id="tc2-l">520 ₡/$</span></div><input type="range" id="tc2" min="460" max="650" step="5" value="520" oninput="update()"></div>
-    <div class="csec">Costo cosecha</div>
-    <div class="ctrl"><div class="clbl">Costo extracción <span class="cval" id="ccf-l">$20/m³</span></div><input type="range" id="ccf" min="0" max="60" step="5" value="20" oninput="update()"></div>
-    <div class="ctip">El costo de extracción solo aplica si vendes <b>rollo en patio</b>. Si vendes en pie, el comprador asume ese costo.</div>
-  </div>
-
-  <!-- s2: Gastos -->
-  <div class="sp" id="sp2">
-    <div class="csec">Operativos anuales</div>
-    <div class="ctrl"><div class="clbl">Cuidador (₡/mes) <span class="cval" id="cuid-l">₡300k</span></div><input type="range" id="cuid" min="100000" max="700000" step="25000" value="300000" oninput="update()"></div>
-    <div class="ctrl"><div class="clbl">Electricidad (₡/mes) <span class="cval" id="elec-l">₡20k</span></div><input type="range" id="elec" min="0" max="100000" step="5000" value="20000" oninput="update()"></div>
-    <div class="ctrl"><div class="clbl">Imp. municipales (₡/año) <span class="cval" id="imp-l">₡150k</span></div><input type="range" id="imp" min="0" max="500000" step="25000" value="150000" oninput="update()"></div>
-    <div class="ctrl"><div class="clbl">Otros (₡/año) <span class="cval" id="otros-l">₡0</span></div><input type="range" id="otros" min="0" max="1000000" step="50000" value="0" oninput="update()"></div>
-    <div class="csec">Intervenciones</div>
-    <div class="ctrl"><div class="clbl">Costo raleo (₡/árbol) <span class="cval" id="cral-l">₡1,000</span></div><input type="range" id="cral" min="500" max="2500" step="100" value="1000" oninput="update()"></div>
-  </div>
-
-  <!-- s3: Casas -->
-  <div class="sp" id="sp3">
-    <div class="csec">Casas con madera del raleo</div>
-    <div class="ctip">Solo pisos + paredes de tabla. Madera del raleo 1. Factor aserradero 50%.</div>
-    <div id="casas-sb"></div>
-    <button style="width:100%;padding:6px;background:rgba(255,255,255,.08);border:1px dashed rgba(255,255,255,.3);color:rgba(255,255,255,.65);border-radius:6px;cursor:pointer;font-size:11px;margin-top:4px" onclick="addCasa()">+ Agregar casa</button>
-    <div class="csec">Costos construcción</div>
-    <div class="ctrl"><div class="clbl">Mano de obra (₡/m²) <span class="cval" id="mo-l">₡80k</span></div><input type="range" id="mo" min="20000" max="200000" step="5000" value="80000" oninput="update()"></div>
-    <div class="ctrl"><div class="clbl">Otros materiales (₡/m²) <span class="cval" id="mat-l">₡50k</span></div><input type="range" id="mat" min="0" max="150000" step="5000" value="50000" oninput="update()"></div>
-  </div>
-
-  <div class="s-footer">Ec. Fallas (2017) · 1 PMT = 0.002360 m³<br>IMA sigmoidal · Boost post-raleo</div>
-</aside>
+<!-- sidebar eliminado: controles movidos a los tabs -->
 
 </div><!-- body-row -->
 </div><!-- app -->
@@ -753,6 +826,28 @@ let charts = {};
 let sortCol = 3, sortDir = 1;
 let treeRows = [];
 let currentTab = 0;
+// Factory de casa con parámetros de diseño completos (metros)
+function nuevaCasa() {
+  return {
+    nombre:'Casa',
+    largo:8, ancho:5, altoPared:2.5, pendiente:30,   // % pendiente techo
+    grosorPared:2.5, grosorPiso:3.8,                 // cm (tabla)
+    vigaW:10, vigaH:15,                               // cm viga principal
+    postSize:15,                                      // cm poste
+    artesonados:9,                                    // pares de vigas de artesonado
+    aleroFrente:0.6, aleroAtras:0.6, aleroIzq:0.6, aleroDer:0.6, // m
+    // Ambientes: rect en coords relativas de la planta (0..1 de largo/ancho)
+    ambientes:[
+      {tipo:'sala',   x:0.0, y:0.0, w:0.55, h:1.0, color:'#DCE7D8'},
+      {tipo:'cuarto', x:0.55,y:0.0, w:0.45, h:0.55,color:'#E8DFC8'},
+      {tipo:'baño',   x:0.55,y:0.55,w:0.45, h:0.45,color:'#CFE0EC'}
+    ],
+    // Deck y pasillo: lado ('frente','atras','izq','der','none') y profundidad m
+    deckLado:'frente', deckProf:2.5,
+    pasilloLado:'der', pasilloProf:1.2
+  };
+}
+
 let S = {
   esc:'C', mkt:'export', mod:'pie',
   r1on:true, r1y:7, ri1:35,
@@ -761,12 +856,15 @@ let S = {
   ralYear:7,
   zGenInt:35,   // intensidad zona general
   zVieInt:0,    // intensidad zona viento (default 0 = solo sanitario)
-  boost:20, tasa:8, infl:2,
+  ral2on:false, ral2Year:11,
+  zGenInt2:20, zVieInt2:0,
+  boost:20, boost2:20, tasa:8, infl:2,
   pexp:300, tc:520, pnac:200,
   pral:150, tc2:520, ccf:20,
   cuid:300000, elec:20000, imp:150000, otros:0, cral:1000,
   mo:80000, mat:50000,
-  casas:[{area:40, grosor:1.0, alto:2.5}],
+  casas:[ nuevaCasa() ],
+  casaActiva:0,
   metodo:'resumen'
 };
 
@@ -887,11 +985,13 @@ function getActiveFlat() {
   var rows = [];
   inventarios.filter(function(i){ return activeInvs.has(i.id); }).forEach(function(inv) {
     var totalArea = inv.parcelas.reduce(function(s,p){ return s+p.area; }, 0);
+    var invTag = inv.id==='inv1'?'i1':'i2';
     inv.parcelas.forEach(function(p) {
       p.trees.forEach(function(t) {
         var abTree = abF(t.dap);
         rows.push({
           invId: inv.id, invName: inv.name, parc: p.id,
+          pkey: p.id+'·'+invTag, parcArea: p.area,
           n: t.n, dap: t.dap, h: t.h,
           vol: volF(t.dap), ab: abTree,
           abHa: abTree*(10000/totalArea)
@@ -903,46 +1003,63 @@ function getActiveFlat() {
 }
 
 function buildProjection() {
-  var ima = S.esc==='C' ? IMA_C : IMA_O;
-  var bf = 1 + S.boost/100;
-  var vol = 91.1, br = 0;
-  var rows = [];
-  // Volumen de raleo combinado (dos zonas) expresado como m³/ha promedio de la finca
-  var ralVolHa = combinedRaleoVolHa();
+  // Serie de volumen/ha de la finca (ponderada por zonas) con raleos y cosecha final
+  var G=ZONES.general, V=ZONES.viento;
+  var declEl=document.getElementById('mort-decline');
+  var isDecline = declEl ? declEl.checked : true;
+  var mortEl=document.getElementById('proj-mort');
+  var mortFixed = mortEl ? +mortEl.value : 3;
+  var pg = zoneProjectionFull(G.densViva, S.zGenInt, S.ral2on?S.zGenInt2:0, isDecline, mortFixed);
+  var pv = zoneProjectionFull(V.densViva, S.zVieInt, S.ral2on?S.zVieInt2:0, isDecline, mortFixed);
+  var wTot=G.areaHa+V.areaHa;
+
+  // volumen extraído por raleo (m³/ha finca) en cada evento
+  var rvol = raleoVolPerHa();
+
+  var rows=[];
   for (var y=5; y<=15; y++) {
-    var ib = y>5 ? (ima[y]||10) : 0;
-    var ica = (br>0 && y>5) ? ib*bf : ib;
-    if (br>0 && y>5) br--;
-    var vb = Math.round((vol+ica)*10)/10;
-    var ex = 0, lbl = '';
-    if (S.r1on && y===S.ralYear && ralVolHa>0) { ex=Math.round(ralVolHa*10)/10; br=3; lbl='R1'; }
-    else if (y===15)                            { ex=vb; lbl='CF'; }
-    var va = Math.round((vb-ex)*10)/10;
-    vol = va;
-    rows.push({y:y, ica:Math.round(ica*10)/10, vb:vb, ex:ex, lbl:lbl, va:va});
+    // volumen en pie/ha finca según proyección (para y>=7); para y<7 usar interpolación simple hacia atrás
+    var idx = y-7;
+    var volHa;
+    if (idx>=0 && idx<pg.length) {
+      volHa = (pg[idx].vol*G.areaHa + pv[idx].vol*V.areaHa)/wTot;
+    } else {
+      volHa = 91.1 + (y-5)*13; // años 5-6 aproximados (pre-inv2)
+    }
+    var ex=0, lbl='';
+    if (y===S.ralYear && rvol.r1>0) { ex=Math.round(rvol.r1*10)/10; lbl='R1'; }
+    else if (S.ral2on && y===S.ral2Year && rvol.r2>0) { ex=Math.round(rvol.r2*10)/10; lbl='R2'; }
+    else if (y===15) { ex=Math.round(volHa*10)/10; lbl='CF'; }
+    rows.push({y:y, vb:Math.round(volHa*10)/10, ex:ex, lbl:lbl, va:Math.round((volHa-ex)*10)/10, ica:0});
   }
   return rows;
 }
 
-// Volumen total de raleo de ambas zonas, dividido por el área total → m³/ha promedio finca
-function combinedRaleoVolHa() {
+// Volumen de raleo por ha-finca para R1 y R2 (suma de zonas / HA)
+function raleoVolPerHa() {
   var G=ZONES.general, V=ZONES.viento;
-  var mortEl = document.getElementById('proj-mort');
-  var mort = (mortEl ? +mortEl.value : 3)/100;
-  var startYr = Math.round(OBS.edad2);
-  function volExtHa(densViva, intensidad) {
-    if (!intensidad) return 0;
-    var d=OBS.dap2, dn=densViva;
-    for (var yy=startYr; yy<S.ralYear; yy++){
-      var ic = OBS.icaRef*Math.pow(OBS.edadRef/((yy+1)-0.5),OBS.kDecay);
-      d += ic; dn *= (1-mort);
+  var declEl=document.getElementById('mort-decline');
+  var isDecline = declEl ? declEl.checked : true;
+  var mortEl=document.getElementById('proj-mort');
+  var mortFixed = mortEl ? +mortEl.value : 3;
+  var startYr=Math.round(OBS.edad2);
+
+  function ext(densViva, int1, int2, wantSecond) {
+    var d=OBS.dap2, dn=densViva, br=0, cb=1, v1=0, v2=0;
+    for (var y=startYr; y<=15; y++) {
+      var edad=OBS.edad2+(y-startYr);
+      if (y>startYr) { var ic=OBS.icaRef*Math.pow(OBS.edadRef/(y-0.5),OBS.kDecay); d+=(br>0?ic*cb:ic); if(br>0)br--; dn*=(1-mortAt(edad,isDecline,mortFixed)); }
+      if (y===S.ralYear && int1>0) { v1=volF(d)*dn*(int1/100); dn*=(1-int1/100); br=3; cb=1+S.boost/100; }
+      if (y===S.ral2Year && int2>0) { v2=volF(d)*dn*(int2/100); dn*=(1-int2/100); br=3; cb=1+S.boost2/100; }
     }
-    return volF(d)*dn*(intensidad/100);
+    return wantSecond ? v2 : v1;
   }
-  var volGenTot = volExtHa(G.densViva, S.zGenInt)*G.areaHa;
-  var volVieTot = volExtHa(V.densViva, S.zVieInt)*V.areaHa;
-  // Dividir por HA (área oficial usada en el resto del Financiero) para que ex*HA reproduzca el total real
-  return (volGenTot+volVieTot)/HA;
+  var r1 = (ext(G.densViva,S.zGenInt,0,false)*G.areaHa + ext(V.densViva,S.zVieInt,0,false)*V.areaHa)/HA;
+  var r2 = 0;
+  if (S.ral2on) {
+    r2 = (ext(G.densViva,S.zGenInt,S.zGenInt2,true)*G.areaHa + ext(V.densViva,S.zVieInt,S.zVieInt2,true)*V.areaHa)/HA;
+  }
+  return {r1:r1, r2:r2};
 }
 
 function calcFin(rows) {
@@ -1062,17 +1179,18 @@ function renderInventarioTab() {
   var bins = [10,12,14,16,18,20,22,24,26];
   var bLabels = bins.slice(0,-1).map(function(b,i){ return b+'–'+bins[i+1]; });
   var parcs = [];
-  rows.forEach(function(r){ if (parcs.indexOf(r.parc)<0) parcs.push(r.parc); });
+  rows.forEach(function(r){ if (parcs.indexOf(r.pkey)<0) parcs.push(r.pkey); });
   parcs.sort();
-  var pcols = Object.values(PAR_COLORS);
+  var palette = ['#2C5F2E','#5B8C3E','#8FB43E','#B45309','#D97706','#E8A33D','#0C447C','#3B82A0','#6B7280'];
+  function pcolOf(i){ return palette[i % palette.length]; }
   var dsDap = parcs.map(function(p,pi) {
     return {
       label: p,
       data: bins.slice(0,-1).map(function(b,bi) {
-        return rows.filter(function(r){ return r.parc===p && r.dap>=b && r.dap<bins[bi+1]; }).length;
+        return rows.filter(function(r){ return r.pkey===p && r.dap>=b && r.dap<bins[bi+1]; }).length;
       }),
-      backgroundColor: pcols[pi]+'BB',
-      borderColor: pcols[pi],
+      backgroundColor: pcolOf(pi)+'BB',
+      borderColor: pcolOf(pi),
       borderWidth: 1
     };
   });
@@ -1085,9 +1203,9 @@ function renderInventarioTab() {
   var dsVol = parcs.map(function(p,pi) {
     return {
       label: p,
-      data: rows.filter(function(r){ return r.parc===p; }).map(function(r){ return {x:r.dap,y:r.vol}; }),
-      backgroundColor: pcols[pi]+'99',
-      borderColor: pcols[pi],
+      data: rows.filter(function(r){ return r.pkey===p; }).map(function(r){ return {x:r.dap,y:r.vol}; }),
+      backgroundColor: pcolOf(pi)+'99',
+      borderColor: pcolOf(pi),
       pointRadius: 5
     };
   });
@@ -1096,13 +1214,14 @@ function renderInventarioTab() {
      y:{title:{display:true,text:'Vol (m³)',font:{size:10}}}},
     true);
 
-  // AB por parcela
+  // AB por parcela (9 parcelas reales, cada una 200 m²)
   var pAB = parcs.map(function(p) {
-    var pr = rows.filter(function(r){ return r.parc===p; });
-    return pr.reduce(function(s,r){ return s+r.ab; }, 0)*(10000/200);
+    var pr = rows.filter(function(r){ return r.pkey===p; });
+    var area = pr.length ? pr[0].parcArea : 200;
+    return pr.reduce(function(s,r){ return s+r.ab; }, 0)*(10000/area);
   });
   mkChart('ch-ab','bar',
-    {labels:parcs, datasets:[{data:pAB, backgroundColor:parcs.map(function(_,i){ return pcols[i]+'BB'; }), borderColor:parcs.map(function(_,i){ return pcols[i]; }), borderWidth:1}]},
+    {labels:parcs, datasets:[{data:pAB, backgroundColor:parcs.map(function(_,i){ return pcolOf(i)+'BB'; }), borderColor:parcs.map(function(_,i){ return pcolOf(i); }), borderWidth:1}]},
     {y:{title:{display:true,text:'m²/ha',font:{size:10}}}},
     false);
 
@@ -1114,14 +1233,113 @@ function renderInventarioTab() {
     {y:{title:{display:true,text:'árb/ha',font:{size:10}}}},
     false);
 
-  renderProjection();
+  renderMortPanel();
   renderTable();
 }
 
 // ═══════════════════════════════════════════════════
-// RENDER PROYECCIÓN (Tab Inventario)
+// TAB 2: PROYECCIONES
 // ═══════════════════════════════════════════════════
-function renderProjection() {
+// Modelo de mortalidad: si decline=true, decae de m0 a 1% suavemente
+function mortAt(edad, decline, mortFixed) {
+  if (!decline) return mortFixed/100;
+  var m0=3.0, mf=1.0, edad0=OBS.edad2, lam=0.372;
+  return (mf + (m0-mf)*Math.exp(-lam*(edad-edad0)))/100;
+}
+
+// Proyección de una zona con mortalidad variable y hasta 2 raleos
+function zoneProjectionFull(densViva, intensidad, int2, decline, mortFixed) {
+  var bf = 1+S.boost/100, bf2 = 1+S.boost2/100;
+  var startYr = Math.round(OBS.edad2);
+  var dens=densViva, dap=OBS.dap2, br=0, curBoost=1;
+  var arr=[];
+  for (var y=startYr; y<=15; y++) {
+    var edad = OBS.edad2 + (y-startYr);
+    if (y>startYr) {
+      var icaBase = OBS.icaRef * Math.pow(OBS.edadRef/(y-0.5), OBS.kDecay);
+      var ica = (br>0) ? icaBase*curBoost : icaBase;
+      if (br>0) br--;
+      dap += ica;
+      dens *= (1-mortAt(edad, decline, mortFixed));
+    }
+    if (y===S.ralYear && intensidad>0) { dens*=(1-intensidad/100); br=3; curBoost=bf; }
+    if (S.ral2on && y===S.ral2Year && int2>0) { dens*=(1-int2/100); br=3; curBoost=bf2; }
+    arr.push({edad:Math.round(edad*10)/10, y:y, dap:Math.round(dap*10)/10, dens:Math.round(dens),
+              ab:Math.round(abF(dap)*dens*10)/10, vol:Math.round(volF(dap)*dens*10)/10});
+  }
+  return arr;
+}
+
+function renderProyeccionesTab() {
+  var decline = document.getElementById('mort-decline');
+  var isDecline = decline ? decline.checked : true;
+  var fixedCtrl = document.getElementById('mort-fixed-ctrl');
+  if (fixedCtrl) fixedCtrl.style.display = isDecline ? 'none' : '';
+  var infoEl = document.getElementById('mort-decline-info');
+  if (infoEl) infoEl.style.display = isDecline ? '' : 'none';
+  var mortEl = document.getElementById('proj-mort');
+  var mortFixed = mortEl ? +mortEl.value : 3;
+  var lbl = document.getElementById('proj-mort-lbl');
+  if (lbl) lbl.textContent = fN(mortFixed,1)+'%';
+
+  var G=ZONES.general, V=ZONES.viento;
+  var pg = zoneProjectionFull(G.densViva, S.zGenInt, S.zGenInt2, isDecline, mortFixed);
+  var pv = zoneProjectionFull(V.densViva, S.zVieInt, S.zVieInt2, isDecline, mortFixed);
+  var labels = pg.map(function(p){ return 'A'+p.y; });
+
+  // Serie ponderada por área (finca completa)
+  var wTot = G.areaHa+V.areaHa;
+  var fincaSerie = pg.map(function(p,i){
+    var pvv=pv[i];
+    return {
+      edad:p.edad, y:p.y,
+      dap:(p.dap*G.areaHa+pvv.dap*V.areaHa)/wTot,
+      dens:(p.dens*G.areaHa+pvv.dens*V.areaHa)/wTot,
+      ab:(p.ab*G.areaHa+pvv.ab*V.areaHa)/wTot,
+      volHa:(p.vol*G.areaHa+pvv.vol*V.areaHa)/wTot,
+      volTot:p.vol*G.areaHa+pvv.vol*V.areaHa
+    };
+  });
+
+  function overlay(cid, key, unit, extra) {
+    var ds=[
+      {label:'General', data:pg.map(function(p){return p[key];}), borderColor:'#2C5F2E', backgroundColor:'transparent', tension:.3, borderWidth:2, pointRadius:2},
+      {label:'Viento', data:pv.map(function(p){return p[key];}), borderColor:'#B45309', backgroundColor:'transparent', tension:.3, borderWidth:2, pointRadius:2}
+    ];
+    if (extra) ds=ds.concat(extra);
+    mkChart(cid,'line',{labels:labels,datasets:ds},
+      {x:{ticks:{font:{size:9}}}, y:{title:{display:true,text:unit,font:{size:9}},ticks:{font:{size:9}}}}, true,
+      {plugins:{legend:{display:true,labels:{usePointStyle:true,pointStyle:'line',boxWidth:24,font:{size:10}}}}});
+  }
+  overlay('ch-proj-dap','dap','cm');
+  overlay('ch-proj-ab','ab','m²/ha',[{label:'Umbral 16',data:labels.map(function(){return 16;}),borderColor:'#B91C1C',borderWidth:1.5,borderDash:[5,3],pointRadius:0,fill:false}]);
+  overlay('ch-proj-vol','vol','m³/ha');
+  overlay('ch-proj-dens','dens','árb/ha');
+
+  // KPIs
+  var last = fincaSerie[fincaSerie.length-1];
+  var kEl = document.getElementById('proy-kpis');
+  if (kEl) kEl.innerHTML =
+    '<div class="kpi"><div class="kl">DAP a cosecha (año 15)</div><div class="kv">'+fN(last.dap,1)+' cm</div><div class="ks2">promedio finca</div></div>' +
+    '<div class="kpi hi"><div class="kl">Volumen a cosecha</div><div class="kv">'+fN(last.volHa,1)+'</div><div class="ks2">m³/ha · '+fN(last.volTot,0)+' m³ total</div></div>' +
+    '<div class="kpi"><div class="kl">Densidad a cosecha</div><div class="kv">'+Math.round(last.dens)+'</div><div class="ks2">árb/ha</div></div>' +
+    '<div class="kpi"><div class="kl">Mortalidad</div><div class="kv">'+(isDecline?'3→1%':fN(mortFixed,1)+'%')+'</div><div class="ks2">'+(isDecline?'decreciente':'fija')+'</div></div>';
+
+  // Tabla finca
+  var tb=document.getElementById('proj-table');
+  if (tb) tb.innerHTML =
+    '<thead><tr><th>Año</th><th>Edad</th><th>DAP (cm)</th><th>Densidad</th><th>AB (m²/ha)</th><th>Vol (m³/ha)</th><th>Vol total (m³)</th></tr></thead><tbody>' +
+    fincaSerie.map(function(p){
+      var over=p.ab>=16;
+      var ral=(p.y===S.ralYear)||(S.ral2on&&p.y===S.ral2Year);
+      return '<tr'+(ral?' style="background:var(--teca-lt);font-weight:600"':(over?' style="background:#FEF7ED"':''))+'>'+
+        '<td>'+p.y+(ral?' ✂':'')+'</td><td>'+p.edad+'</td><td>'+fN(p.dap,1)+'</td><td>'+Math.round(p.dens)+'</td><td>'+(over?'⚠ ':'')+fN(p.ab,1)+'</td><td>'+fN(p.volHa,1)+'</td><td>'+fN(p.volTot,0)+'</td></tr>';
+    }).join('')+'</tbody>';
+
+  var md=document.getElementById('md-start'); if(md) md.textContent='3%';
+}
+
+function renderProjection_UNUSED() {
   var mortEl = document.getElementById('proj-mort');
   var mort = mortEl ? +mortEl.value : 1.5;
   var lbl = document.getElementById('proj-mort-lbl');
@@ -1261,12 +1479,33 @@ function onZoneInput() {
   S.ralYear  = get('ral-year', 7);
   S.zGenInt  = get('zg-int', 35);
   S.zVieInt  = get('zv-int', 0);
+  S.boost    = get('boost1', 20);
+  var chk2 = document.getElementById('chk-ral2');
+  S.ral2on = chk2 ? chk2.checked : false;
+  S.ral2Year = get('ral2-year', 11);
+  S.zGenInt2 = get('zg-int2', 20);
+  S.zVieInt2 = get('zv-int2', 0);
+  S.boost2   = get('boost2', 20);
+
   L('ral-year-lbl', 'Año '+S.ralYear);
   L('zg-int-lbl', S.zGenInt+'%');
   L('zv-int-lbl', S.zVieInt+'%');
-  // Mantener compat con Financiero: raleo único combinado
-  S.r1on = true; S.r1y = S.ralYear; S.r2on = false;
+  L('boost1-lbl', '+'+S.boost+'%');
+  L('ral2-year-lbl', 'Año '+S.ral2Year);
+  L('zg-int2-lbl', S.zGenInt2+'%');
+  L('zv-int2-lbl', S.zVieInt2+'%');
+  L('boost2-lbl', '+'+S.boost2+'%');
+
+  // Mostrar/ocultar controles del 2º raleo
+  var r2c = document.getElementById('ral2-ctrl'); if (r2c) r2c.style.display = S.ral2on?'':'none';
+  var rows2 = document.querySelectorAll('.zg2-row');
+  for (var i=0;i<rows2.length;i++) rows2[i].style.display = S.ral2on?'flex':'none';
+
+  // Compat con Financiero
+  S.r1on = true; S.r1y = S.ralYear; S.r2on = S.ral2on;
+
   renderRaleosTab();
+  renderProyeccionesTab();
   renderFinTab();
 }
 
@@ -1385,39 +1624,54 @@ function renderRaleosTab() {
     '<div class="kpi"><div class="kl">Densidad post — general</div><div class="kv">'+pg.densPost+'</div><div class="ks2">árb/ha (era '+G.densViva+')</div></div>' +
     '<div class="kpi"><div class="kl">Densidad post — viento</div><div class="kv">'+pv.densPost+'</div><div class="ks2">árb/ha (era '+V.densViva+')</div></div>';
 
+  // Volumen del segundo raleo (si activo)
+  var vol2GenTot=0, vol2VieTot=0, arb2Gen=0, arb2Vie=0;
+  if (S.ral2on) {
+    var p2g = zoneProjection2(G.densViva, S.zGenInt, S.zGenInt2);
+    var p2v = zoneProjection2(V.densViva, S.zVieInt, S.zVieInt2);
+    vol2GenTot = p2g.vol2ExtHa*G.areaHa;
+    vol2VieTot = p2v.vol2ExtHa*V.areaHa;
+    arb2Gen = Math.round(p2g.densPre2*(S.zGenInt2/100)*G.areaHa);
+    arb2Vie = Math.round(p2v.densPre2*(S.zVieInt2/100)*V.areaHa);
+  }
+  var vol2Tot = vol2GenTot+vol2VieTot;
+
   // Resumen combinado
   var resEl = document.getElementById('ral-resumen');
+  var r2txt = S.ral2on ?
+    ' <br><b>Raleo 2 (año '+S.ral2Year+'):</b> general '+S.zGenInt2+'% ('+arb2Gen+' árb, '+fN(vol2GenTot,1)+' m³), viento '+S.zVieInt2+'% ('+arb2Vie+' árb, '+fN(vol2VieTot,1)+' m³). Total raleo 2: <b>'+fN(vol2Tot,1)+' m³</b>.' : '';
   if (resEl) resEl.innerHTML =
-    '<div class="ctitle">Resumen de la decisión (año '+S.ralYear+')</div>' +
+    '<div class="ctitle">Resumen de la decisión</div>' +
     '<div style="font-size:13px;line-height:1.6;margin-top:6px">' +
-    'Zona general: <b>'+S.zGenInt+'%</b> → extrae <b>'+arbGen+' árboles</b> ('+fN(volGenTot,1)+' m³). ' +
-    'Zona de viento: <b>'+S.zVieInt+'%</b> → extrae <b>'+arbVie+' árboles</b> ('+fN(volVieTot,1)+' m³). ' +
-    'Total finca: <b>'+(arbGen+arbVie)+' árboles</b>, <b>'+fN(volTot,1)+' m³</b> de madera de raleo. ' +
-    'Este volumen alimenta el análisis financiero.</div>';
+    '<b>Raleo 1 (año '+S.ralYear+'):</b> zona general <b>'+S.zGenInt+'%</b> → <b>'+arbGen+' árboles</b> ('+fN(volGenTot,1)+' m³); ' +
+    'zona de viento <b>'+S.zVieInt+'%</b> → <b>'+arbVie+' árboles</b> ('+fN(volVieTot,1)+' m³). Total raleo 1: <b>'+fN(volTot,1)+' m³</b>.' +
+    r2txt +
+    '<br>Los ingresos por raleo y cosecha se calculan en el tab <b>Financiero</b>; las trayectorias año a año en <b>Proyecciones</b>.</div>';
+}
 
-  // ── Gráficos superpuestos ──
-  var yrs = pg.yrs;
-  var xScale = {ticks:{autoSkip:false,maxRotation:0,font:{size:9}}};
-  var yTiny  = {ticks:{font:{size:9}},grid:{color:'rgba(0,0,0,0.04)'}};
-  function evtPts(proj){ return proj.yrs.map(function(y){ return y===S.ralYear?6:(y===15?5:2); }); }
-
-  function overlay(cid, key, unit, extraDatasets) {
-    var ds = [
-      {label:'General', data:pg[key], borderColor:'#2C5F2E', backgroundColor:'#2C5F2E11', fill:false, tension:.35, borderWidth:2, pointRadius:evtPts(pg), pointBackgroundColor:'#2C5F2E'},
-      {label:'Viento',  data:pv[key], borderColor:'#B45309', backgroundColor:'#B4530911', fill:false, tension:.35, borderWidth:2, pointRadius:evtPts(pv), pointBackgroundColor:'#B45309'}
-    ];
-    if (extraDatasets) ds = ds.concat(extraDatasets);
-    mkChart(cid,'line',{labels:yrs,datasets:ds},
-      {x:xScale, y:Object.assign({title:{display:true,text:unit,font:{size:9}}},yTiny)}, true,
-      {plugins:{legend:{display:true,labels:{usePointStyle:true,pointStyle:'line',boxWidth:24,font:{size:10}}}}});
+// Proyección auxiliar para calcular el volumen del 2º raleo y densidad previa
+function zoneProjection2(densViva, int1, int2) {
+  var mortEl = document.getElementById('proj-mort');
+  var declEl = document.getElementById('mort-decline');
+  var isDecline = declEl ? declEl.checked : true;
+  var mortFixed = mortEl ? +mortEl.value : 3;
+  var startYr = Math.round(OBS.edad2);
+  var dens=densViva, dap=OBS.dap2, br=0, curBoost=1;
+  var densPre2=densViva, vol2ExtHa=0;
+  for (var y=startYr; y<=15; y++) {
+    var edad = OBS.edad2 + (y-startYr);
+    if (y>startYr) {
+      var icaBase = OBS.icaRef * Math.pow(OBS.edadRef/(y-0.5), OBS.kDecay);
+      var ica=(br>0)?icaBase*curBoost:icaBase; if(br>0)br--;
+      dap += ica; dens *= (1-mortAt(edad,isDecline,mortFixed));
+    }
+    if (y===S.ralYear && int1>0) { dens*=(1-int1/100); br=3; curBoost=1+S.boost/100; }
+    if (y===S.ral2Year) {
+      densPre2 = dens;
+      if (int2>0) { vol2ExtHa = volF(dap)*dens*(int2/100); dens*=(1-int2/100); br=3; curBoost=1+S.boost2/100; }
+    }
   }
-
-  overlay('ch-dens-t','dens','árb/ha');
-  overlay('ch-ab-t','ab','m²/ha',[
-    {label:'Umbral 16', data:yrs.map(function(){return 16;}), borderColor:'#B91C1C', borderWidth:1.5, borderDash:[5,3], pointRadius:0, fill:false}
-  ]);
-  overlay('ch-dap-t','dap','cm');
-  overlay('ch-vol-t','vol','m³/ha');
+  return {densPre2:densPre2, vol2ExtHa:vol2ExtHa};
 }
 
 // ═══════════════════════════════════════════════════
@@ -1537,69 +1791,335 @@ function renderFinTab() {
 // ═══════════════════════════════════════════════════
 // TAB 3: CONSTRUCCIÓN
 // ═══════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
+// TAB 4: CONSTRUCCIÓN — DISEÑADOR DE CASAS
+// ═══════════════════════════════════════════════════
+var SAW = 0.50;      // factor aserradero (troza→aserrada)
+var PMT_M3 = 0.002360;
+
+function casaAct() { return S.casas[S.casaActiva] || S.casas[0]; }
+
+// ── Cálculo de madera por componente (m³ aserrada) ──
+function maderaCasa(c) {
+  var largo=c.largo, ancho=c.ancho, alto=c.altoPared, pend=c.pendiente/100;
+  var gPared=c.grosorPared/100, gPiso=c.grosorPiso/100;
+  var vW=c.vigaW/100, vH=c.vigaH/100, pS=c.postSize/100;
+  // Postes: 4 esquinas + fila central (según artesonados/2, mínimo 2)
+  var nPostes = 4 + Math.max(2, Math.round(c.artesonados/3));
+  var volPostes = nPostes*pS*pS*alto;
+  // Solera perimetral
+  var perim = 2*(largo+ancho);
+  var volSolera = perim*vW*vH;
+  // Vigas de techo / artesonado (pares sobre la vertiente)
+  var vertiente = Math.sqrt(Math.pow(ancho/2,2)+Math.pow((ancho/2)*pend,2));
+  var volArtes = c.artesonados*2*vertiente*vW*vH;
+  // Piso (tabla)
+  var areaBase = largo*ancho;
+  var volPiso = areaBase*gPiso;
+  // Paredes (tabla) — descuenta ~15% por aberturas
+  var volPared = perim*alto*gPared*0.85;
+  // Deck
+  var deckArea = 0, volDeck = 0;
+  if (c.deckLado!=='none') {
+    var lado = (c.deckLado==='frente'||c.deckLado==='atras') ? largo : ancho;
+    deckArea = lado*c.deckProf;
+    volDeck = deckArea*gPiso;
+  }
+  // Pasillo
+  var pasArea = 0, volPas = 0;
+  if (c.pasilloLado!=='none') {
+    var ladoP = (c.pasilloLado==='frente'||c.pasilloLado==='atras') ? largo : ancho;
+    pasArea = ladoP*c.pasilloProf;
+    volPas = pasArea*gPiso;
+  }
+  var comps = [
+    {n:'Postes ('+nPostes+')', v:volPostes},
+    {n:'Solera perimetral', v:volSolera},
+    {n:'Artesonado ('+c.artesonados+' pares)', v:volArtes},
+    {n:'Piso (tabla)', v:volPiso},
+    {n:'Paredes (tabla)', v:volPared},
+    {n:'Deck', v:volDeck},
+    {n:'Pasillo', v:volPas}
+  ];
+  var totalAser = comps.reduce(function(s,x){ return s+x.v; }, 0);
+  var cumbrera = alto + (ancho/2)*pend;
+  return {comps:comps, totalAser:totalAser, totalTroza:totalAser/SAW,
+          areaBase:areaBase, areaTotal:areaBase+deckArea+pasArea, cumbrera:cumbrera,
+          nPostes:nPostes, deckArea:deckArea, pasArea:pasArea};
+}
+
 function renderCasaTab() {
-  var tc = S.mkt==='export' ? S.tc : S.tc2;
-  var pralCrc = S.pral/PMT;
-  var projRows = buildProjection();
-  var r1Row = projRows.filter(function(r){ return r.lbl==='R1'; })[0];
-  var trozaDisp = r1Row ? r1Row.ex*HA : 0;
+  if (!S.casas.length) S.casas=[nuevaCasa()];
+  if (S.casaActiva>=S.casas.length) S.casaActiva=0;
+  var c = casaAct();
 
-  function calcCasa(c) {
-    var r = Math.sqrt(c.area/40);
-    var pared = 2*(8*r+5*r)*c.alto*0.80;
-    var at = c.area+pared;
-    var vt = at*c.grosor*0.0254*1.15/0.50;
-    return {at:Math.round(at), vt:vt};
+  // Tabs de casas
+  var ct = document.getElementById('casa-tabs');
+  if (ct) ct.innerHTML = S.casas.map(function(cc,i){
+    return '<button class="casa-tab'+(i===S.casaActiva?' active':'')+'" onclick="selCasa('+i+')">'+(cc.nombre||'Casa')+' '+(i+1)+'</button>';
+  }).join('');
+
+  renderCasaParams(c);
+  drawPlan(c); drawElev(c); drawSect(c); drawIso(c);
+  renderMaderaTable(c);
+  renderCasaKpis(c);
+  renderCasaCosts();
+}
+
+function selCasa(i){ S.casaActiva=i; renderCasaTab(); }
+function rmCasaActiva(){ if(S.casas.length>1){ S.casas.splice(S.casaActiva,1); S.casaActiva=Math.max(0,S.casaActiva-1); renderCasaTab(); } }
+
+// ── Panel de parámetros ──
+function renderCasaParams(c) {
+  var el = document.getElementById('casa-params');
+  if (!el) return;
+  function sld(key,label,min,max,step,unit){
+    var v=c[key];
+    return '<div class="cx-ctrl"><label>'+label+'</label><div class="cxrow">'+
+      '<input type="range" min="'+min+'" max="'+max+'" step="'+step+'" value="'+v+'" oninput="setCasa(\''+key+'\',+this.value)">'+
+      '<span class="cxval">'+v+(unit||'')+'</span></div></div>';
   }
-
-  var totalTroza = S.casas.reduce(function(s,c){ return s+calcCasa(c).vt; }, 0);
-  var totalArea  = S.casas.reduce(function(s,c){ return s+c.area; }, 0);
-  var pct = trozaDisp>0 ? totalTroza/trozaDisp*100 : 0;
-  var sob = trozaDisp-totalTroza;
-
-  var ck = document.getElementById('casa-kpis');
-  if (ck) ck.innerHTML =
-    '<div class="kpi"><div class="kl">Casas</div><div class="kv">'+S.casas.length+'</div><div class="ks2">'+totalArea+' m² total</div></div>' +
-    '<div class="kpi"><div class="kl">Troza necesaria</div><div class="kv">'+fN(totalTroza,1)+' m³</div><div class="ks2">'+pct.toFixed(1)+'% del raleo</div></div>' +
-    '<div class="kpi hi"><div class="kl">Disponible raleo 1</div><div class="kv">'+fN(trozaDisp,1)+' m³</div><div class="ks2">'+(sob>=0?'✓ suficiente':'⚠ insuficiente')+'</div></div>' +
-    '<div class="kpi"><div class="kl">Sobrante venta</div><div class="kv">'+fN(Math.max(sob,0)*0.5,1)+' m³</div><div class="ks2">madera procesada</div></div>';
-
-  var maxB = Math.max(trozaDisp*1.1, totalTroza*1.5, 5);
-  var barsEl = document.getElementById('casa-bars');
-  if (!barsEl) return;
-  barsEl.innerHTML = '';
-  function mkBar(lbl, v, col) {
-    var p2 = Math.min(v/maxB*100, 100);
-    var d = document.createElement('div');
-    d.className = 'brow';
-    d.innerHTML = '<div class="blbl">'+lbl+'</div><div class="bbg"><div class="bfill" style="width:'+p2.toFixed(1)+'%;background:'+col+'"><span>'+fN(v,1)+' m³</span></div></div><div class="bnum">'+fN(v/maxB*100,0)+'%</div>';
-    barsEl.appendChild(d);
+  function sel(key,label,opts){
+    return '<div class="cx-ctrl"><label>'+label+'</label><select onchange="setCasa(\''+key+'\',this.value)" style="width:100%">'+
+      opts.map(function(o){ return '<option value="'+o[0]+'"'+(c[key]===o[0]?' selected':'')+'>'+o[1]+'</option>'; }).join('')+'</select></div>';
   }
-  mkBar('Disponible raleo', trozaDisp, '#B4B2A9');
-  S.casas.forEach(function(c,i){ mkBar('Casa '+(i+1)+' ('+c.area+'m², '+c.grosor+'")', calcCasa(c).vt, '#2C5F2E'); });
-  if (S.casas.length>1) mkBar('Total casas', totalTroza, '#4A8A4D');
+  el.innerHTML =
+    '<div class="cx-ctrl"><label>Nombre</label><input type="text" value="'+(c.nombre||'')+'" oninput="setCasa(\'nombre\',this.value)" style="width:100%"></div>' +
+    '<div class="cx-sec">Dimensiones</div>' +
+    sld('largo','Largo',4,16,0.5,' m') + sld('ancho','Ancho',3,10,0.5,' m') +
+    sld('altoPared','Alto pared',2,4,0.1,' m') + sld('pendiente','Pendiente techo',10,60,5,'%') +
+    '<div class="cx-sec">Estructura (cm)</div>' +
+    sld('postSize','Poste (□)',10,25,1,'') + sld('vigaW','Viga ancho',5,20,1,'') + sld('vigaH','Viga alto',10,30,1,'') +
+    sld('artesonados','Artesonado (pares)',3,20,1,'') +
+    '<div class="cx-sec">Tablas (cm)</div>' +
+    sld('grosorPared','Grosor pared',1.5,5,0.1,'') + sld('grosorPiso','Grosor piso',2.5,6,0.1,'') +
+    '<div class="cx-sec">Deck</div>' +
+    sel('deckLado','Lado',[['none','Ninguno'],['frente','Frente'],['atras','Atrás'],['izq','Izquierda'],['der','Derecha']]) +
+    (c.deckLado!=='none'?sld('deckProf','Profundidad',1,5,0.5,' m'):'') +
+    '<div class="cx-sec">Pasillo</div>' +
+    sel('pasilloLado','Lado',[['none','Ninguno'],['frente','Frente'],['atras','Atrás'],['izq','Izquierda'],['der','Derecha']]) +
+    (c.pasilloLado!=='none'?sld('pasilloProf','Ancho',0.8,3,0.1,' m'):'') +
+    '<div class="cx-sec">Aleros (m)</div>' +
+    sld('aleroFrente','Frente',0,2,0.1,'') + sld('aleroAtras','Atrás',0,2,0.1,'') +
+    sld('aleroIzq','Izquierda',0,2,0.1,'') + sld('aleroDer','Derecha',0,2,0.1,'');
+}
 
-  var noteEl = document.getElementById('casa-note');
-  if (noteEl) {
-    noteEl.className = 'note '+(sob>=0?'ok':'warn');
-    noteEl.innerHTML = sob>=0 ?
-      '✓ Todas las casas usan <b>'+fN(totalTroza,1)+' m³</b> ('+pct.toFixed(1)+'% del raleo). Sobran <b>'+fN(sob,1)+' m³</b> → <b>'+fN(sob*0.5,1)+' m³</b> procesados para venta.' :
-      '⚠ Las casas necesitan <b>'+fN(totalTroza,1)+' m³</b> pero el raleo disponible es <b>'+fN(trozaDisp,1)+' m³</b>. Faltan '+fN(-sob,1)+' m³.';
+function setCasa(key,val){ casaAct()[key]=val; renderCasaTab(); if(key==='deckLado'||key==='pasilloLado'){} update0Fin(); }
+function update0Fin(){ /* refrescar financiero por cambios de madera */ }
+
+// ── PLANTA (SVG con arrastre de ambientes) ──
+var PX = 42; // px por metro base
+function drawPlan(c) {
+  var el = document.getElementById('view-plan');
+  if (!el) return;
+  var scale = Math.min(PX, 520/Math.max(c.largo,c.ancho));
+  var W=c.largo*scale, H=c.ancho*scale, pad=40;
+  var svgW=W+pad*2, svgH=H+pad*2;
+  var s='<svg viewBox="0 0 '+svgW+' '+svgH+'" style="max-width:100%;height:auto;font-family:sans-serif" id="plan-svg">';
+  // Deck / pasillo (fondo)
+  s += planExtra(c, scale, pad, W, H);
+  // Contorno casa
+  s += '<rect x="'+pad+'" y="'+pad+'" width="'+W+'" height="'+H+'" fill="#fff" stroke="#2C5F2E" stroke-width="2"/>';
+  // Ambientes
+  c.ambientes.forEach(function(a,i){
+    var ax=pad+a.x*W, ay=pad+a.y*H, aw=a.w*W, ah=a.h*H;
+    s += '<g class="amb-rect" data-i="'+i+'">'+
+      '<rect x="'+ax+'" y="'+ay+'" width="'+aw+'" height="'+ah+'" fill="'+a.color+'" stroke="#8a7a5a" stroke-width="1" opacity="0.85"/>'+
+      '<text x="'+(ax+aw/2)+'" y="'+(ay+ah/2)+'" text-anchor="middle" font-size="11" fill="#3a3a3a">'+a.tipo+'</text>'+
+      '<text x="'+(ax+aw/2)+'" y="'+(ay+ah/2+13)+'" text-anchor="middle" font-size="9" fill="#777">'+fN(a.w*c.largo*a.h*c.ancho,1)+' m²</text>'+
+      '<rect class="amb-handle" data-i="'+i+'" x="'+(ax+aw-8)+'" y="'+(ay+ah-8)+'" width="8" height="8" fill="#2C5F2E"/></g>';
+  });
+  // Cotas
+  s += '<text x="'+(pad+W/2)+'" y="'+(pad-12)+'" text-anchor="middle" font-size="11" fill="#555">'+c.largo+' m</text>';
+  s += '<text x="'+(pad-14)+'" y="'+(pad+H/2)+'" text-anchor="middle" font-size="11" fill="#555" transform="rotate(-90 '+(pad-14)+' '+(pad+H/2)+')">'+c.ancho+' m</text>';
+  s += '</svg>';
+  el.innerHTML = s;
+  attachPlanDrag(el.querySelector('#plan-svg'), c, scale, pad, W, H);
+}
+
+function planExtra(c, scale, pad, W, H) {
+  var s='';
+  function band(lado, prof, color, label){
+    if (lado==='none'||!prof) return '';
+    var p=prof*scale;
+    if (lado==='frente') return '<rect x="'+pad+'" y="'+(pad-p)+'" width="'+W+'" height="'+p+'" fill="'+color+'" opacity="0.5"/><text x="'+(pad+W/2)+'" y="'+(pad-p/2)+'" text-anchor="middle" font-size="9" fill="#555">'+label+'</text>';
+    if (lado==='atras') return '<rect x="'+pad+'" y="'+(pad+H)+'" width="'+W+'" height="'+p+'" fill="'+color+'" opacity="0.5"/><text x="'+(pad+W/2)+'" y="'+(pad+H+p/2)+'" text-anchor="middle" font-size="9" fill="#555">'+label+'</text>';
+    if (lado==='izq') return '<rect x="'+(pad-p)+'" y="'+pad+'" width="'+p+'" height="'+H+'" fill="'+color+'" opacity="0.5"/>';
+    if (lado==='der') return '<rect x="'+(pad+W)+'" y="'+pad+'" width="'+p+'" height="'+H+'" fill="'+color+'" opacity="0.5"/>';
+    return '';
   }
+  s += band(c.deckLado, c.deckProf, '#8FB43E', 'deck');
+  s += band(c.pasilloLado, c.pasilloProf, '#C8A87A', 'pasillo');
+  return s;
+}
 
-  var cc = document.getElementById('casa-cost-cards');
-  if (!cc) return;
-  cc.innerHTML = '';
-  S.casas.forEach(function(c,i) {
-    var cCrc = c.area*(S.mo+S.mat);
-    var d = document.createElement('div');
-    d.className = 'card';
-    d.innerHTML = '<div class="ctitle">Casa '+(i+1)+' — '+c.area+' m²</div>' +
-      '<div class="frow"><span class="fk">Área</span><span class="fv">'+c.area+' m²</span></div>' +
-      '<div class="frow"><span class="fk">Tablas</span><span class="fv">'+c.grosor+'" · '+c.alto+'m alto</span></div>' +
-      '<div class="frow"><span class="fk">Mano de obra</span><span class="fv">'+fC(c.area*S.mo)+'</span></div>' +
-      '<div class="frow"><span class="fk">Otros materiales</span><span class="fv">'+fC(c.area*S.mat)+'</span></div>' +
-      '<div class="ftot"><span style="font-size:12px;font-weight:600">Total construcción</span><span class="ftv">'+fC(cCrc)+'</span></div>';
+function attachPlanDrag(svg, c, scale, pad, W, H) {
+  if (!svg) return;
+  var drag=null;
+  function pt(e){
+    var r=svg.getBoundingClientRect();
+    var vb=svg.viewBox.baseVal;
+    var cx=(e.touches?e.touches[0].clientX:e.clientX);
+    var cy=(e.touches?e.touches[0].clientY:e.clientY);
+    return {x:(cx-r.left)/r.width*vb.width, y:(cy-r.top)/r.height*vb.height};
+  }
+  function down(e){
+    var g=e.target.closest('.amb-rect,.amb-handle'); if(!g) return;
+    var i=+g.getAttribute('data-i');
+    var handle=e.target.classList.contains('amb-handle');
+    drag={i:i, handle:handle, start:pt(e), amb:Object.assign({},c.ambientes[i])};
+    e.preventDefault();
+  }
+  function move(e){
+    if(!drag) return;
+    var p=pt(e); var a=c.ambientes[drag.i];
+    var dx=(p.x-drag.start.x)/W, dy=(p.y-drag.start.y)/H;
+    if(drag.handle){
+      a.w=Math.max(0.1,Math.min(1-a.x, drag.amb.w+dx));
+      a.h=Math.max(0.1,Math.min(1-a.y, drag.amb.h+dy));
+    } else {
+      a.x=Math.max(0,Math.min(1-a.w, drag.amb.x+dx));
+      a.y=Math.max(0,Math.min(1-a.h, drag.amb.y+dy));
+    }
+    drawPlan(c); renderMaderaTable(c);
+    // reattach handled by drawPlan
+    e.preventDefault();
+  }
+  function up(){ if(drag){ drag=null; } }
+  svg.addEventListener('mousedown',down); svg.addEventListener('touchstart',down,{passive:false});
+  window.addEventListener('mousemove',move); window.addEventListener('touchmove',move,{passive:false});
+  window.addEventListener('mouseup',up); window.addEventListener('touchend',up);
+}
+
+// ── ALZADO FRONTAL ──
+function drawElev(c) {
+  var el=document.getElementById('view-elev'); if(!el) return;
+  var scale=Math.min(38, 360/c.largo);
+  var W=c.largo*scale, wallH=c.altoPared*scale;
+  var roofH=(c.ancho/2)*(c.pendiente/100)*scale;
+  var pad=30, svgW=W+pad*2, svgH=wallH+roofH+pad*2;
+  var s='<svg viewBox="0 0 '+svgW+' '+svgH+'" style="max-width:100%;height:auto">';
+  var baseY=pad+roofH+wallH;
+  // pared
+  s+='<rect x="'+pad+'" y="'+(pad+roofH)+'" width="'+W+'" height="'+wallH+'" fill="#F5EFE0" stroke="#8a7a5a"/>';
+  // techo (triángulo frontal)
+  s+='<polygon points="'+(pad-c.aleroIzq*scale)+','+(pad+roofH)+' '+(pad+W/2)+','+pad+' '+(pad+W+c.aleroDer*scale)+','+(pad+roofH)+'" fill="#7a5a3a" opacity="0.85"/>';
+  // postes
+  var np=Math.max(2,Math.round(c.artesonados/3));
+  for(var i=0;i<=np;i++){ var px=pad+(W/np)*i; s+='<line x1="'+px+'" y1="'+(pad+roofH)+'" x2="'+px+'" y2="'+baseY+'" stroke="#2C5F2E" stroke-width="2"/>'; }
+  // suelo
+  s+='<line x1="'+(pad-10)+'" y1="'+baseY+'" x2="'+(pad+W+10)+'" y2="'+baseY+'" stroke="#333" stroke-width="1.5"/>';
+  s+='<text x="'+(pad+W/2)+'" y="'+(svgH-6)+'" text-anchor="middle" font-size="10" fill="#555">cumbrera '+fN(c.altoPared+(c.ancho/2)*(c.pendiente/100),2)+' m</text>';
+  s+='</svg>';
+  el.innerHTML=s;
+}
+
+// ── CORTE TRANSVERSAL ──
+function drawSect(c) {
+  var el=document.getElementById('view-sect'); if(!el) return;
+  var scale=Math.min(38, 360/c.ancho);
+  var W=c.ancho*scale, wallH=c.altoPared*scale;
+  var roofH=(c.ancho/2)*(c.pendiente/100)*scale;
+  var pad=30, svgW=W+pad*2, svgH=wallH+roofH+pad*2;
+  var s='<svg viewBox="0 0 '+svgW+' '+svgH+'" style="max-width:100%;height:auto">';
+  var baseY=pad+roofH+wallH;
+  // paredes laterales
+  s+='<line x1="'+pad+'" y1="'+(pad+roofH)+'" x2="'+pad+'" y2="'+baseY+'" stroke="#8a7a5a" stroke-width="3"/>';
+  s+='<line x1="'+(pad+W)+'" y1="'+(pad+roofH)+'" x2="'+(pad+W)+'" y2="'+baseY+'" stroke="#8a7a5a" stroke-width="3"/>';
+  // techo a dos aguas
+  s+='<line x1="'+(pad-c.aleroIzq*scale)+'" y1="'+(pad+roofH)+'" x2="'+(pad+W/2)+'" y2="'+pad+'" stroke="#7a5a3a" stroke-width="3"/>';
+  s+='<line x1="'+(pad+W/2)+'" y1="'+pad+'" x2="'+(pad+W+c.aleroDer*scale)+'" y2="'+(pad+roofH)+'" stroke="#7a5a3a" stroke-width="3"/>';
+  // artesonado (vigas de la vertiente)
+  s+='<line x1="'+pad+'" y1="'+(pad+roofH)+'" x2="'+(pad+W/2)+'" y2="'+(pad+roofH*0.15)+'" stroke="#B45309" stroke-width="1" opacity="0.6"/>';
+  s+='<line x1="'+(pad+W)+'" y1="'+(pad+roofH)+'" x2="'+(pad+W/2)+'" y2="'+(pad+roofH*0.15)+'" stroke="#B45309" stroke-width="1" opacity="0.6"/>';
+  // piso
+  s+='<line x1="'+pad+'" y1="'+baseY+'" x2="'+(pad+W)+'" y2="'+baseY+'" stroke="#5a4a2a" stroke-width="3"/>';
+  s+='<text x="'+(pad+W/2)+'" y="'+(svgH-6)+'" text-anchor="middle" font-size="10" fill="#555">'+c.ancho+' m · viga '+c.vigaW+'×'+c.vigaH+' cm</text>';
+  s+='</svg>';
+  el.innerHTML=s;
+}
+
+// ── 3D ISOMÉTRICO ──
+function drawIso(c) {
+  var el=document.getElementById('view-iso'); if(!el) return;
+  var sc=Math.min(30, 300/Math.max(c.largo,c.ancho));
+  var L=c.largo*sc, A=c.ancho*sc, Hh=c.altoPared*sc;
+  var rH=(c.ancho/2)*(c.pendiente/100)*sc;
+  var ax=0.7, ay=0.4; // proyección iso
+  function P(x,y,z){ return [(x-y)*ax*sc/sc*1+ 0, 0]; }
+  // proyección isométrica simple
+  function iso(x,y,z){ return {X:(x-y)*Math.cos(0.5), Y:(x+y)*Math.sin(0.5)-z}; }
+  var pad=40;
+  var pts=[];
+  [[0,0,0],[c.largo,0,0],[c.largo,c.ancho,0],[0,c.ancho,0],
+   [0,0,c.altoPared],[c.largo,0,c.altoPared],[c.largo,c.ancho,c.altoPared],[0,c.ancho,c.altoPared],
+   [c.largo/2,0,c.altoPared+(c.ancho/2)*(c.pendiente/100)],[c.largo/2,c.ancho,c.altoPared+(c.ancho/2)*(c.pendiente/100)]
+  ].forEach(function(p){ var q=iso(p[0],p[1],p[2]); pts.push({X:q.X*sc,Y:q.Y*sc}); });
+  var minX=Math.min.apply(null,pts.map(function(p){return p.X;}));
+  var minY=Math.min.apply(null,pts.map(function(p){return p.Y;}));
+  pts=pts.map(function(p){ return {X:p.X-minX+pad, Y:p.Y-minY+pad}; });
+  var maxX=Math.max.apply(null,pts.map(function(p){return p.X;}))+pad;
+  var maxY=Math.max.apply(null,pts.map(function(p){return p.Y;}))+pad;
+  function poly(idx,fill,op){ return '<polygon points="'+idx.map(function(i){return pts[i].X+','+pts[i].Y;}).join(' ')+'" fill="'+fill+'" stroke="#3a3a3a" stroke-width="1" opacity="'+(op||1)+'"/>'; }
+  var s='<svg viewBox="0 0 '+maxX+' '+maxY+'" style="max-width:100%;height:auto">';
+  s+=poly([3,2,6,7],'#C8B99C',0.9);   // pared derecha
+  s+=poly([0,3,7,4],'#D8CBAF',0.9);   // pared frontal
+  s+=poly([4,5,8],'#8a6a4a',0.9);     // techo frente
+  s+=poly([4,7,9,8],'#7a5a3a',0.95);  // techo agua izq
+  s+=poly([5,6,9,8],'#6a4a2a',0.9);   // techo agua der
+  s+='</svg>';
+  el.innerHTML=s;
+}
+
+// ── Tabla de madera ──
+function renderMaderaTable(c) {
+  var el=document.getElementById('madera-tbl'); if(!el) return;
+  var m=maderaCasa(c);
+  var pralCrc=S.pral/PMT_M3;
+  el.innerHTML='<thead><tr><th style="text-align:left">Componente</th><th>m³ aserrada</th><th>m³ troza</th><th>PMT</th></tr></thead><tbody>'+
+    m.comps.filter(function(x){return x.v>0;}).map(function(x){
+      return '<tr><td style="text-align:left">'+x.n+'</td><td>'+fN(x.v,3)+'</td><td>'+fN(x.v/SAW,3)+'</td><td>'+fN(x.v/PMT_M3,0)+'</td></tr>';
+    }).join('')+
+    '<tr style="font-weight:700;background:var(--teca-lt)"><td style="text-align:left">TOTAL</td><td>'+fN(m.totalAser,3)+'</td><td>'+fN(m.totalTroza,3)+'</td><td>'+fN(m.totalAser/PMT_M3,0)+'</td></tr>'+
+    '</tbody>';
+
+  // Cruce con raleo disponible
+  var projRows=buildProjection();
+  var r1=projRows.filter(function(r){return r.lbl==='R1';})[0];
+  var trozaDisp=r1?r1.ex*HA:0;
+  var totalTrozaAll=S.casas.reduce(function(s,cc){ return s+maderaCasa(cc).totalTroza; },0);
+  var cruce=document.getElementById('madera-cruce');
+  if (cruce){
+    var ok=totalTrozaAll<=trozaDisp;
+    cruce.className='note '+(ok?'ok':'warn');
+    cruce.innerHTML=(ok?'✓ ':'⚠ ')+'Todas las casas ('+S.casas.length+') necesitan <b>'+fN(totalTrozaAll,1)+' m³ de troza</b>. '+
+      'El raleo 1 rinde <b>'+fN(trozaDisp,1)+' m³</b> ('+(trozaDisp>0?fN(totalTrozaAll/trozaDisp*100,1):'—')+'% usado). '+
+      (ok?'Sobran <b>'+fN(trozaDisp-totalTrozaAll,1)+' m³</b>.':'Faltan <b>'+fN(totalTrozaAll-trozaDisp,1)+' m³</b> — reducí tamaño o usá la cosecha final.');
+  }
+}
+
+function renderCasaKpis(c) {
+  var m=maderaCasa(c);
+  var el=document.getElementById('casa-kpis'); if(!el) return;
+  el.innerHTML=
+    '<div class="kpi"><div class="kl">Área base</div><div class="kv">'+fN(m.areaBase,1)+' m²</div><div class="ks2">+ deck/pasillo '+fN(m.areaTotal-m.areaBase,1)+' m²</div></div>' +
+    '<div class="kpi hi"><div class="kl">Madera (esta casa)</div><div class="kv">'+fN(m.totalTroza,1)+' m³</div><div class="ks2">troza · '+fN(m.totalAser,2)+' m³ aserrada</div></div>' +
+    '<div class="kpi"><div class="kl">Cumbrera</div><div class="kv">'+fN(m.cumbrera,2)+' m</div><div class="ks2">pendiente '+c.pendiente+'%</div></div>' +
+    '<div class="kpi"><div class="kl">Postes</div><div class="kv">'+m.nPostes+'</div><div class="ks2">'+c.postSize+'×'+c.postSize+' cm</div></div>';
+}
+
+function renderCasaCosts() {
+  var cc=document.getElementById('casa-cost-cards'); if(!cc) return;
+  cc.innerHTML='';
+  S.casas.forEach(function(c,i){
+    var m=maderaCasa(c);
+    var costoCrc=m.areaTotal*(S.mo+S.mat);
+    var d=document.createElement('div'); d.className='card';
+    d.innerHTML='<div class="ctitle">'+(c.nombre||'Casa')+' '+(i+1)+' — '+fN(m.areaTotal,1)+' m²</div>'+
+      '<div class="frow"><span class="fk">Madera troza</span><span class="fv">'+fN(m.totalTroza,1)+' m³</span></div>'+
+      '<div class="frow"><span class="fk">Mano de obra</span><span class="fv">'+fC(m.areaTotal*S.mo)+'</span></div>'+
+      '<div class="frow"><span class="fk">Otros materiales</span><span class="fv">'+fC(m.areaTotal*S.mat)+'</span></div>'+
+      '<div class="ftot"><span style="font-size:12px;font-weight:600">Total construcción</span><span class="ftv">'+fC(costoCrc)+'</span></div>';
     cc.appendChild(d);
   });
 }
@@ -2146,24 +2666,9 @@ async function loadFromGitHub() {
 // ═══════════════════════════════════════════════════
 // SIDEBAR CASAS
 // ═══════════════════════════════════════════════════
-function renderCasasSb() {
-  var el = document.getElementById('casas-sb');
-  if (!el) return;
-  el.innerHTML = '';
-  S.casas.forEach(function(c,i) {
-    var d = document.createElement('div');
-    d.style.cssText = 'background:rgba(0,0,0,.15);border-radius:6px;padding:8px 9px;margin-bottom:7px';
-    var rmBtn = S.casas.length>1 ? '<button onclick="rmCasa('+i+')" style="float:right;background:rgba(220,50,50,.3);border:none;color:#fca5a5;border-radius:3px;padding:1px 5px;font-size:9px;cursor:pointer">✕</button>' : '';
-    d.innerHTML =
-      '<div style="font-size:10px;font-weight:600;color:rgba(255,255,255,.5);margin-bottom:6px">Casa '+(i+1)+rmBtn+'</div>' +
-      '<div class="ctrl"><div class="clbl">Tamaño <span class="cval">'+c.area+' m²</span></div><input type="range" min="20" max="200" step="5" value="'+c.area+'" oninput="S.casas['+i+'].area=+this.value;this.previousElementSibling.lastChild.textContent=this.value+\' m²\';update()"></div>' +
-      '<div class="ctrl"><div class="clbl">Grosor <span class="cval">'+c.grosor+'"</span></div><input type="range" min="0.75" max="2" step="0.25" value="'+c.grosor+'" oninput="S.casas['+i+'].grosor=+this.value;this.previousElementSibling.lastChild.textContent=this.value+\'&quot;\';update()"></div>' +
-      '<div class="ctrl"><div class="clbl">Alto paredes <span class="cval">'+c.alto.toFixed(1)+' m</span></div><input type="range" min="2.0" max="3.5" step="0.1" value="'+c.alto+'" oninput="S.casas['+i+'].alto=+this.value;this.previousElementSibling.lastChild.textContent=this.value+\' m\';update()"></div>';
-    el.appendChild(d);
-  });
-}
-function addCasa() { S.casas.push({area:40,grosor:1.0,alto:2.5}); renderCasasSb(); update(); }
-function rmCasa(i) { if (S.casas.length>1) { S.casas.splice(i,1); renderCasasSb(); update(); } }
+function renderCasasSb() { /* obsoleto: los controles de casa están en el tab Construcción */ }
+function addCasa() { var nc=nuevaCasa(); nc.nombre='Casa'; S.casas.push(nc); S.casaActiva=S.casas.length-1; renderCasaTab(); }
+function rmCasa(i) { if (S.casas.length>1) { S.casas.splice(i,1); if(S.casaActiva>=S.casas.length)S.casaActiva=S.casas.length-1; renderCasaTab(); } }
 
 // ═══════════════════════════════════════════════════
 // NAVEGACIÓN
@@ -2183,14 +2688,17 @@ function sTab(i) {
 function ss(k,v) {
   S[k]=v;
   if (k==='esc') {
-    document.getElementById('btn-C').classList.toggle('active',v==='C');
-    document.getElementById('btn-O').classList.toggle('active',v==='O');
+    var bC=document.getElementById('btn-C'), bO=document.getElementById('btn-O');
+    if(bC) bC.classList.toggle('active',v==='C');
+    if(bO) bO.classList.toggle('active',v==='O');
   }
   if (k==='mkt') {
-    document.getElementById('btn-mkt-exp').classList.toggle('active',v==='export');
-    document.getElementById('btn-mkt-nac').classList.toggle('active',v==='nac');
-    document.getElementById('pan-exp').style.display = v==='export'?'':'none';
-    document.getElementById('pan-nac').style.display = v==='nac'?'':'none';
+    var me=document.getElementById('btn-mkt-exp'), mn=document.getElementById('btn-mkt-nac');
+    if(me) me.classList.toggle('active',v==='export');
+    if(mn) mn.classList.toggle('active',v==='nac');
+    var pe=document.getElementById('pan-exp'), pn=document.getElementById('pan-nac');
+    if(pe) pe.style.display = v==='export'?'':'none';
+    if(pn) pn.style.display = v==='nac'?'':'none';
   }
   if (k==='mod') {
     ['btn-pie','btn-pie2'].forEach(function(id){ var e=document.getElementById(id); if(e) e.classList.toggle('active',v==='pie'); });
@@ -2203,8 +2711,8 @@ function ss(k,v) {
 // UPDATE PRINCIPAL
 // ═══════════════════════════════════════════════════
 function update() {
-  // Read sliders (raleo ahora se controla en el tab Raleos, no aquí)
-  S.boost=get('boost',20); S.tasa=get('tasa',8); S.infl=get('infl',2);
+  // Raleo y boost se controlan en el tab Raleos (no leer 'boost' aquí)
+  S.tasa=get('tasa',8); S.infl=get('infl',2);
   S.pexp=get('pexp',300); S.tc=get('tc',520); S.pnac=get('pnac',200);
   S.pral=get('pral',150); S.tc2=get('tc2',520); S.ccf=get('ccf',20);
   S.cuid=get('cuid',300000); S.elec=get('elec',20000);
@@ -2212,7 +2720,7 @@ function update() {
   S.mo=get('mo',80000); S.mat=get('mat',50000);
 
   // Update labels
-  L('boost-l','+'+S.boost+'%'); L('tasa-l',S.tasa+'%'); L('infl-l',S.infl+'%');
+  L('tasa-l',S.tasa+'%'); L('infl-l',S.infl+'%');
   L('pexp-l','$'+S.pexp+'/m³'); L('tc-l',S.tc+' ₡/$'); L('pnac-l',S.pnac+' ₡/PMT');
   L('pral-l',S.pral+' ₡/PMT'); L('tc2-l',S.tc2+' ₡/$'); L('ccf-l','$'+S.ccf+'/m³');
   L('cuid-l','₡'+Math.round(S.cuid/1000)+'k'); L('elec-l','₡'+Math.round(S.elec/1000)+'k');
@@ -2226,9 +2734,10 @@ function update() {
 function renderCurrentTab() {
   if (currentTab===0) { updateFilters(); renderInventarioTab(); }
   else if (currentTab===1) renderRaleosTab();
-  else if (currentTab===2) renderFinTab();
-  else if (currentTab===3) renderCasaTab();
-  else if (currentTab===4) renderCampoTab();
+  else if (currentTab===2) renderProyeccionesTab();
+  else if (currentTab===3) renderFinTab();
+  else if (currentTab===4) renderCasaTab();
+  else if (currentTab===5) renderCampoTab();
 }
 
 // ═══════════════════════════════════════════════════
