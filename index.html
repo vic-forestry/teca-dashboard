@@ -269,27 +269,57 @@ tbody tr:hover{background:var(--teca-lt)}
     <!-- ═══ TAB 1: RALEOS ════════════════════════════════════════ -->
     <div class="tp" id="tp1">
       <div class="ks" id="ral-kpis"></div>
-      <div class="g2">
-        <div class="card"><div class="ctitle">Densidad árb/ha a lo largo del tiempo</div><div class="csub">Con raleos aplicados</div><div style="height:190px"><canvas id="ch-dens-t"></canvas></div></div>
-        <div class="card"><div class="ctitle">Área basal proyectada vs umbral</div><div class="csub">Umbral técnico 16 m²/ha (línea roja)</div><div style="height:190px"><canvas id="ch-ab-t"></canvas></div></div>
-      </div>
-      <div class="g2">
-        <div class="card"><div class="ctitle">DAP promedio proyectado (cm)</div><div class="csub">Crecimiento con IMA sigmoidal</div><div style="height:190px"><canvas id="ch-dap-t"></canvas></div></div>
-        <div class="card"><div class="ctitle">Volumen en pie (m³/ha)</div><div class="csub">Con efecto post-raleo</div><div style="height:190px"><canvas id="ch-vol-t"></canvas></div></div>
-      </div>
-      <div class="sl">Comparativo de intensidades de raleo</div>
-      <div class="card"><div class="ctitle">¿Qué % extraer? — análisis por intensidad</div>
-        <div class="csub">Basado en densidad objetivo a cosecha 250–350 árb/ha (Murillo & Badilla 2004)</div>
-        <div class="tw" style="margin-top:8px"><table class="rtbl" id="ral-compare"></table></div>
-        <div class="note info" style="margin-top:10px"><b>Dist. entre árb.:</b> distancia equivalente entre árboles asumiendo distribución cuadrada (√(10000/N)). A mayor espaciamiento, más luz y agua por árbol.<br><br>Para un <b>raleo único en teca clonal</b>, se recomienda <b>33–38%</b>. Todos los árboles son de buena forma (clones), por lo que no hay selección por calidad — solo por espacio. Extraer menos del 30% en un único raleo deja demasiados árboles; el área basal volverá a saturar antes de la cosecha.</div>
+
+      <div class="card" style="margin-bottom:12px">
+        <div class="ctitle">Año del raleo</div>
+        <div class="csub">Aplica a ambas zonas. La plantación está en año ~7 (edad 6.9).</div>
+        <div style="display:flex;align-items:center;gap:12px;margin-top:8px">
+          <input type="range" id="ral-year" min="7" max="12" step="1" value="7" oninput="onZoneInput()" style="flex:1;max-width:300px">
+          <span id="ral-year-lbl" style="font-weight:700;color:var(--teca);font-size:16px">Año 7</span>
+        </div>
       </div>
 
-      <div class="sl">Manejo diferenciado por zona</div>
-      <div class="card">
-        <div class="ctitle">La finca no es homogénea — dos unidades de manejo</div>
-        <div class="csub">La zona de viento tiene mayor mortalidad y menor densidad; requiere una decisión distinta</div>
-        <div id="zona-panel" style="margin-top:10px"></div>
+      <div class="sl">Decisión de raleo por zona</div>
+      <div class="g2">
+        <!-- ZONA GENERAL -->
+        <div class="card" style="border-top:3px solid #2C5F2E">
+          <div class="ctitle" style="color:#2C5F2E">🌳 Zona general (sana)</div>
+          <div class="csub" id="zg-sub">1.83 ha · 520 árb/ha</div>
+          <div style="display:flex;align-items:center;gap:10px;margin:10px 0">
+            <span style="font-size:12px;color:var(--muted)">Intensidad:</span>
+            <input type="range" id="zg-int" min="0" max="45" step="1" value="35" oninput="onZoneInput()" style="flex:1">
+            <span id="zg-int-lbl" style="font-weight:700;color:#2C5F2E;min-width:38px">35%</span>
+          </div>
+          <div id="zg-rec" style="font-size:12px;margin-bottom:8px"></div>
+          <div class="tw"><table class="rtbl" id="zg-table"></table></div>
+        </div>
+        <!-- ZONA VIENTO -->
+        <div class="card" style="border-top:3px solid #B45309">
+          <div class="ctitle" style="color:#B45309">💨 Zona de viento</div>
+          <div class="csub" id="zv-sub">0.26 ha · 350 árb/ha</div>
+          <div style="display:flex;align-items:center;gap:10px;margin:10px 0">
+            <span style="font-size:12px;color:var(--muted)">Intensidad:</span>
+            <input type="range" id="zv-int" min="0" max="45" step="1" value="0" oninput="onZoneInput()" style="flex:1">
+            <span id="zv-int-lbl" style="font-weight:700;color:#B45309;min-width:38px">0%</span>
+          </div>
+          <div id="zv-rec" style="font-size:12px;margin-bottom:8px"></div>
+          <div class="tw"><table class="rtbl" id="zv-table"></table></div>
+        </div>
       </div>
+
+      <div class="card" id="ral-resumen" style="margin-top:12px"></div>
+
+      <div class="sl">Proyección — ambas zonas</div>
+      <div class="g2">
+        <div class="card"><div class="ctitle">Densidad (árb/ha)</div><div class="csub">Verde = general · Naranja = viento</div><div style="height:190px"><canvas id="ch-dens-t"></canvas></div></div>
+        <div class="card"><div class="ctitle">Área basal (m²/ha)</div><div class="csub">Umbral 16 m²/ha (línea punteada)</div><div style="height:190px"><canvas id="ch-ab-t"></canvas></div></div>
+      </div>
+      <div class="g2">
+        <div class="card"><div class="ctitle">DAP promedio (cm)</div><div class="csub">Con boost post-raleo</div><div style="height:190px"><canvas id="ch-dap-t"></canvas></div></div>
+        <div class="card"><div class="ctitle">Volumen en pie (m³/ha)</div><div class="csub">Con efecto post-raleo</div><div style="height:190px"><canvas id="ch-vol-t"></canvas></div></div>
+      </div>
+
+      <div class="note info" style="margin-top:10px">Para un <b>raleo único en teca clonal</b> se recomienda <b>33–38%</b> en rodal sano. La <b>zona de viento</b> ya está cerca de la densidad final (250–350 árb/ha) y expuesta; por eso su default es <b>0% (solo sanitario)</b>. Lo que definís aquí alimenta el tab <b>Financiero</b> (suma de ambas zonas).</div>
     </div>
 
     <!-- ═══ TAB 2: FINANCIERO ════════════════════════════════════ -->
@@ -297,7 +327,7 @@ tbody tr:hover{background:var(--teca-lt)}
       <div class="ks" id="fin-kpis"></div>
       <div class="g2">
         <div class="card"><div class="ctitle">Volumen en pie (m³/ha)</div><div class="csub" id="vol-sub-fin">Años 5–15</div><div style="height:190px"><canvas id="ch-vol-f"></canvas></div></div>
-        <div class="card"><div class="ctitle">Ingreso bruto por evento (USD)</div><div class="csub">2.24 ha totales</div><div style="height:190px"><canvas id="ch-fin-f"></canvas></div></div>
+        <div class="card"><div class="ctitle">Ingreso bruto por evento (USD)</div><div class="csub">Finca completa (2.24 ha)</div><div style="height:190px"><canvas id="ch-fin-f"></canvas></div></div>
       </div>
       <div class="sl">Detalle financiero</div>
       <div class="g2" id="fin-cards"></div>
@@ -510,18 +540,7 @@ tbody tr:hover{background:var(--teca-lt)}
       <div class="clbl">Crecimiento</div>
       <div class="tog"><button id="btn-C" class="active" onclick="ss('esc','C')">Conserv.</button><button id="btn-O" onclick="ss('esc','O')">Optimista</button></div>
     </div>
-    <div class="csec">Raleo 1</div>
-    <div class="chk-row"><input type="checkbox" id="chk-r1" checked onchange="update()"><label for="chk-r1">Hacer raleo 1</label></div>
-    <div id="r1b">
-      <div class="ctrl"><div class="clbl">Año <span class="cval" id="r1y-l">7</span></div><input type="range" id="r1y" min="5" max="10" value="7" oninput="update()"></div>
-      <div class="ctrl"><div class="clbl">Intensidad <span class="cval" id="ri1-l">35%</span></div><input type="range" id="ri1" min="10" max="50" step="5" value="35" oninput="update()"></div>
-    </div>
-    <div class="csec">Raleo 2</div>
-    <div class="chk-row"><input type="checkbox" id="chk-r2" onchange="update()"><label for="chk-r2">Hacer raleo 2</label></div>
-    <div id="r2b" style="display:none">
-      <div class="ctrl"><div class="clbl">Año <span class="cval" id="r2y-l">10</span></div><input type="range" id="r2y" min="6" max="13" value="10" oninput="update()"></div>
-      <div class="ctrl"><div class="clbl">Intensidad <span class="cval" id="ri2-l">25%</span></div><input type="range" id="ri2" min="10" max="45" step="5" value="25" oninput="update()"></div>
-    </div>
+    <div class="ctip" style="margin-top:6px"><b>Raleos:</b> los controles de raleo por zona (general y viento) están ahora en el tab <b>✂️ Raleos</b>. Lo que definas ahí alimenta el análisis financiero.</div>
     <div class="csec">Post-raleo</div>
     <div class="ctrl"><div class="clbl">Boost ICA <span class="cval" id="boost-l">+20%</span></div><input type="range" id="boost" min="0" max="50" step="5" value="20" oninput="update()"></div>
     <div class="csec">Análisis financiero</div>
@@ -738,6 +757,10 @@ let S = {
   esc:'C', mkt:'export', mod:'pie',
   r1on:true, r1y:7, ri1:35,
   r2on:false, r2y:10, ri2:25,
+  // Raleo por zona (año del raleo común; intensidad por zona)
+  ralYear:7,
+  zGenInt:35,   // intensidad zona general
+  zVieInt:0,    // intensidad zona viento (default 0 = solo sanitario)
   boost:20, tasa:8, infl:2,
   pexp:300, tc:520, pnac:200,
   pral:150, tc2:520, ccf:20,
@@ -745,6 +768,12 @@ let S = {
   mo:80000, mat:50000,
   casas:[{area:40, grosor:1.0, alto:2.5}],
   metodo:'resumen'
+};
+
+// Zonas de manejo (área en ha, densidad viva árb/ha)
+var ZONES = {
+  general: {name:'Zona general', areaHa:1.8255, densViva:520, color:'#2C5F2E', bg:'#F0FDF4'},
+  viento:  {name:'Zona de viento', areaHa:0.2595, densViva:350, color:'#B45309', bg:'#FFF7ED'}
 };
 
 // ═══════════════════════════════════════════════════
@@ -878,20 +907,42 @@ function buildProjection() {
   var bf = 1 + S.boost/100;
   var vol = 91.1, br = 0;
   var rows = [];
+  // Volumen de raleo combinado (dos zonas) expresado como m³/ha promedio de la finca
+  var ralVolHa = combinedRaleoVolHa();
   for (var y=5; y<=15; y++) {
     var ib = y>5 ? (ima[y]||10) : 0;
     var ica = (br>0 && y>5) ? ib*bf : ib;
     if (br>0 && y>5) br--;
     var vb = Math.round((vol+ica)*10)/10;
     var ex = 0, lbl = '';
-    if (S.r1on && y===S.r1y)       { ex=Math.round(vb*S.ri1/100*10)/10; br=3; lbl='R1'; }
-    else if (S.r2on && y===S.r2y) { ex=Math.round(vb*S.ri2/100*10)/10; br=3; lbl='R2'; }
-    else if (y===15)               { ex=vb; lbl='CF'; }
+    if (S.r1on && y===S.ralYear && ralVolHa>0) { ex=Math.round(ralVolHa*10)/10; br=3; lbl='R1'; }
+    else if (y===15)                            { ex=vb; lbl='CF'; }
     var va = Math.round((vb-ex)*10)/10;
     vol = va;
     rows.push({y:y, ica:Math.round(ica*10)/10, vb:vb, ex:ex, lbl:lbl, va:va});
   }
   return rows;
+}
+
+// Volumen total de raleo de ambas zonas, dividido por el área total → m³/ha promedio finca
+function combinedRaleoVolHa() {
+  var G=ZONES.general, V=ZONES.viento;
+  var mortEl = document.getElementById('proj-mort');
+  var mort = (mortEl ? +mortEl.value : 3)/100;
+  var startYr = Math.round(OBS.edad2);
+  function volExtHa(densViva, intensidad) {
+    if (!intensidad) return 0;
+    var d=OBS.dap2, dn=densViva;
+    for (var yy=startYr; yy<S.ralYear; yy++){
+      var ic = OBS.icaRef*Math.pow(OBS.edadRef/((yy+1)-0.5),OBS.kDecay);
+      d += ic; dn *= (1-mort);
+    }
+    return volF(d)*dn*(intensidad/100);
+  }
+  var volGenTot = volExtHa(G.densViva, S.zGenInt)*G.areaHa;
+  var volVieTot = volExtHa(V.densViva, S.zVieInt)*V.areaHa;
+  // Dividir por HA (área oficial usada en el resto del Financiero) para que ex*HA reproduzca el total real
+  return (volGenTot+volVieTot)/HA;
 }
 
 function calcFin(rows) {
@@ -1202,23 +1253,31 @@ function updateFilters() {
 }
 
 // ═══════════════════════════════════════════════════
-// TAB 1: RALEOS
+// TAB 1: RALEOS (dos zonas)
 // ═══════════════════════════════════════════════════
-function renderRaleosTab() {
-  // Base = inventario 2 (más reciente). Proyección con crecimiento observado.
-  var st = invStats(INV2);
-  var densBase = st.densHa;
-  var dapBase  = st.mean;
+
+// Lee los sliders del tab y sincroniza el estado S
+function onZoneInput() {
+  S.ralYear  = get('ral-year', 7);
+  S.zGenInt  = get('zg-int', 35);
+  S.zVieInt  = get('zv-int', 0);
+  L('ral-year-lbl', 'Año '+S.ralYear);
+  L('zg-int-lbl', S.zGenInt+'%');
+  L('zv-int-lbl', S.zVieInt+'%');
+  // Mantener compat con Financiero: raleo único combinado
+  S.r1on = true; S.r1y = S.ralYear; S.r2on = false;
+  renderRaleosTab();
+  renderFinTab();
+}
+
+// Proyecta una zona: densidad, dap, ab, vol año por año, con raleo en ralYear
+function zoneProjection(densViva, intensidad) {
   var bf = 1+S.boost/100;
   var mortEl = document.getElementById('proj-mort');
-  var mort = (mortEl ? +mortEl.value : 1.5)/100;
-
-  // Trayectoria natural sin raleo (para el efecto boost usamos ICA observado con desaceleración)
-  var edad0 = OBS.edad2;
-  var dens=densBase, dap=dapBase, br=0;
+  var mort = (mortEl ? +mortEl.value : 3)/100;
+  var startYr = Math.round(OBS.edad2);
+  var dens=densViva, dap=OBS.dap2, br=0;
   var yrs=[],densArr=[],abArr=[],dapArr=[],volArr=[];
-
-  var startYr = Math.round(edad0);
   for (var y=startYr; y<=15; y++) {
     yrs.push(y);
     if (y>startYr) {
@@ -1228,123 +1287,137 @@ function renderRaleosTab() {
       dap += ica;
       dens *= (1-mort);
     }
-    if (S.r1on && y===S.r1y) { dens*=(1-S.ri1/100); br=3; }
-    else if (S.r2on && y===S.r2y) { dens*=(1-S.ri2/100); br=3; }
+    if (y===S.ralYear && intensidad>0) { dens *= (1-intensidad/100); br=3; }
     densArr.push(Math.round(dens));
     abArr.push(Math.round(abF(dap)*dens*10)/10);
     dapArr.push(Math.round(dap*10)/10);
     volArr.push(Math.round(volF(dap)*dens*10)/10);
   }
-
-  // Volumen extraído por raleo (usa DAP del año del raleo)
-  function volAtYear(yr){
-    var d=dapBase, dn=densBase, b=0;
-    for (var yy=startYr; yy<yr; yy++){
+  // Volumen extraído en el raleo (m³/ha)
+  var volExtHa = 0, densPost = densViva;
+  if (intensidad>0) {
+    var d=OBS.dap2, dn=densViva;
+    for (var yy=startYr; yy<S.ralYear; yy++){
       var ic = OBS.icaRef*Math.pow(OBS.edadRef/((yy+1)-0.5),OBS.kDecay);
       d += ic; dn *= (1-mort);
     }
-    return {dap:d, dens:dn};
+    volExtHa = volF(d)*dn*(intensidad/100);
+    densPost = Math.round(densViva*(1-intensidad/100));
   }
-  var r1VolTot=0, r2VolTot=0;
-  if (S.r1on){ var a1=volAtYear(S.r1y); r1VolTot=volF(a1.dap)*a1.dens*(S.ri1/100)*HA; }
-  if (S.r2on){ var a2=volAtYear(S.r2y); r2VolTot=volF(a2.dap)*a2.dens*(S.ri2/100)*HA; }
-
-  var densPost1 = S.r1on ? Math.round(densBase*(1-S.ri1/100)) : Math.round(densBase);
-  var densPost2 = S.r1on && S.r2on ? Math.round(densPost1*(1-S.ri2/100)) : densPost1;
-
-  var rkEl = document.getElementById('ral-kpis');
-  if (rkEl) rkEl.innerHTML =
-    '<div class="kpi"><div class="kl">Densidad actual (inv2)</div><div class="kv">'+Math.round(densBase)+'</div><div class="ks2">árb/ha · AB '+fN(st.abHa,1)+'</div></div>' +
-    '<div class="kpi hi"><div class="kl">'+(S.r1on?'Post raleo 1':'Sin raleo')+'</div><div class="kv">'+densPost1+'</div><div class="ks2">árb/ha · vol: '+(r1VolTot>0?fN(r1VolTot,1):'—')+' m³</div></div>' +
-    (S.r2on ? '<div class="kpi hi"><div class="kl">Post raleo 2</div><div class="kv">'+densPost2+'</div><div class="ks2">árb/ha · vol: '+(r2VolTot>0?fN(r2VolTot,1):'—')+' m³</div></div>' : '') +
-    '<div class="kpi"><div class="kl">Densidad cosecha</div><div class="kv">'+densArr[densArr.length-1]+'</div><div class="ks2">árb/ha año 15</div></div>';
-
-  var evtSet = {};
-  if (S.r1on) evtSet[S.r1y]=true;
-  if (S.r2on) evtSet[S.r2y]=true;
-  evtSet[15]=true;
-  var ptR = yrs.map(function(y){ return evtSet[y] ? 6 : 3; });
-  var ptC = yrs.map(function(y){ return y===15?'#3B6D11':evtSet[y]?'#D97706':'#2C5F2E'; });
-
-  var xScale = {ticks:{autoSkip:false,maxRotation:0,font:{size:9}}};
-  var yTiny   = {ticks:{font:{size:9}},grid:{color:'rgba(0,0,0,0.04)'}};
-
-  function lineDs(arr, color) {
-    return {datasets:[{data:arr,borderColor:color,backgroundColor:color+'11',fill:true,tension:.35,borderWidth:2,pointRadius:ptR,pointBackgroundColor:ptC}]};
-  }
-
-  mkChart('ch-dens-t','line',Object.assign({labels:yrs},lineDs(densArr,'#2C5F2E')),Object.assign({x:xScale,y:Object.assign({title:{display:true,text:'árb/ha',font:{size:9}}},yTiny)}),false);
-  mkChart('ch-ab-t','line',{labels:yrs,datasets:[
-    {data:abArr,label:'Área basal (m²/ha)',borderColor:'#D97706',backgroundColor:'#D9770611',fill:true,tension:.35,borderWidth:2,pointRadius:ptR,pointBackgroundColor:ptC},
-    {data:yrs.map(function(){return 16;}),label:'Umbral 16 m²',borderColor:'#D97706',borderWidth:1.5,borderDash:[5,3],pointRadius:0,backgroundColor:'transparent',fill:false}
-  ]},{x:xScale,y:Object.assign({title:{display:true,text:'m²/ha',font:{size:9}}},yTiny),},true,
-  {plugins:{legend:{display:true,labels:{usePointStyle:true,pointStyle:'line',boxWidth:30,font:{size:10}}}}});
-  mkChart('ch-dap-t','line',Object.assign({labels:yrs},lineDs(dapArr,'#6B21A8')),Object.assign({x:xScale,y:Object.assign({title:{display:true,text:'DAP cm',font:{size:9}}},yTiny)}),false);
-  mkChart('ch-vol-t','line',Object.assign({labels:yrs},lineDs(volArr,'#2C5F2E')),Object.assign({x:xScale,y:Object.assign({title:{display:true,text:'m³/ha',font:{size:9}}},yTiny)}),false);
-
-  // Tabla comparativa
-  var pcts = [20,25,30,33,35,38,40,45];
-  var tblEl = document.getElementById('ral-compare');
-  if (!tblEl) return;
-  var html = '<thead><tr><th style="text-align:left">Intens.</th><th>Extr./ha</th><th>Total finca</th><th>Rem./ha</th><th>Vol. raleo/ha</th><th>Marcar por caja (4/6/8)</th><th>Rem. cosecha</th><th>Rango</th></tr></thead><tbody>';
-  pcts.forEach(function(pct) {
-    var frac = pct/100;
-    var ext = Math.round(densBase*frac);
-    var rem = densBase-ext;
-    var totalFinca = Math.round(densBase*frac*HA);
-    var rcos = Math.round(rem*Math.pow(1-mort,8));
-    var vol2 = fN(volF(st.mean)*ext,1);
-    var caja = Math.round(4*frac)+' / '+Math.round(6*frac)+' / '+Math.round(8*frac);
-    var ok   = rcos>=250 && rcos<=380;
-    var isRec = pct>=33 && pct<=38;
-    html += '<tr'+(isRec?' style="background:var(--teca-lt);font-weight:600"':'')+'>'+
-      '<td>'+pct+'%'+(isRec?' ★':'')+'</td><td>'+ext+'</td><td>'+totalFinca+'</td><td>'+rem+'</td><td>'+vol2+' m³</td><td>'+caja+'</td><td>'+rcos+'</td>'+
-      '<td style="color:'+(ok?'#27500A':'#991B1B')+'">'+(ok?'✓ óptimo':'fuera')+'</td></tr>';
-  });
-  html += '</tbody>';
-  tblEl.innerHTML = html;
-  renderZonaPanel();
+  return {yrs:yrs, dens:densArr, ab:abArr, dap:dapArr, vol:volArr, volExtHa:volExtHa, densPost:densPost, densCosecha:densArr[densArr.length-1]};
 }
 
-// ═══════════════════════════════════════════════════
-// PANEL DE MANEJO POR ZONA (Tab Raleos)
-// ═══════════════════════════════════════════════════
-function renderZonaPanel() {
-  var el = document.getElementById('zona-panel');
-  if (!el) return;
-  var m = mortAnalysis();
-  var v = m.viento;
+// Recomendación textual por zona según densidad e intensidad elegida
+function zoneRec(densViva, intensidad, esViento) {
+  var post = Math.round(densViva*(1-intensidad/100));
+  var cosecha = Math.round(post*Math.pow(1-0.03,8));
+  var okFinal = cosecha>=250 && cosecha<=380;
+  var msg, color;
+  if (esViento) {
+    if (intensidad===0) { color='#16A34A'; msg='Solo sanitario — mantiene el dosel cerrado como protección contra viento. Correcto para esta zona.'; }
+    else if (intensidad<=15) { color='#CA8A04'; msg='Raleo ligero. Aceptable si sacás solo dañados/torcidos, pero cuidá no abrir demasiado el dosel.'; }
+    else { color='#B91C1C'; msg='⚠ Intensidad alta para zona expuesta: dejaría ~'+post+' árb/ha y aumenta riesgo de volcamiento por menor protección lateral.'; }
+  } else {
+    if (intensidad<30) { color='#CA8A04'; msg='Por debajo de 30% en raleo único: el área basal volverá a saturar antes de cosecha. Considerá subir.'; }
+    else if (intensidad<=38) { color='#16A34A'; msg='En el rango óptimo (33–38%) para teca clonal. Deja ~'+post+' árb/ha, cosecha ~'+cosecha+' árb/ha.'; }
+    else { color='#CA8A04'; msg='Intensidad alta: baja el volumen total/ha aunque cada árbol engorde más. Deja ~'+post+' árb/ha.'; }
+  }
+  return '<span style="color:'+color+';font-weight:600">'+msg+'</span>' +
+    ' <span style="color:var(--muted)">Post-raleo ~'+post+' árb/ha · cosecha ~'+cosecha+' árb/ha '+(okFinal?'✓':'')+'</span>';
+}
 
-  function zonaCard(titulo, color, bg, densViva, recTitulo, recTexto, intensidad) {
-    var remHa = intensidad ? Math.round(densViva*(1-intensidad/100)) : Math.round(densViva);
-    return '<div style="border-left:4px solid '+color+';background:'+bg+';border-radius:8px;padding:14px 16px;flex:1;min-width:260px">' +
-      '<div style="font-weight:700;color:'+color+';margin-bottom:4px">'+titulo+'</div>' +
-      '<div style="font-size:12px;color:var(--muted);margin-bottom:8px">Densidad viva: <b>'+Math.round(densViva)+' árb/ha</b></div>' +
-      '<div style="font-size:13px;font-weight:600;color:'+color+';margin-bottom:4px">'+recTitulo+'</div>' +
-      '<div style="font-size:13px;line-height:1.5;color:var(--text)">'+recTexto+'</div>' +
-      (intensidad!==null ? '<div style="font-size:12px;color:var(--muted);margin-top:8px">→ Post-raleo: ~<b>'+remHa+' árb/ha</b></div>' : '') +
-      '</div>';
+// Tabla de intensidad para una zona (resalta la intensidad elegida)
+function zoneTable(tblId, densViva, areaHa, intSel) {
+  var mortEl = document.getElementById('proj-mort');
+  var mort = (mortEl ? +mortEl.value : 3)/100;
+  var pcts = [0,15,25,30,33,35,38,40];
+  if (pcts.indexOf(intSel)<0) { pcts.push(intSel); pcts.sort(function(a,b){return a-b;}); }
+  var tbl = document.getElementById(tblId);
+  if (!tbl) return;
+  var html = '<thead><tr><th style="text-align:left">Intens.</th><th>Extr./ha</th><th>Total zona</th><th>Rem./ha</th><th>Vol raleo/ha</th><th>Caja 4/6/8</th></tr></thead><tbody>';
+  pcts.forEach(function(pct){
+    var frac=pct/100;
+    var ext=Math.round(densViva*frac);
+    var rem=densViva-ext;
+    var totalZona=Math.round(densViva*frac*areaHa);
+    var vol2=fN(volF(OBS.dap2)*ext,1);
+    var caja=Math.round(4*frac)+' / '+Math.round(6*frac)+' / '+Math.round(8*frac);
+    var sel=(pct===intSel);
+    html += '<tr'+(sel?' style="background:var(--teca-lt);font-weight:700"':'')+'>'+
+      '<td>'+pct+'%'+(sel?' ◀':'')+'</td><td>'+ext+'</td><td>'+totalZona+'</td><td>'+rem+'</td><td>'+vol2+' m³</td><td>'+caja+'</td></tr>';
+  });
+  html += '</tbody>';
+  tbl.innerHTML = html;
+}
+
+function renderRaleosTab() {
+  // Sincronizar labels con el estado actual (por si se entra sin mover sliders)
+  var yEl=document.getElementById('ral-year'); if(yEl) yEl.value=S.ralYear;
+  var gEl=document.getElementById('zg-int'); if(gEl) gEl.value=S.zGenInt;
+  var vEl=document.getElementById('zv-int'); if(vEl) vEl.value=S.zVieInt;
+  L('ral-year-lbl','Año '+S.ralYear);
+  L('zg-int-lbl',S.zGenInt+'%');
+  L('zv-int-lbl',S.zVieInt+'%');
+
+  var G=ZONES.general, V=ZONES.viento;
+  L('zg-sub', fN(G.areaHa,2)+' ha · '+G.densViva+' árb/ha');
+  L('zv-sub', fN(V.areaHa,2)+' ha · '+V.densViva+' árb/ha');
+
+  var pg = zoneProjection(G.densViva, S.zGenInt);
+  var pv = zoneProjection(V.densViva, S.zVieInt);
+
+  // Recomendaciones y tablas por zona
+  var rg=document.getElementById('zg-rec'); if(rg) rg.innerHTML=zoneRec(G.densViva,S.zGenInt,false);
+  var rv=document.getElementById('zv-rec'); if(rv) rv.innerHTML=zoneRec(V.densViva,S.zVieInt,true);
+  zoneTable('zg-table', G.densViva, G.areaHa, S.zGenInt);
+  zoneTable('zv-table', V.densViva, V.areaHa, S.zVieInt);
+
+  // KPIs combinados
+  var volGenTot = pg.volExtHa*G.areaHa;
+  var volVieTot = pv.volExtHa*V.areaHa;
+  var volTot = volGenTot+volVieTot;
+  var arbGen = Math.round(G.densViva*(S.zGenInt/100)*G.areaHa);
+  var arbVie = Math.round(V.densViva*(S.zVieInt/100)*V.areaHa);
+  var rkEl = document.getElementById('ral-kpis');
+  if (rkEl) rkEl.innerHTML =
+    '<div class="kpi"><div class="kl">Árboles a extraer</div><div class="kv">'+(arbGen+arbVie)+'</div><div class="ks2">gen '+arbGen+' · viento '+arbVie+'</div></div>' +
+    '<div class="kpi hi"><div class="kl">Vol. raleo total</div><div class="kv">'+fN(volTot,1)+'</div><div class="ks2">m³ · gen '+fN(volGenTot,1)+' + viento '+fN(volVieTot,1)+'</div></div>' +
+    '<div class="kpi"><div class="kl">Densidad post — general</div><div class="kv">'+pg.densPost+'</div><div class="ks2">árb/ha (era '+G.densViva+')</div></div>' +
+    '<div class="kpi"><div class="kl">Densidad post — viento</div><div class="kv">'+pv.densPost+'</div><div class="ks2">árb/ha (era '+V.densViva+')</div></div>';
+
+  // Resumen combinado
+  var resEl = document.getElementById('ral-resumen');
+  if (resEl) resEl.innerHTML =
+    '<div class="ctitle">Resumen de la decisión (año '+S.ralYear+')</div>' +
+    '<div style="font-size:13px;line-height:1.6;margin-top:6px">' +
+    'Zona general: <b>'+S.zGenInt+'%</b> → extrae <b>'+arbGen+' árboles</b> ('+fN(volGenTot,1)+' m³). ' +
+    'Zona de viento: <b>'+S.zVieInt+'%</b> → extrae <b>'+arbVie+' árboles</b> ('+fN(volVieTot,1)+' m³). ' +
+    'Total finca: <b>'+(arbGen+arbVie)+' árboles</b>, <b>'+fN(volTot,1)+' m³</b> de madera de raleo. ' +
+    'Este volumen alimenta el análisis financiero.</div>';
+
+  // ── Gráficos superpuestos ──
+  var yrs = pg.yrs;
+  var xScale = {ticks:{autoSkip:false,maxRotation:0,font:{size:9}}};
+  var yTiny  = {ticks:{font:{size:9}},grid:{color:'rgba(0,0,0,0.04)'}};
+  function evtPts(proj){ return proj.yrs.map(function(y){ return y===S.ralYear?6:(y===15?5:2); }); }
+
+  function overlay(cid, key, unit, extraDatasets) {
+    var ds = [
+      {label:'General', data:pg[key], borderColor:'#2C5F2E', backgroundColor:'#2C5F2E11', fill:false, tension:.35, borderWidth:2, pointRadius:evtPts(pg), pointBackgroundColor:'#2C5F2E'},
+      {label:'Viento',  data:pv[key], borderColor:'#B45309', backgroundColor:'#B4530911', fill:false, tension:.35, borderWidth:2, pointRadius:evtPts(pv), pointBackgroundColor:'#B45309'}
+    ];
+    if (extraDatasets) ds = ds.concat(extraDatasets);
+    mkChart(cid,'line',{labels:yrs,datasets:ds},
+      {x:xScale, y:Object.assign({title:{display:true,text:unit,font:{size:9}}},yTiny)}, true,
+      {plugins:{legend:{display:true,labels:{usePointStyle:true,pointStyle:'line',boxWidth:24,font:{size:10}}}}});
   }
 
-  var general = zonaCard(
-    'Zona general (sana)', '#2C5F2E', '#F0FDF4',
-    v.restoDensViva,
-    'Raleo pleno 33–38% (rec. 35%)',
-    'Densidad alta y buen vigor, área basal sobre umbral. El raleo pleno libera espacio de crecimiento sin comprometer la cobertura. Priorizar los pocos fustes defectuosos que queden, completar por espaciamiento.',
-    35
-  );
-
-  var viento = zonaCard(
-    'Zona de viento (P5 y contorno)', '#B45309', '#FFF7ED',
-    v.densViva,
-    'Solo sanitario — raleo ligero o nulo',
-    'Ya está cerca del rango de densidad final (250–350 árb/ha). Ralear al 35% aquí la dejaría en ~'+Math.round(v.densViva*0.65)+' árb/ha, por debajo del óptimo. En una zona ya expuesta al viento, reducir más la densidad quita protección lateral mutua y aumenta el riesgo de volcamiento. Sacar solo dañados/torcidos, mantener el dosel cerrado.',
-    null
-  );
-
-  el.innerHTML =
-    '<div style="display:flex;gap:12px;flex-wrap:wrap">'+general+viento+'</div>' +
-    '<div class="note warn" style="margin-top:12px"><b>Antes de ejecutar:</b> delimitar en campo el borde de la zona de viento (visible en la foto aérea, ~esquina donde se tomó la parcela 5). El % de raleo del resto de controles y gráficos de este tab aplica a la <b>zona general</b>; la zona de viento se maneja aparte con criterio sanitario.</div>';
+  overlay('ch-dens-t','dens','árb/ha');
+  overlay('ch-ab-t','ab','m²/ha',[
+    {label:'Umbral 16', data:yrs.map(function(){return 16;}), borderColor:'#B91C1C', borderWidth:1.5, borderDash:[5,3], pointRadius:0, fill:false}
+  ]);
+  overlay('ch-dap-t','dap','cm');
+  overlay('ch-vol-t','vol','m³/ha');
 }
 
 // ═══════════════════════════════════════════════════
@@ -2130,15 +2203,7 @@ function ss(k,v) {
 // UPDATE PRINCIPAL
 // ═══════════════════════════════════════════════════
 function update() {
-  // Read sliders
-  S.r1on = document.getElementById('chk-r1').checked;
-  S.r2on = document.getElementById('chk-r2').checked;
-  S.r1y=get('r1y',7);  S.ri1=get('ri1',35);
-  S.r2y=get('r2y',10); S.ri2=get('ri2',25);
-  if (S.r2on && S.r1on && S.r2y<=S.r1y) {
-    S.r2y=S.r1y+1;
-    var el=document.getElementById('r2y'); if(el) el.value=S.r2y;
-  }
+  // Read sliders (raleo ahora se controla en el tab Raleos, no aquí)
   S.boost=get('boost',20); S.tasa=get('tasa',8); S.infl=get('infl',2);
   S.pexp=get('pexp',300); S.tc=get('tc',520); S.pnac=get('pnac',200);
   S.pral=get('pral',150); S.tc2=get('tc2',520); S.ccf=get('ccf',20);
@@ -2146,13 +2211,7 @@ function update() {
   S.imp=get('imp',150000); S.otros=get('otros',0); S.cral=get('cral',1000);
   S.mo=get('mo',80000); S.mat=get('mat',50000);
 
-  // Show/hide raleo blocks
-  var r1b = document.getElementById('r1b'); if(r1b) r1b.style.display=S.r1on?'':'none';
-  var r2b = document.getElementById('r2b'); if(r2b) r2b.style.display=S.r2on?'':'none';
-
   // Update labels
-  L('r1y-l',S.r1y); L('ri1-l',S.ri1+'%');
-  L('r2y-l',S.r2y); L('ri2-l',S.ri2+'%');
   L('boost-l','+'+S.boost+'%'); L('tasa-l',S.tasa+'%'); L('infl-l',S.infl+'%');
   L('pexp-l','$'+S.pexp+'/m³'); L('tc-l',S.tc+' ₡/$'); L('pnac-l',S.pnac+' ₡/PMT');
   L('pral-l',S.pral+' ₡/PMT'); L('tc2-l',S.tc2+' ₡/$'); L('ccf-l','$'+S.ccf+'/m³');
