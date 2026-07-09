@@ -219,8 +219,8 @@ tbody tr:hover{background:var(--teca-lt)}
         <div class="csub" id="proj-sub">ICA DAP observado inv1→inv2, con desaceleración gradual. Ajustá la mortalidad anual.</div>
         <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin:10px 0">
           <label style="font-size:12px;color:var(--muted)">Mortalidad anual:
-            <input type="range" id="proj-mort" min="0" max="4" step="0.5" value="1.5" oninput="renderInventarioTab()" style="vertical-align:middle;width:120px">
-            <span id="proj-mort-lbl" style="font-weight:600;color:var(--teca)">1.5%</span>
+            <input type="range" id="proj-mort" min="0" max="5" step="0.25" value="3" oninput="renderInventarioTab()" style="vertical-align:middle;width:120px">
+            <span id="proj-mort-lbl" style="font-weight:600;color:var(--teca)">3.0%</span>
           </label>
         </div>
         <div class="g2">
@@ -232,6 +232,17 @@ tbody tr:hover{background:var(--teca-lt)}
           <div><div class="csub">Densidad (árb/ha)</div><div style="height:170px"><canvas id="ch-proj-dens"></canvas></div></div>
         </div>
         <div class="tw" style="margin-top:10px"><table class="rtbl" id="proj-table"></table></div>
+      </div>
+
+      <div class="sl">Análisis de mortalidad</div>
+      <div class="card">
+        <div class="ctitle">Comparación de métodos de estimación</div>
+        <div class="csub">Parcelas del inv2 · censo total de muertos (253) · implícito entre muestreos</div>
+        <div id="mort-panel" style="margin-top:10px"></div>
+      </div>
+
+      <div class="note info" id="inv-nota" style="margin-top:12px">
+        <b>Nota metodológica:</b> los inventarios 1 y 2 son <b>muestreos independientes</b> — las parcelas P1, P2, P3… del inv1 <b>no</b> son las mismas del inv2, y no se midieron los mismos árboles. Las comparaciones son válidas a nivel de <b>rodal completo</b> (promedios), no parcela por parcela. El crecimiento estimado es la tendencia del rodal entre dos fechas, no seguimiento de árboles individuales.
       </div>
 
       <div class="sl">Tabla de datos</div>
@@ -271,6 +282,13 @@ tbody tr:hover{background:var(--teca-lt)}
         <div class="csub">Basado en densidad objetivo a cosecha 250–350 árb/ha (Murillo & Badilla 2004)</div>
         <div class="tw" style="margin-top:8px"><table class="rtbl" id="ral-compare"></table></div>
         <div class="note info" style="margin-top:10px"><b>Dist. entre árb.:</b> distancia equivalente entre árboles asumiendo distribución cuadrada (√(10000/N)). A mayor espaciamiento, más luz y agua por árbol.<br><br>Para un <b>raleo único en teca clonal</b>, se recomienda <b>33–38%</b>. Todos los árboles son de buena forma (clones), por lo que no hay selección por calidad — solo por espacio. Extraer menos del 30% en un único raleo deja demasiados árboles; el área basal volverá a saturar antes de la cosecha.</div>
+      </div>
+
+      <div class="sl">Manejo diferenciado por zona</div>
+      <div class="card">
+        <div class="ctitle">La finca no es homogénea — dos unidades de manejo</div>
+        <div class="csub">La zona de viento tiene mayor mortalidad y menor densidad; requiere una decisión distinta</div>
+        <div id="zona-panel" style="margin-top:10px"></div>
       </div>
     </div>
 
@@ -651,6 +669,67 @@ var OBS = {
   edad1:5.62, edad2:6.94,
   icaRef:3.427, edadRef:6.28, kDecay:1.0
 };
+
+// ── Datos de mortalidad (inv2, Jul 2026) ──
+var MORT = {
+  // Muertos y vivos por parcela del inv2 (parcelas de 200 m²)
+  parcelas: {
+    P1:{vivos:13, muertos:0},
+    P2:{vivos:9,  muertos:0},
+    P3:{vivos:9,  muertos:4},
+    P4:{vivos:10, muertos:2},
+    P5:{vivos:7,  muertos:6},  // zona de viento
+    P6:{vivos:11, muertos:2}
+  },
+  censoTotal: 253,          // muertos contados en toda la finca
+  areaMedidaHa: 2.085,      // área medida en Google Earth (20,850 m²)
+  areaNominalHa: 2.24,
+  edad: 6.94,
+  zonaViento: 'P5'          // parcela en la zona afectada por viento
+};
+
+// Análisis de mortalidad por los tres métodos
+function mortAnalysis() {
+  var p = MORT.parcelas;
+  var keys = Object.keys(p);
+  var vivos = keys.reduce(function(s,k){ return s+p[k].vivos; }, 0);
+  var muertos = keys.reduce(function(s,k){ return s+p[k].muertos; }, 0);
+  var totalOrig = vivos+muertos;
+  var areaParc = keys.length*200;
+
+  // Método A: parcelas
+  var acumA = muertos/totalOrig;
+  var anualA = 1-Math.pow(1-acumA, 1/MORT.edad);
+  var densMuertosA = muertos*10000/areaParc;
+
+  // Método B: censo total (área medida)
+  var densViva = OBS.dens2;
+  var vivosEstM = densViva*MORT.areaMedidaHa;
+  var origEstM = vivosEstM+MORT.censoTotal;
+  var acumB = MORT.censoTotal/origEstM;
+  var anualB = 1-Math.pow(1-acumB, 1/MORT.edad);
+  var densMuertosB = MORT.censoTotal/MORT.areaMedidaHa;
+
+  // Método C: implícito inv1->inv2
+  var anualC = 1-Math.pow(OBS.dens2/OBS.dens1, 1/1.32);
+
+  // Zona viento vs resto
+  var zw = p[MORT.zonaViento];
+  var zwAcum = zw.muertos/(zw.vivos+zw.muertos);
+  var zwDensViva = zw.vivos*10000/200;
+  var restoV=0, restoM=0;
+  keys.forEach(function(k){ if(k!==MORT.zonaViento){ restoV+=p[k].vivos; restoM+=p[k].muertos; } });
+  var restoAcum = restoM/(restoV+restoM);
+  var restoDensViva = restoV/(keys.length-1)*10000/200;
+
+  return {
+    A:{acum:acumA, anual:anualA, densMuertos:densMuertosA},
+    B:{acum:acumB, anual:anualB, densMuertos:densMuertosB},
+    C:{anual:anualC},
+    densOrig: Math.round(OBS.dens2 + (densMuertosA+densMuertosB)/2),
+    viento:{acum:zwAcum, densViva:zwDensViva, restoAcum:restoAcum, restoDensViva:restoDensViva}
+  };
+}
 let charts = {};
 let sortCol = 3, sortDir = 1;
 let treeRows = [];
@@ -1024,6 +1103,44 @@ function renderProjection() {
         return '<tr'+(over?' style="background:#FEF7ED"':'')+'><td><b>'+p.edad+'</b></td><td>'+fN(p.dap,1)+'</td><td>'+p.dens+'</td><td>'+(over?'⚠ ':'')+fN(p.ab,1)+'</td><td>'+fN(p.vol,1)+'</td><td>'+fN(p.vol*HA,0)+'</td></tr>';
       }).join('') + '</tbody>';
   }
+  renderMortPanel();
+}
+
+// ═══════════════════════════════════════════════════
+// PANEL DE MORTALIDAD
+// ═══════════════════════════════════════════════════
+function renderMortPanel() {
+  var el = document.getElementById('mort-panel');
+  if (!el) return;
+  var m = mortAnalysis();
+  function pct(v){ return fN(v*100,1)+'%'; }
+
+  // Tabla comparativa de métodos
+  var methodsTbl =
+    '<table class="rtbl"><thead><tr><th style="text-align:left">Método</th><th>Mort. acumulada</th><th>Muertos/ha</th><th>Anual</th><th>Confianza</th></tr></thead><tbody>' +
+    '<tr><td style="text-align:left">A · Parcelas inv2 (6×200 m²)</td><td>'+pct(m.A.acum)+'</td><td>'+Math.round(m.A.densMuertos)+'</td><td>'+pct(m.A.anual)+'</td><td style="color:#16A34A">alta</td></tr>' +
+    '<tr><td style="text-align:left">B · Censo total (253 muertos)</td><td>'+pct(m.B.acum)+'</td><td>'+Math.round(m.B.densMuertos)+'</td><td>'+pct(m.B.anual)+'</td><td style="color:#16A34A">alta</td></tr>' +
+    '<tr style="opacity:.65"><td style="text-align:left">C · Implícito inv1→inv2</td><td>—</td><td>—</td><td>'+pct(m.C.anual)+'</td><td style="color:#B91C1C">ruido muestreo</td></tr>' +
+    '</tbody></table>';
+
+  var convergen = Math.abs(m.A.anual-m.B.anual)<0.01;
+  var conclusion =
+    '<div class="note '+(convergen?'ok':'info')+'" style="margin-top:10px">' +
+    (convergen ? '<b>✓ Los métodos A y B convergen</b> (~'+pct((m.A.anual+m.B.anual)/2)+'/año). ' : '') +
+    'Dos mediciones independientes — muestreo de parcelas y conteo total — dan prácticamente el mismo resultado, lo que valida la estimación. La mortalidad real ronda <b>'+pct((m.A.anual+m.B.anual)/2)+'/año</b>. ' +
+    'El método C (10%+/año) era un artefacto de comparar promedios de muestras distintas. ' +
+    'Densidad plantada reconstruida: ~'+m.densOrig+' árb/ha (compatible con marco ~4×4 m).</div>';
+
+  // Zona de viento
+  var v = m.viento;
+  var ratio = v.restoAcum>0 ? (v.acum/v.restoAcum) : 0;
+  var viento =
+    '<div style="margin-top:12px;border-left:4px solid #B45309;background:#FFF7ED;border-radius:8px;padding:12px 14px">' +
+    '<div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:#B45309;margin-bottom:6px">Zona afectada por viento (parcela 5)</div>' +
+    '<div style="font-size:13px;line-height:1.5">La parcela 5 (zona del daño de viento visible en la foto aérea) tiene <b>'+pct(v.acum)+'</b> de mortalidad acumulada y densidad viva de <b>'+Math.round(v.densViva)+' árb/ha</b>, frente a <b>'+pct(v.restoAcum)+'</b> y <b>'+Math.round(v.restoDensViva)+' árb/ha</b> en el resto de la finca. ' +
+    'Es ~<b>'+fN(ratio,1)+'× más mortalidad</b> que el resto — funciona como una unidad de manejo distinta. Ver la decisión diferenciada de raleo en el tab Raleos.</div></div>';
+
+  el.innerHTML = methodsTbl + conclusion + viento;
 }
 
 // ═══════════════════════════════════════════════════
@@ -1054,9 +1171,10 @@ function renderTable() {
   if (!tb) return;
   tb.innerHTML = filtered.map(function(r) {
     var tagCls = r.parc==='P1'?'tg1':r.parc==='P2'?'tg2':'tg3';
+    var invTag = r.invId==='inv1'?'i1':'i2';
     return '<tr>' +
       '<td><span style="font-size:10px;font-weight:600;color:#0C447C;background:#E6F1FB;padding:1px 6px;border-radius:20px">'+r.invName+'</span></td>' +
-      '<td><span class="tag '+tagCls+'">'+r.parc+'</span></td>' +
+      '<td><span class="tag '+tagCls+'">'+r.parc+'·'+invTag+'</span></td>' +
       '<td>'+r.n+'</td>' +
       '<td style="font-weight:600">'+fN(r.dap)+'</td>' +
       '<td>'+fN(r.vol,4)+'</td>' +
@@ -1185,6 +1303,48 @@ function renderRaleosTab() {
   });
   html += '</tbody>';
   tblEl.innerHTML = html;
+  renderZonaPanel();
+}
+
+// ═══════════════════════════════════════════════════
+// PANEL DE MANEJO POR ZONA (Tab Raleos)
+// ═══════════════════════════════════════════════════
+function renderZonaPanel() {
+  var el = document.getElementById('zona-panel');
+  if (!el) return;
+  var m = mortAnalysis();
+  var v = m.viento;
+
+  function zonaCard(titulo, color, bg, densViva, recTitulo, recTexto, intensidad) {
+    var remHa = intensidad ? Math.round(densViva*(1-intensidad/100)) : Math.round(densViva);
+    return '<div style="border-left:4px solid '+color+';background:'+bg+';border-radius:8px;padding:14px 16px;flex:1;min-width:260px">' +
+      '<div style="font-weight:700;color:'+color+';margin-bottom:4px">'+titulo+'</div>' +
+      '<div style="font-size:12px;color:var(--muted);margin-bottom:8px">Densidad viva: <b>'+Math.round(densViva)+' árb/ha</b></div>' +
+      '<div style="font-size:13px;font-weight:600;color:'+color+';margin-bottom:4px">'+recTitulo+'</div>' +
+      '<div style="font-size:13px;line-height:1.5;color:var(--text)">'+recTexto+'</div>' +
+      (intensidad!==null ? '<div style="font-size:12px;color:var(--muted);margin-top:8px">→ Post-raleo: ~<b>'+remHa+' árb/ha</b></div>' : '') +
+      '</div>';
+  }
+
+  var general = zonaCard(
+    'Zona general (sana)', '#2C5F2E', '#F0FDF4',
+    v.restoDensViva,
+    'Raleo pleno 33–38% (rec. 35%)',
+    'Densidad alta y buen vigor, área basal sobre umbral. El raleo pleno libera espacio de crecimiento sin comprometer la cobertura. Priorizar los pocos fustes defectuosos que queden, completar por espaciamiento.',
+    35
+  );
+
+  var viento = zonaCard(
+    'Zona de viento (P5 y contorno)', '#B45309', '#FFF7ED',
+    v.densViva,
+    'Solo sanitario — raleo ligero o nulo',
+    'Ya está cerca del rango de densidad final (250–350 árb/ha). Ralear al 35% aquí la dejaría en ~'+Math.round(v.densViva*0.65)+' árb/ha, por debajo del óptimo. En una zona ya expuesta al viento, reducir más la densidad quita protección lateral mutua y aumenta el riesgo de volcamiento. Sacar solo dañados/torcidos, mantener el dosel cerrado.',
+    null
+  );
+
+  el.innerHTML =
+    '<div style="display:flex;gap:12px;flex-wrap:wrap">'+general+viento+'</div>' +
+    '<div class="note warn" style="margin-top:12px"><b>Antes de ejecutar:</b> delimitar en campo el borde de la zona de viento (visible en la foto aérea, ~esquina donde se tomó la parcela 5). El % de raleo del resto de controles y gráficos de este tab aplica a la <b>zona general</b>; la zona de viento se maneja aparte con criterio sanitario.</div>';
 }
 
 // ═══════════════════════════════════════════════════
