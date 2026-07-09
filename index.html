@@ -34,6 +34,9 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
 .main-tabs{display:flex;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto}
 .mtab{padding:.6rem 1rem;font-size:12px;font-weight:500;border:none;background:none;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;white-space:nowrap;transition:all .15s}
 .mtab.active{color:var(--teca);border-bottom-color:var(--teca);font-weight:600}
+.vbtn{padding:.35rem .8rem;font-size:12px;font-weight:500;border:1px solid var(--border);background:var(--surface);cursor:pointer;color:var(--muted);border-radius:6px;transition:all .15s}
+.vbtn:hover{border-color:var(--teca);color:var(--teca)}
+.vbtn.active{background:var(--teca);color:#fff;border-color:var(--teca);font-weight:600}
 .tc{flex:1;overflow-y:auto}
 .tp{display:none;padding:1.1rem}
 .tp.active{display:block}
@@ -193,6 +196,13 @@ tbody tr:hover{background:var(--teca-lt)}
 
     <!-- ═══ TAB 0: INVENTARIO ═════════════════════════════════════ -->
     <div class="tp active" id="tp0">
+      <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:10px">
+        <span style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">Vista:</span>
+        <button class="vbtn" id="vb-inv1" onclick="setInvView('inv1')">Inventario 1</button>
+        <button class="vbtn active" id="vb-inv2" onclick="setInvView('inv2')">Inventario 2</button>
+        <button class="vbtn" id="vb-comp" onclick="setInvView('comp')">Comparación</button>
+        <button class="vbtn" id="vb-over" onclick="setInvView('overlay')">Overlay</button>
+      </div>
       <div class="ks" id="inv-kpis"></div>
       <div class="g2">
         <div class="card"><div class="ctitle">Distribución de DAP (cm)</div><div class="csub">Histograma por parcelas activas</div><div style="height:180px"><canvas id="ch-dap"></canvas></div></div>
@@ -202,6 +212,28 @@ tbody tr:hover{background:var(--teca-lt)}
         <div class="card"><div class="ctitle">Área basal por parcela (m²/ha)</div><div class="csub">Extrapolada a hectárea</div><div style="height:180px"><canvas id="ch-ab"></canvas></div></div>
         <div class="card"><div class="ctitle">Densidad estimada (árb/ha)</div><div class="csub">Por inventario activo</div><div style="height:180px"><canvas id="ch-dens"></canvas></div></div>
       </div>
+
+      <div class="sl">Proyección de crecimiento año por año</div>
+      <div class="card">
+        <div class="ctitle">Basada en el crecimiento observado entre inventarios</div>
+        <div class="csub" id="proj-sub">ICA DAP observado inv1→inv2, con desaceleración gradual. Ajustá la mortalidad anual.</div>
+        <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin:10px 0">
+          <label style="font-size:12px;color:var(--muted)">Mortalidad anual:
+            <input type="range" id="proj-mort" min="0" max="4" step="0.5" value="1.5" oninput="renderInventarioTab()" style="vertical-align:middle;width:120px">
+            <span id="proj-mort-lbl" style="font-weight:600;color:var(--teca)">1.5%</span>
+          </label>
+        </div>
+        <div class="g2">
+          <div><div class="csub">DAP promedio (cm)</div><div style="height:170px"><canvas id="ch-proj-dap"></canvas></div></div>
+          <div><div class="csub">Área basal (m²/ha)</div><div style="height:170px"><canvas id="ch-proj-ab"></canvas></div></div>
+        </div>
+        <div class="g2" style="margin-top:8px">
+          <div><div class="csub">Volumen en pie (m³/ha)</div><div style="height:170px"><canvas id="ch-proj-vol"></canvas></div></div>
+          <div><div class="csub">Densidad (árb/ha)</div><div style="height:170px"><canvas id="ch-proj-dens"></canvas></div></div>
+        </div>
+        <div class="tw" style="margin-top:10px"><table class="rtbl" id="proj-table"></table></div>
+      </div>
+
       <div class="sl">Tabla de datos</div>
       <div class="tf">
         <select id="f-parc" onchange="renderTable()"><option value="">Todas las parcelas</option></select>
@@ -566,11 +598,59 @@ const INV1 = {
   ]
 };
 
+const INV2 = {
+  id:'inv2', name:'Inventario 2', date:'2026-07-09', age:6.94, method:'trees',
+  parcelas:[
+    {id:'P1',area:200,trees:[
+      {n:1,dap:20,h:null,circ:null},{n:2,dap:19,h:null,circ:null},{n:3,dap:15,h:null,circ:null},{n:4,dap:18,h:null,circ:null},
+      {n:5,dap:17,h:null,circ:null},{n:6,dap:17,h:null,circ:null},{n:7,dap:18,h:null,circ:null},{n:8,dap:20,h:null,circ:null},
+      {n:9,dap:21.01,h:null,circ:66},{n:10,dap:20.69,h:null,circ:65},{n:11,dap:21.01,h:null,circ:66},{n:12,dap:19.42,h:null,circ:61},
+      {n:13,dap:20.37,h:null,circ:64}
+    ]},
+    {id:'P2',area:200,trees:[
+      {n:1,dap:20.37,h:null,circ:64},{n:2,dap:20.69,h:null,circ:65},{n:3,dap:22.28,h:null,circ:70},{n:4,dap:24.51,h:null,circ:77},
+      {n:5,dap:24.19,h:null,circ:76},{n:6,dap:24.83,h:null,circ:78},{n:7,dap:21.65,h:null,circ:68},{n:8,dap:16.55,h:null,circ:52},
+      {n:9,dap:21.96,h:null,circ:69}
+    ]},
+    {id:'P3',area:200,trees:[
+      {n:1,dap:20.69,h:null,circ:65},{n:2,dap:21.33,h:null,circ:67},{n:3,dap:21.33,h:null,circ:67},{n:4,dap:22.6,h:null,circ:71},
+      {n:5,dap:20.37,h:null,circ:64},{n:6,dap:20.69,h:null,circ:65},{n:7,dap:18.78,h:null,circ:59},{n:8,dap:22.28,h:null,circ:70},
+      {n:9,dap:22.92,h:null,circ:72}
+    ]},
+    {id:'P4',area:200,trees:[
+      {n:1,dap:22.92,h:null,circ:72},{n:2,dap:23.55,h:null,circ:74},{n:3,dap:19.1,h:null,circ:60},{n:4,dap:20.05,h:null,circ:63},
+      {n:5,dap:22.6,h:null,circ:71},{n:6,dap:21.65,h:null,circ:68},{n:7,dap:20.05,h:null,circ:63},{n:8,dap:22.28,h:null,circ:70},
+      {n:9,dap:22.28,h:null,circ:70},{n:10,dap:21.96,h:null,circ:69}
+    ]},
+    {id:'P5',area:200,trees:[
+      {n:1,dap:24.51,h:null,circ:77},{n:2,dap:18.78,h:null,circ:59},{n:3,dap:22.6,h:null,circ:71},{n:4,dap:23.87,h:null,circ:75},
+      {n:5,dap:25.15,h:null,circ:79},{n:6,dap:23.24,h:null,circ:73},{n:7,dap:20.37,h:null,circ:64}
+    ]},
+    {id:'P6',area:200,trees:[
+      {n:1,dap:22.6,h:null,circ:71},{n:2,dap:21.96,h:null,circ:69},{n:3,dap:19.74,h:null,circ:62},{n:4,dap:20.37,h:null,circ:64},
+      {n:5,dap:19.42,h:null,circ:61},{n:6,dap:15.6,h:null,circ:49},{n:7,dap:21.01,h:null,circ:66},{n:8,dap:21.65,h:null,circ:68},
+      {n:9,dap:21.01,h:null,circ:66},{n:10,dap:19.74,h:null,circ:62},{n:11,dap:19.42,h:null,circ:61}
+    ]}
+  ]
+};
 // ═══════════════════════════════════════════════════
 // ESTADO GLOBAL
 // ═══════════════════════════════════════════════════
-let inventarios = [INV1];
-let activeInvs = new Set(['inv1']);
+let inventarios = [INV1, INV2];
+let activeInvs = new Set(['inv1','inv2']);
+let invView = 'inv2';
+
+// ── Parámetros de crecimiento observados entre inv1 e inv2 ──
+// inv1: DAP 16.37 @ edad 5.62 · inv2: DAP 20.88 @ edad 6.94 → ICA ≈ 3.43 cm/año
+// Se aplica desaceleración con exponente k sobre la edad (crecimiento se frena al cerrar dosel)
+var OBS = {
+  dap1:16.368, dap2:20.881,
+  ab1:12.111,  ab2:17.023,
+  vol1:91.126, vol2:146.925,
+  dens1:566.667, dens2:491.667,
+  edad1:5.62, edad2:6.94,
+  icaRef:3.427, edadRef:6.28, kDecay:1.0
+};
 let charts = {};
 let sortCol = 3, sortDir = 1;
 let treeRows = [];
@@ -598,6 +678,56 @@ function fU(v)   { return '$'+Math.round(v).toLocaleString('en-US'); }
 function fC(v)   { return v>=1e6 ? '₡'+(v/1e6).toFixed(1)+'M' : '₡'+Math.round(v).toLocaleString('es-CR'); }
 function L(id,t) { var e=document.getElementById(id); if(e) e.textContent=t; }
 function get(id, def) { var e=document.getElementById(id); return e ? +e.value : def; }
+
+// ═══════════════════════════════════════════════════
+// VISTA DE INVENTARIO
+// ═══════════════════════════════════════════════════
+function setInvView(v) {
+  invView = v;
+  ['inv1','inv2','comp','over'].forEach(function(id){
+    var btnId = id==='over' ? 'vb-over' : ('vb-'+id);
+    var el = document.getElementById(btnId);
+    if (el) el.classList.remove('active');
+  });
+  var map = {inv1:'vb-inv1', inv2:'vb-inv2', comp:'vb-comp', overlay:'vb-over'};
+  var act = document.getElementById(map[v]);
+  if (act) act.classList.add('active');
+  // Sincronizar inventarios activos con la vista
+  if (v==='inv1') activeInvs = new Set(['inv1']);
+  else if (v==='inv2') activeInvs = new Set(['inv2']);
+  else activeInvs = new Set(['inv1','inv2']);
+  updateFilters();
+  renderInventarioTab();
+}
+
+// ═══════════════════════════════════════════════════
+// PROYECCIÓN DE CRECIMIENTO (base observada inv1→inv2)
+// ═══════════════════════════════════════════════════
+// Devuelve array de {edad, dap, dens, ab, vol} desde edad2 hasta año 15.
+// mortPct: mortalidad anual (%). Sin raleos — es la trayectoria natural.
+function growthProjection(mortPct) {
+  var out = [];
+  var dap = OBS.dap2;
+  var dens = OBS.dens2;
+  var mort = (mortPct||0)/100;
+  var steps = Math.ceil(15 - OBS.edad2) + 1;
+  for (var s=0; s<steps; s++) {
+    var edad = OBS.edad2 + s;
+    if (s>0) {
+      var ica = OBS.icaRef * Math.pow(OBS.edadRef/(edad-0.5), OBS.kDecay);
+      dap += ica;
+      dens *= (1-mort);
+    }
+    out.push({
+      edad: Math.round(edad*10)/10,
+      dap: Math.round(dap*10)/10,
+      dens: Math.round(dens),
+      ab: Math.round(abF(dap)*dens*10)/10,
+      vol: Math.round(volF(dap)*dens*10)/10
+    });
+  }
+  return out;
+}
 
 // ═══════════════════════════════════════════════════
 // MODELO
@@ -765,24 +895,41 @@ function renderInventarioTab() {
     return;
   }
 
-  var daps = rows.map(function(r){ return r.dap; });
-  var mean = daps.reduce(function(a,b){ return a+b; }, 0)/daps.length;
-  var variance = daps.map(function(d){ return (d-mean)*(d-mean); }).reduce(function(a,b){ return a+b; }, 0)/daps.length;
-  var sd = Math.sqrt(variance);
-  var nActInvs = inventarios.filter(function(i){ return activeInvs.has(i.id); }).length;
-  var abHa = rows.reduce(function(s,r){ return s+r.abHa; }, 0) / nActInvs;
-  var volHa = rows.reduce(function(s,r){ return s+r.vol; }, 0) * (10000/600);
-  var densHa = rows.length * (10000/600);
+  var actInvs = inventarios.filter(function(i){ return activeInvs.has(i.id); });
+  var nActInvs = actInvs.length;
 
-  kpiEl.innerHTML =
-    '<div class="kpi"><div class="kl">Árboles medidos</div><div class="kv">'+rows.length+'</div><div class="ks2">'+nActInvs+' inventario(s)</div></div>' +
-    '<div class="kpi hi"><div class="kl">DAP promedio</div><div class="kv">'+fN(mean)+' cm</div><div class="ks2">SD: '+fN(sd)+' cm</div></div>' +
-    '<div class="kpi"><div class="kl">Área basal</div><div class="kv">'+fN(abHa)+' m²/ha</div><div class="ks2">'+(abHa>=16?'⚠ sobre umbral':'bajo umbral (16)')+'</div></div>' +
-    '<div class="kpi"><div class="kv">'+fN(volHa)+' m³/ha</div><div class="kl">Vol. estimado</div><div class="ks2">'+fN(volHa*HA,0)+' m³ total</div></div>' +
-    '<div class="kpi"><div class="kl">Densidad</div><div class="kv">'+Math.round(densHa)+'</div><div class="ks2">árb/ha est.</div></div>';
+  // Vista comparación: KPIs lado a lado por inventario
+  if (invView==='comp' && nActInvs>1) {
+    var s1 = invStats(INV1), s2 = invStats(INV2);
+    var dDap = s2.mean - s1.mean, dAb = s2.abHa - s1.abHa, dVol = s2.volHa - s1.volHa;
+    function delta(v,dec){ var sign=v>=0?'+':''; return '<span style="color:'+(v>=0?'#16A34A':'#B91C1C')+'">'+sign+fN(v,dec)+'</span>'; }
+    kpiEl.innerHTML =
+      '<div class="kpi"><div class="kl">DAP prom. — Inv 1 → 2</div><div class="kv" style="font-size:16px">'+fN(s1.mean)+' → '+fN(s2.mean)+' cm</div><div class="ks2">'+delta(dDap,1)+' cm ('+fN(dDap/1.32,1)+'/año)</div></div>' +
+      '<div class="kpi hi"><div class="kl">Área basal — Inv 1 → 2</div><div class="kv" style="font-size:16px">'+fN(s1.abHa)+' → '+fN(s2.abHa)+'</div><div class="ks2">'+delta(dAb,1)+' m²/ha '+(s2.abHa>=16?'⚠ sobre umbral':'')+'</div></div>' +
+      '<div class="kpi"><div class="kl">Volumen — Inv 1 → 2</div><div class="kv" style="font-size:16px">'+fN(s1.volHa)+' → '+fN(s2.volHa)+'</div><div class="ks2">'+delta(dVol,1)+' m³/ha</div></div>' +
+      '<div class="kpi"><div class="kl">Densidad — Inv 1 → 2</div><div class="kv" style="font-size:16px">'+Math.round(s1.densHa)+' → '+Math.round(s2.densHa)+'</div><div class="ks2">árb/ha (muestreo)</div></div>' +
+      '<div class="kpi"><div class="kl">Árboles medidos</div><div class="kv">'+s1.n+' / '+s2.n+'</div><div class="ks2">inv1 / inv2</div></div>';
+  } else {
+    // Vista individual u overlay: estadísticos agregados correctos (por inventario, no /600 fijo)
+    var mean=0, abHa=0, volHa=0, densHa=0, sd=0;
+    actInvs.forEach(function(inv){
+      var st = invStats(inv);
+      abHa += st.abHa; volHa += st.volHa; densHa += st.densHa;
+    });
+    abHa/=nActInvs; volHa/=nActInvs; densHa/=nActInvs;
+    var daps = rows.map(function(r){ return r.dap; });
+    mean = daps.reduce(function(a,b){ return a+b; }, 0)/daps.length;
+    sd = Math.sqrt(daps.map(function(d){ return (d-mean)*(d-mean); }).reduce(function(a,b){ return a+b; }, 0)/daps.length);
+    kpiEl.innerHTML =
+      '<div class="kpi"><div class="kl">Árboles medidos</div><div class="kv">'+rows.length+'</div><div class="ks2">'+nActInvs+' inventario(s)</div></div>' +
+      '<div class="kpi hi"><div class="kl">DAP promedio</div><div class="kv">'+fN(mean)+' cm</div><div class="ks2">SD: '+fN(sd)+' cm</div></div>' +
+      '<div class="kpi"><div class="kl">Área basal</div><div class="kv">'+fN(abHa)+' m²/ha</div><div class="ks2">'+(abHa>=16?'⚠ sobre umbral':'bajo umbral (16)')+'</div></div>' +
+      '<div class="kpi"><div class="kv">'+fN(volHa)+' m³/ha</div><div class="kl">Vol. estimado</div><div class="ks2">'+fN(volHa*HA,0)+' m³ total</div></div>' +
+      '<div class="kpi"><div class="kl">Densidad</div><div class="kv">'+Math.round(densHa)+'</div><div class="ks2">árb/ha est.</div></div>';
+  }
 
   // Histograma DAP
-  var bins = [10,12,14,16,18,20,22];
+  var bins = [10,12,14,16,18,20,22,24,26];
   var bLabels = bins.slice(0,-1).map(function(b,i){ return b+'–'+bins[i+1]; });
   var parcs = [];
   rows.forEach(function(r){ if (parcs.indexOf(r.parc)<0) parcs.push(r.parc); });
@@ -837,7 +984,46 @@ function renderInventarioTab() {
     {y:{title:{display:true,text:'árb/ha',font:{size:10}}}},
     false);
 
+  renderProjection();
   renderTable();
+}
+
+// ═══════════════════════════════════════════════════
+// RENDER PROYECCIÓN (Tab Inventario)
+// ═══════════════════════════════════════════════════
+function renderProjection() {
+  var mortEl = document.getElementById('proj-mort');
+  var mort = mortEl ? +mortEl.value : 1.5;
+  var lbl = document.getElementById('proj-mort-lbl');
+  if (lbl) lbl.textContent = fN(mort,1)+'%';
+
+  var proj = growthProjection(mort);
+  var labels = proj.map(function(p){ return 'A'+Math.round(p.edad); });
+
+  function pchart(cid, key, color, unit) {
+    mkChart(cid,'line',
+      {labels:labels, datasets:[{
+        label:unit, data:proj.map(function(p){ return p[key]; }),
+        borderColor:color, backgroundColor:color+'22', fill:true, tension:.3, pointRadius:3
+      }]},
+      {y:{title:{display:true,text:unit,font:{size:10}}}, x:{title:{display:true,text:'Edad (años)',font:{size:9}}}},
+      false);
+  }
+  pchart('ch-proj-dap','dap','#2C5F2E','cm');
+  pchart('ch-proj-ab','ab','#B45309','m²/ha');
+  pchart('ch-proj-vol','vol','#0C447C','m³/ha');
+  pchart('ch-proj-dens','dens','#6B7280','árb/ha');
+
+  // Tabla resumen
+  var tb = document.getElementById('proj-table');
+  if (tb) {
+    tb.innerHTML =
+      '<thead><tr><th>Edad</th><th>DAP (cm)</th><th>Densidad</th><th>AB (m²/ha)</th><th>Vol (m³/ha)</th><th>Vol total (m³)</th></tr></thead><tbody>' +
+      proj.map(function(p){
+        var over = p.ab>=16;
+        return '<tr'+(over?' style="background:#FEF7ED"':'')+'><td><b>'+p.edad+'</b></td><td>'+fN(p.dap,1)+'</td><td>'+p.dens+'</td><td>'+(over?'⚠ ':'')+fN(p.ab,1)+'</td><td>'+fN(p.vol,1)+'</td><td>'+fN(p.vol*HA,0)+'</td></tr>';
+      }).join('') + '</tbody>';
+  }
 }
 
 // ═══════════════════════════════════════════════════
@@ -901,44 +1087,56 @@ function updateFilters() {
 // TAB 1: RALEOS
 // ═══════════════════════════════════════════════════
 function renderRaleosTab() {
-  var st = invStats(INV1);
+  // Base = inventario 2 (más reciente). Proyección con crecimiento observado.
+  var st = invStats(INV2);
   var densBase = st.densHa;
   var dapBase  = st.mean;
-  var imaFn = function(yr) { return S.esc==='C' ? (IMA_C[yr]||10) : (IMA_O[yr]||13); };
   var bf = 1+S.boost/100;
-  var mort = 0.01;
+  var mortEl = document.getElementById('proj-mort');
+  var mort = (mortEl ? +mortEl.value : 1.5)/100;
 
-  // Project density, DAP, AB year by year
+  // Trayectoria natural sin raleo (para el efecto boost usamos ICA observado con desaceleración)
+  var edad0 = OBS.edad2;
   var dens=densBase, dap=dapBase, br=0;
   var yrs=[],densArr=[],abArr=[],dapArr=[],volArr=[];
-  var projRows = buildProjection();
 
-  for (var y=5; y<=15; y++) {
+  var startYr = Math.round(edad0);
+  for (var y=startYr; y<=15; y++) {
     yrs.push(y);
-    var ib = y>5 ? imaFn(y) : 0;
-    var ica = (br>0 && y>5) ? ib*bf : ib;
-    if (br>0 && y>5) br--;
-    dap += y>5 ? ica*0.12 : 0;
-    if (y>5) dens *= (1-mort);
+    if (y>startYr) {
+      var icaBase = OBS.icaRef * Math.pow(OBS.edadRef/(y-0.5), OBS.kDecay);
+      var ica = (br>0) ? icaBase*bf : icaBase;
+      if (br>0) br--;
+      dap += ica;
+      dens *= (1-mort);
+    }
     if (S.r1on && y===S.r1y) { dens*=(1-S.ri1/100); br=3; }
     else if (S.r2on && y===S.r2y) { dens*=(1-S.ri2/100); br=3; }
     densArr.push(Math.round(dens));
     abArr.push(Math.round(abF(dap)*dens*10)/10);
     dapArr.push(Math.round(dap*10)/10);
-    var vRow = projRows.filter(function(r){ return r.y===y; })[0];
-    volArr.push(vRow ? vRow.vb : null);
+    volArr.push(Math.round(volF(dap)*dens*10)/10);
   }
 
-  var r1Row = projRows.filter(function(r){ return r.lbl==='R1'; })[0];
-  var r2Row = projRows.filter(function(r){ return r.lbl==='R2'; })[0];
-  var r1VolTot = r1Row ? r1Row.ex*HA : 0;
-  var r2VolTot = r2Row ? r2Row.ex*HA : 0;
+  // Volumen extraído por raleo (usa DAP del año del raleo)
+  function volAtYear(yr){
+    var d=dapBase, dn=densBase, b=0;
+    for (var yy=startYr; yy<yr; yy++){
+      var ic = OBS.icaRef*Math.pow(OBS.edadRef/((yy+1)-0.5),OBS.kDecay);
+      d += ic; dn *= (1-mort);
+    }
+    return {dap:d, dens:dn};
+  }
+  var r1VolTot=0, r2VolTot=0;
+  if (S.r1on){ var a1=volAtYear(S.r1y); r1VolTot=volF(a1.dap)*a1.dens*(S.ri1/100)*HA; }
+  if (S.r2on){ var a2=volAtYear(S.r2y); r2VolTot=volF(a2.dap)*a2.dens*(S.ri2/100)*HA; }
+
   var densPost1 = S.r1on ? Math.round(densBase*(1-S.ri1/100)) : Math.round(densBase);
   var densPost2 = S.r1on && S.r2on ? Math.round(densPost1*(1-S.ri2/100)) : densPost1;
 
   var rkEl = document.getElementById('ral-kpis');
   if (rkEl) rkEl.innerHTML =
-    '<div class="kpi"><div class="kl">Densidad actual</div><div class="kv">'+Math.round(densBase)+'</div><div class="ks2">árb/ha</div></div>' +
+    '<div class="kpi"><div class="kl">Densidad actual (inv2)</div><div class="kv">'+Math.round(densBase)+'</div><div class="ks2">árb/ha · AB '+fN(st.abHa,1)+'</div></div>' +
     '<div class="kpi hi"><div class="kl">'+(S.r1on?'Post raleo 1':'Sin raleo')+'</div><div class="kv">'+densPost1+'</div><div class="ks2">árb/ha · vol: '+(r1VolTot>0?fN(r1VolTot,1):'—')+' m³</div></div>' +
     (S.r2on ? '<div class="kpi hi"><div class="kl">Post raleo 2</div><div class="kv">'+densPost2+'</div><div class="ks2">árb/ha · vol: '+(r2VolTot>0?fN(r2VolTot,1):'—')+' m³</div></div>' : '') +
     '<div class="kpi"><div class="kl">Densidad cosecha</div><div class="kv">'+densArr[densArr.length-1]+'</div><div class="ks2">árb/ha año 15</div></div>';
@@ -967,20 +1165,22 @@ function renderRaleosTab() {
   mkChart('ch-vol-t','line',Object.assign({labels:yrs},lineDs(volArr,'#2C5F2E')),Object.assign({x:xScale,y:Object.assign({title:{display:true,text:'m³/ha',font:{size:9}}},yTiny)}),false);
 
   // Tabla comparativa
-  var pcts = [20,25,30,35,40,45,50];
+  var pcts = [20,25,30,33,35,38,40,45];
   var tblEl = document.getElementById('ral-compare');
   if (!tblEl) return;
-  var html = '<thead><tr><th style="text-align:left">Intens.</th><th>Extr./ha</th><th>Rem./ha</th><th>Vol. raleo/ha m³</th><th>Rem. cosecha</th><th>Dist. entre árb.</th><th>Rango</th></tr></thead><tbody>';
+  var html = '<thead><tr><th style="text-align:left">Intens.</th><th>Extr./ha</th><th>Total finca</th><th>Rem./ha</th><th>Vol. raleo/ha</th><th>Marcar por caja (4/6/8)</th><th>Rem. cosecha</th><th>Rango</th></tr></thead><tbody>';
   pcts.forEach(function(pct) {
-    var ext = Math.round(densBase*pct/100);
+    var frac = pct/100;
+    var ext = Math.round(densBase*frac);
     var rem = densBase-ext;
+    var totalFinca = Math.round(densBase*frac*HA);
     var rcos = Math.round(rem*Math.pow(1-mort,8));
     var vol2 = fN(volF(st.mean)*ext,1);
-    var esp  = fN(Math.sqrt(10000/rem),1);  // metros entre árboles (distancia equiv.)
+    var caja = Math.round(4*frac)+' / '+Math.round(6*frac)+' / '+Math.round(8*frac);
     var ok   = rcos>=250 && rcos<=380;
     var isRec = pct>=33 && pct<=38;
     html += '<tr'+(isRec?' style="background:var(--teca-lt);font-weight:600"':'')+'>'+
-      '<td>'+pct+'%'+(isRec?' ★':'')+'</td><td>'+ext+'</td><td>'+rem+'</td><td>'+vol2+'</td><td>'+rcos+'</td><td>'+esp+' m</td>'+
+      '<td>'+pct+'%'+(isRec?' ★':'')+'</td><td>'+ext+'</td><td>'+totalFinca+'</td><td>'+rem+'</td><td>'+vol2+' m³</td><td>'+caja+'</td><td>'+rcos+'</td>'+
       '<td style="color:'+(ok?'#27500A':'#991B1B')+'">'+(ok?'✓ óptimo':'fuera')+'</td></tr>';
   });
   html += '</tbody>';
@@ -1849,6 +2049,7 @@ function initSidebarState() {
   renderCasasSb();
   renderChips();
   updateFilters();
+  setInvView('inv2');
   initSidebarState();
   updateGHBadge();
   update();
