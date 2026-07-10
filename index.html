@@ -1861,6 +1861,7 @@ function renderCasaTab() {
 
   renderCasaParams(c);
   drawPlan(c); drawElev(c); drawSect(c); drawIso(c);
+  initPlanDrag();
   renderMaderaTable(c);
   renderCasaKpis(c);
   renderCasaCosts();
@@ -1915,26 +1916,41 @@ function drawPlan(c) {
   var scale = Math.min(PX, 520/Math.max(c.largo,c.ancho));
   var W=c.largo*scale, H=c.ancho*scale, pad=40;
   var svgW=W+pad*2, svgH=H+pad*2;
-  var s='<svg viewBox="0 0 '+svgW+' '+svgH+'" style="max-width:100%;height:auto;font-family:sans-serif" id="plan-svg">';
+  var s='<svg viewBox="0 0 '+svgW+' '+svgH+'" style="max-width:100%;height:auto;font-family:sans-serif;touch-action:none;user-select:none" id="plan-svg">';
   // Deck / pasillo (fondo)
   s += planExtra(c, scale, pad, W, H);
   // Contorno casa
   s += '<rect x="'+pad+'" y="'+pad+'" width="'+W+'" height="'+H+'" fill="#fff" stroke="#2C5F2E" stroke-width="2"/>';
-  // Ambientes
+  // Ambientes (con IDs estables para actualización en vivo)
   c.ambientes.forEach(function(a,i){
     var ax=pad+a.x*W, ay=pad+a.y*H, aw=a.w*W, ah=a.h*H;
     s += '<g class="amb-rect" data-i="'+i+'">'+
-      '<rect x="'+ax+'" y="'+ay+'" width="'+aw+'" height="'+ah+'" fill="'+a.color+'" stroke="#8a7a5a" stroke-width="1" opacity="0.85"/>'+
-      '<text x="'+(ax+aw/2)+'" y="'+(ay+ah/2)+'" text-anchor="middle" font-size="11" fill="#3a3a3a">'+a.tipo+'</text>'+
-      '<text x="'+(ax+aw/2)+'" y="'+(ay+ah/2+13)+'" text-anchor="middle" font-size="9" fill="#777">'+fN(a.w*c.largo*a.h*c.ancho,1)+' m²</text>'+
-      '<rect class="amb-handle" data-i="'+i+'" x="'+(ax+aw-8)+'" y="'+(ay+ah-8)+'" width="8" height="8" fill="#2C5F2E"/></g>';
+      '<rect id="amb-r-'+i+'" x="'+ax+'" y="'+ay+'" width="'+aw+'" height="'+ah+'" fill="'+a.color+'" stroke="#8a7a5a" stroke-width="1.5" opacity="0.9"/>'+
+      '<text id="amb-t1-'+i+'" x="'+(ax+aw/2)+'" y="'+(ay+ah/2)+'" text-anchor="middle" font-size="11" fill="#3a3a3a" pointer-events="none">'+a.tipo+'</text>'+
+      '<text id="amb-t2-'+i+'" x="'+(ax+aw/2)+'" y="'+(ay+ah/2+13)+'" text-anchor="middle" font-size="9" fill="#777" pointer-events="none">'+fN(a.w*c.largo*a.h*c.ancho,1)+' m²</text>'+
+      '<rect class="amb-handle" data-i="'+i+'" id="amb-h-'+i+'" x="'+(ax+aw-9)+'" y="'+(ay+ah-9)+'" width="11" height="11" fill="#2C5F2E" stroke="#fff" stroke-width="1"/></g>';
   });
   // Cotas
-  s += '<text x="'+(pad+W/2)+'" y="'+(pad-12)+'" text-anchor="middle" font-size="11" fill="#555">'+c.largo+' m</text>';
-  s += '<text x="'+(pad-14)+'" y="'+(pad+H/2)+'" text-anchor="middle" font-size="11" fill="#555" transform="rotate(-90 '+(pad-14)+' '+(pad+H/2)+')">'+c.ancho+' m</text>';
+  s += '<text x="'+(pad+W/2)+'" y="'+(pad-12)+'" text-anchor="middle" font-size="11" fill="#555" pointer-events="none">'+c.largo+' m</text>';
+  s += '<text x="'+(pad-14)+'" y="'+(pad+H/2)+'" text-anchor="middle" font-size="11" fill="#555" pointer-events="none" transform="rotate(-90 '+(pad-14)+' '+(pad+H/2)+')">'+c.ancho+' m</text>';
   s += '</svg>';
   el.innerHTML = s;
-  attachPlanDrag(el.querySelector('#plan-svg'), c, scale, pad, W, H);
+  // Guardar geometría para el manejador de arrastre global
+  planGeo = {scale:scale, W:W, H:H, pad:pad, c:c};
+}
+
+// Actualiza en vivo las posiciones SVG del ambiente i sin redibujar todo
+function updateAmbSvg(i) {
+  var g=planGeo; if(!g) return;
+  var a=g.c.ambientes[i];
+  var ax=g.pad+a.x*g.W, ay=g.pad+a.y*g.H, aw=a.w*g.W, ah=a.h*g.H;
+  var r=document.getElementById('amb-r-'+i);
+  var t1=document.getElementById('amb-t1-'+i), t2=document.getElementById('amb-t2-'+i);
+  var h=document.getElementById('amb-h-'+i);
+  if(r){ r.setAttribute('x',ax); r.setAttribute('y',ay); r.setAttribute('width',aw); r.setAttribute('height',ah); }
+  if(t1){ t1.setAttribute('x',ax+aw/2); t1.setAttribute('y',ay+ah/2); }
+  if(t2){ t2.setAttribute('x',ax+aw/2); t2.setAttribute('y',ay+ah/2+13); t2.textContent=fN(a.w*g.c.largo*a.h*g.c.ancho,1)+' m²'; }
+  if(h){ h.setAttribute('x',ax+aw-9); h.setAttribute('y',ay+ah-9); }
 }
 
 function planExtra(c, scale, pad, W, H) {
@@ -1953,42 +1969,65 @@ function planExtra(c, scale, pad, W, H) {
   return s;
 }
 
-function attachPlanDrag(svg, c, scale, pad, W, H) {
-  if (!svg) return;
-  var drag=null;
-  function pt(e){
-    var r=svg.getBoundingClientRect();
-    var vb=svg.viewBox.baseVal;
-    var cx=(e.touches?e.touches[0].clientX:e.clientX);
-    var cy=(e.touches?e.touches[0].clientY:e.clientY);
-    return {x:(cx-r.left)/r.width*vb.width, y:(cy-r.top)/r.height*vb.height};
-  }
+// Estado y geometría del arrastre en la planta (a nivel de módulo)
+var planGeo = null;
+var planDrag = null;
+var planDragInit = false;
+
+function svgPoint(svg, e){
+  var r=svg.getBoundingClientRect();
+  var vb=svg.viewBox.baseVal;
+  var cx=(e.touches?e.touches[0].clientX:e.clientX);
+  var cy=(e.touches?e.touches[0].clientY:e.clientY);
+  return {x:(cx-r.left)/r.width*vb.width, y:(cy-r.top)/r.height*vb.height};
+}
+
+function initPlanDrag() {
+  if (planDragInit) return;
+  planDragInit = true;
+
   function down(e){
-    var g=e.target.closest('.amb-rect,.amb-handle'); if(!g) return;
-    var i=+g.getAttribute('data-i');
-    var handle=e.target.classList.contains('amb-handle');
-    drag={i:i, handle:handle, start:pt(e), amb:Object.assign({},c.ambientes[i])};
+    var svg=document.getElementById('plan-svg'); if(!svg) return;
+    if (!svg.contains(e.target)) return;
+    var handleEl=e.target.closest('.amb-handle');
+    var rectG=e.target.closest('.amb-rect');
+    if(!handleEl && !rectG) return;
+    var isHandle = !!handleEl;
+    var i = +(isHandle?handleEl:rectG).getAttribute('data-i');
+    if (isNaN(i) || !planGeo) return;
+    var a=planGeo.c.ambientes[i];
+    planDrag={i:i, handle:isHandle, start:svgPoint(svg,e), amb:{x:a.x,y:a.y,w:a.w,h:a.h}};
     e.preventDefault();
   }
   function move(e){
-    if(!drag) return;
-    var p=pt(e); var a=c.ambientes[drag.i];
-    var dx=(p.x-drag.start.x)/W, dy=(p.y-drag.start.y)/H;
-    if(drag.handle){
-      a.w=Math.max(0.1,Math.min(1-a.x, drag.amb.w+dx));
-      a.h=Math.max(0.1,Math.min(1-a.y, drag.amb.h+dy));
+    if(!planDrag || !planGeo) return;
+    var svg=document.getElementById('plan-svg'); if(!svg) return;
+    var p=svgPoint(svg,e);
+    var a=planGeo.c.ambientes[planDrag.i];
+    var dx=(p.x-planDrag.start.x)/planGeo.W, dy=(p.y-planDrag.start.y)/planGeo.H;
+    if(planDrag.handle){
+      a.w=Math.max(0.12,Math.min(1-planDrag.amb.x, planDrag.amb.w+dx));
+      a.h=Math.max(0.12,Math.min(1-planDrag.amb.y, planDrag.amb.h+dy));
     } else {
-      a.x=Math.max(0,Math.min(1-a.w, drag.amb.x+dx));
-      a.y=Math.max(0,Math.min(1-a.h, drag.amb.y+dy));
+      a.x=Math.max(0,Math.min(1-planDrag.amb.w, planDrag.amb.x+dx));
+      a.y=Math.max(0,Math.min(1-planDrag.amb.h, planDrag.amb.y+dy));
     }
-    drawPlan(c); renderMaderaTable(c);
-    // reattach handled by drawPlan
+    updateAmbSvg(planDrag.i);
     e.preventDefault();
   }
-  function up(){ if(drag){ drag=null; } }
-  svg.addEventListener('mousedown',down); svg.addEventListener('touchstart',down,{passive:false});
-  window.addEventListener('mousemove',move); window.addEventListener('touchmove',move,{passive:false});
-  window.addEventListener('mouseup',up); window.addEventListener('touchend',up);
+  function up(){
+    if(planDrag){
+      planDrag=null;
+      // Redibujar tabla de madera y KPIs una vez al soltar
+      if(planGeo){ renderMaderaTable(planGeo.c); renderCasaKpis(planGeo.c); }
+    }
+  }
+  document.addEventListener('mousedown',down);
+  document.addEventListener('touchstart',down,{passive:false});
+  document.addEventListener('mousemove',move);
+  document.addEventListener('touchmove',move,{passive:false});
+  document.addEventListener('mouseup',up);
+  document.addEventListener('touchend',up);
 }
 
 // ── ALZADO FRONTAL ──
