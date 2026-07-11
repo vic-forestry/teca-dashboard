@@ -390,61 +390,84 @@ tbody tr:hover{background:var(--teca-lt)}
     <!-- ═══ TAB 3: FINANCIERO ════════════════════════════════════ -->
     <div class="tp" id="tp3">
 
-      <div class="sl">Parámetros de precios e ingresos</div>
+      <!-- ══ 1. ESTRUCTURA DE COSTOS ══ -->
+      <div class="sl">1 · Estructura de costos</div>
       <div class="g2">
         <div class="card">
+          <div class="ctitle">Inversión inicial (año 0)</div>
+          <div class="ctrl"><div class="clbl">Compra de árboles (USD) <span class="cval" id="arboles-l">$1,687</span></div><input type="range" id="arboles" min="0" max="5000" step="1" value="1687" oninput="update()"></div>
+          <div class="ctrl"><div class="clbl">N° árboles plantados <span class="cval" id="nArboles-l">1,875</span></div><input type="range" id="nArboles" min="500" max="3000" step="25" value="1875" oninput="update()"></div>
+          <div class="ctrl"><div class="clbl">Motoguadaña (₡) <span class="cval" id="eqMotoguadana-l">₡462k</span></div><input type="range" id="eqMotoguadana" min="0" max="1000000" step="1000" value="461765" oninput="update()"></div>
+          <div class="ctrl"><div class="clbl">Motosierras ×2 (₡) <span class="cval" id="eqMotosierra-l">₡413k</span></div><input type="range" id="eqMotosierra" min="0" max="1000000" step="1000" value="413288" oninput="update()"></div>
+          <div class="ctrl"><div class="clbl">Equipo protección (₡) <span class="cval" id="eqProteccion-l">₡50k</span></div><input type="range" id="eqProteccion" min="0" max="300000" step="5000" value="50000" oninput="update()"></div>
+          <div class="csub" id="inv0-sub"></div>
+        </div>
+        <div class="card">
+          <div class="ctitle">Gastos fijos anuales</div>
+          <div class="ctrl"><div class="clbl">Cuidador (Hilario) ₡/mes <span class="cval" id="cuid-l">₡300k</span></div><input type="range" id="cuid" min="100000" max="700000" step="25000" value="300000" oninput="update()"></div>
+          <div class="ctrl"><div class="clbl">Electricidad ₡/mes <span class="cval" id="elec-l">₡20k</span></div><input type="range" id="elec" min="0" max="100000" step="5000" value="20000" oninput="update()"></div>
+          <div class="ctrl"><div class="clbl">Gasolina ₡/mes <span class="cval" id="gasolina-l">₡0</span></div><input type="range" id="gasolina" min="0" max="150000" step="5000" value="0" oninput="update()"></div>
+          <div class="ctrl"><div class="clbl">Aceite ₡/mes <span class="cval" id="aceite-l">₡0</span></div><input type="range" id="aceite" min="0" max="60000" step="2500" value="0" oninput="update()"></div>
+          <div class="ctrl"><div class="clbl">Agua ₡/mes <span class="cval" id="agua-l">₡0</span></div><input type="range" id="agua" min="0" max="60000" step="2500" value="0" oninput="update()"></div>
+          <div class="ctrl"><div class="clbl">Imp. municipales ₡/año <span class="cval" id="imp-l">₡150k</span></div><input type="range" id="imp" min="0" max="500000" step="25000" value="150000" oninput="update()"></div>
+          <div class="ctrl"><div class="clbl">Otros ₡/año <span class="cval" id="otros-l">₡0</span></div><input type="range" id="otros" min="0" max="1000000" step="50000" value="0" oninput="update()"></div>
+          <div class="ctrl"><div class="clbl">Costo por raleo ₡/árbol <span class="cval" id="cral-l">₡1,000</span></div><input type="range" id="cral" min="500" max="2500" step="100" value="1000" oninput="update()"></div>
+          <div class="csub" id="gfijo-sub"></div>
+        </div>
+      </div>
+
+      <!-- ══ 2. ESTRUCTURA DE INGRESOS ══ -->
+      <div class="sl">2 · Estructura de ingresos</div>
+      <div class="g2">
+        <div class="card">
+          <div class="ctitle">Raleos (mercado nacional)</div>
+          <div class="ctrl"><div class="clbl">Precio raleo <span class="cval" id="pral-l">150 ₡/PMT</span></div><input type="range" id="pral" min="50" max="300" step="10" value="150" oninput="update()"></div>
+          <div class="ctrl"><div class="clbl">Tipo de cambio <span class="cval" id="tc2-l">520 ₡/$</span></div><input type="range" id="tc2" min="460" max="650" step="5" value="520" oninput="update()"></div>
+          <div class="csub">Los años e intensidades de raleo se definen en el tab <b>Raleos</b>.</div>
+        </div>
+        <div class="card">
           <div class="ctitle">Cosecha final</div>
+          <div class="ctrl"><div class="clbl">Año de cosecha <span class="cval" id="cosechaYear-l">15</span></div><input type="range" id="cosechaYear" min="12" max="25" step="1" value="15" oninput="update()"></div>
           <div class="ctrl"><div class="clbl">Mercado</div><div class="tog"><button id="btn-mkt-exp" class="active" onclick="ss('mkt','export')">Exportación</button><button id="btn-mkt-nac" onclick="ss('mkt','nac')">Nacional</button></div></div>
           <div id="pan-exp">
             <div class="ctrl"><div class="clbl">Modalidad</div><div class="tog"><button id="btn-pie" class="active" onclick="ss('mod','pie')">En pie</button><button id="btn-rollo" onclick="ss('mod','rollo')">Rollo patio</button></div></div>
             <div class="ctrl"><div class="clbl">Precio export <span class="cval" id="pexp-l">$300/m³</span></div><input type="range" id="pexp" min="100" max="700" step="25" value="300" oninput="update()"></div>
             <div class="ctrl"><div class="clbl">Tipo cambio <span class="cval" id="tc-l">520 ₡/$</span></div><input type="range" id="tc" min="460" max="650" step="5" value="520" oninput="update()"></div>
+            <div class="ctrl"><div class="clbl">Costo extracción (rollo) <span class="cval" id="ccf-l">$20/m³</span></div><input type="range" id="ccf" min="0" max="60" step="5" value="20" oninput="update()"></div>
           </div>
           <div id="pan-nac" style="display:none">
             <div class="ctrl"><div class="clbl">Modalidad</div><div class="tog"><button id="btn-pie2" class="active" onclick="ss('mod','pie')">En pie</button><button id="btn-rollo2" onclick="ss('mod','rollo')">Rollo patio</button></div></div>
             <div class="ctrl"><div class="clbl">Precio cosecha <span class="cval" id="pnac-l">200 ₡/PMT</span></div><input type="range" id="pnac" min="80" max="500" step="10" value="200" oninput="update()"></div>
           </div>
-          <div class="ctrl"><div class="clbl">Costo extracción <span class="cval" id="ccf-l">$20/m³</span></div><input type="range" id="ccf" min="0" max="60" step="5" value="20" oninput="update()"></div>
-          <div class="csub">El costo de extracción solo aplica en <b>rollo en patio</b>.</div>
-        </div>
-        <div class="card">
-          <div class="ctitle">Raleo (mercado nacional)</div>
-          <div class="ctrl"><div class="clbl">Precio raleo <span class="cval" id="pral-l">150 ₡/PMT</span></div><input type="range" id="pral" min="50" max="300" step="10" value="150" oninput="update()"></div>
-          <div class="ctrl"><div class="clbl">Tipo cambio raleo <span class="cval" id="tc2-l">520 ₡/$</span></div><input type="range" id="tc2" min="460" max="650" step="5" value="520" oninput="update()"></div>
-          <div class="ctitle" style="margin-top:12px">Descuento e inflación</div>
-          <div class="ctrl"><div class="clbl">Tasa descuento <span class="cval" id="tasa-l">8%</span></div><input type="range" id="tasa" min="3" max="20" value="8" oninput="update()"></div>
-          <div class="ctrl"><div class="clbl">Inflación USD/año <span class="cval" id="infl-l">2%</span></div><input type="range" id="infl" min="0" max="8" step="0.5" value="2" oninput="update()"></div>
-          <div class="csub">Precios en PMT (1 PMT = 0.002360 m³); resultados en $ y m³.</div>
+          <div class="csub">Precio en PMT (1 PMT = 0.002360 m³); resultados en $ y m³.</div>
         </div>
       </div>
 
-      <div class="sl">Parámetros de gastos</div>
-      <div class="card">
-        <div class="g2">
-          <div>
-            <div class="ctrl"><div class="clbl">Cuidador (₡/mes) <span class="cval" id="cuid-l">₡300k</span></div><input type="range" id="cuid" min="100000" max="700000" step="25000" value="300000" oninput="update()"></div>
-            <div class="ctrl"><div class="clbl">Electricidad (₡/mes) <span class="cval" id="elec-l">₡20k</span></div><input type="range" id="elec" min="0" max="100000" step="5000" value="20000" oninput="update()"></div>
-            <div class="ctrl"><div class="clbl">Imp. municipales (₡/año) <span class="cval" id="imp-l">₡150k</span></div><input type="range" id="imp" min="0" max="500000" step="25000" value="150000" oninput="update()"></div>
-          </div>
-          <div>
-            <div class="ctrl"><div class="clbl">Otros (₡/año) <span class="cval" id="otros-l">₡0</span></div><input type="range" id="otros" min="0" max="1000000" step="50000" value="0" oninput="update()"></div>
-            <div class="ctrl"><div class="clbl">Costo raleo (₡/árbol) <span class="cval" id="cral-l">₡1,000</span></div><input type="range" id="cral" min="500" max="2500" step="100" value="1000" oninput="update()"></div>
-          </div>
+      <!-- ══ 3. TABLA AÑO A AÑO ══ -->
+      <div class="sl">3 · Flujo de caja — vida completa de la plantación</div>
+      <div class="card" style="margin-bottom:10px">
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <span style="font-size:12px;color:var(--muted)">Tasa de descuento:</span>
+          <input type="range" id="tasa" min="3" max="20" step="0.5" value="8" oninput="update()" style="flex:1;max-width:240px">
+          <span class="cval" id="tasa-l" style="font-size:14px">8%</span>
+          <span style="font-size:12px;color:var(--muted);margin-left:16px">Inflación USD/año:</span>
+          <input type="range" id="infl" min="0" max="8" step="0.5" value="2" oninput="update()" style="flex:1;max-width:160px">
+          <span class="cval" id="infl-l">2%</span>
         </div>
       </div>
-
-      <div class="sl">Resultados</div>
       <div class="ks" id="fin-kpis"></div>
+      <div class="card hi"><div class="ctitle">Análisis año 0 → cosecha</div><div id="vpn-tbl" style="margin-top:8px"></div></div>
+
+      <!-- ══ 4. GRÁFICOS ══ -->
+      <div class="sl">4 · Gráficos</div>
       <div class="g2">
-        <div class="card"><div class="ctitle">Volumen en pie (m³/ha)</div><div class="csub" id="vol-sub-fin">Años 5–15</div><div style="height:190px"><canvas id="ch-vol-f"></canvas></div></div>
-        <div class="card"><div class="ctitle">Ingreso bruto por evento (USD)</div><div class="csub">Finca completa (2.24 ha)</div><div style="height:190px"><canvas id="ch-fin-f"></canvas></div></div>
+        <div class="card"><div class="ctitle">Flujo de caja anual (USD)</div><div class="csub">Verde = ingreso neto · Rojo = gasto</div><div style="height:200px"><canvas id="ch-flujo-f"></canvas></div></div>
+        <div class="card"><div class="ctitle">VPN acumulado (USD)</div><div class="csub">Cruce con cero = punto de recuperación</div><div style="height:200px"><canvas id="ch-vpnacum-f"></canvas></div></div>
       </div>
-      <div class="sl">Detalle financiero</div>
-      <div class="g2" id="fin-cards"></div>
-      <div class="sl">VPN — Flujo descontado</div>
-      <div class="card hi"><div class="ctitle">Análisis año a año</div><div id="vpn-tbl"></div></div>
-      <div class="sl">Gastos operativos</div>
-      <div class="card" id="gastos-card"></div>
+      <div class="g2">
+        <div class="card"><div class="ctitle">Ingreso bruto por evento (USD)</div><div class="csub">Raleos y cosecha final</div><div style="height:190px"><canvas id="ch-fin-f"></canvas></div></div>
+        <div class="card"><div class="ctitle">Volumen en pie (m³/ha)</div><div class="csub" id="vol-sub-fin">Año 5 → cosecha</div><div style="height:190px"><canvas id="ch-vol-f"></canvas></div></div>
+      </div>
     </div>
 
     <!-- ═══ TAB 4: CONSTRUCCIÓN ══════════════════════════════════ -->
@@ -862,6 +885,12 @@ let S = {
   pexp:300, tc:520, pnac:200,
   pral:150, tc2:520, ccf:20,
   cuid:300000, elec:20000, imp:150000, otros:0, cral:1000,
+  // Inversión inicial (año 0)
+  arboles:1687, tcArb:520, nArboles:1875,   // compra árboles en USD, tc para equipos
+  eqMotoguadana:461765, eqMotosierra:413288, eqProteccion:50000,
+  // Gastos fijos anuales adicionales (₡)
+  gasolina:0, aceite:0, agua:0,
+  cosechaYear:15,
   mo:80000, mat:50000,
   casas:[ nuevaCasa() ],
   casaActiva:0,
@@ -1017,6 +1046,7 @@ function buildProjection() {
   var rvol = raleoVolPerHa();
 
   var rows=[];
+  var cfY = Math.min(S.cosechaYear||15, 15);  // el modelo de crecimiento llega a 15
   for (var y=5; y<=15; y++) {
     // volumen en pie/ha finca según proyección (para y>=7); para y<7 usar interpolación simple hacia atrás
     var idx = y-7;
@@ -1029,7 +1059,7 @@ function buildProjection() {
     var ex=0, lbl='';
     if (y===S.ralYear && rvol.r1>0) { ex=Math.round(rvol.r1*10)/10; lbl='R1'; }
     else if (S.ral2on && y===S.ral2Year && rvol.r2>0) { ex=Math.round(rvol.r2*10)/10; lbl='R2'; }
-    else if (y===15) { ex=Math.round(volHa*10)/10; lbl='CF'; }
+    else if (y===cfY) { ex=Math.round(volHa*10)/10; lbl='CF'; }
     rows.push({y:y, vb:Math.round(volHa*10)/10, ex:ex, lbl:lbl, va:Math.round((volHa-ex)*10)/10, ica:0});
   }
   return rows;
@@ -1062,44 +1092,79 @@ function raleoVolPerHa() {
   return {r1:r1, r2:r2};
 }
 
-function calcFin(rows) {
-  var tc  = S.mkt==='export' ? S.tc : S.tc2;
-  var tcN = S.tc2;
-  var pcfCrc = S.mkt==='export' ? S.pexp*tc : S.pnac/PMT;
-  var pralCrc = S.pral/PMT;
+// Flujo de caja completo: año 0 (siembra) hasta cosecha
+function buildCashFlow() {
+  var tcCF = S.mkt==='export' ? S.tc : S.tc2;   // tc cosecha final
+  var tcR  = S.tc2;                              // tc raleos
+  var pcfCrc = S.mkt==='export' ? S.pexp*tcCF : S.pnac/PMT_M3;  // ₡/m³ cosecha
+  var pralCrc = S.pral/PMT_M3;                   // ₡/m³ raleo
   var infl = S.infl/100;
-  var events = [];
-  rows.forEach(function(r) {
+  var tasa = S.tasa/100;
+  var cosechaY = S.cosechaYear;
+
+  // Inversión inicial (año 0) en USD
+  var invArbolesU = S.arboles;                   // ya en USD
+  var invEquipoU  = (S.eqMotoguadana+S.eqMotosierra+S.eqProteccion)/tcR;
+  var inv0U = invArbolesU + invEquipoU;
+
+  // Gasto fijo anual (₡ → USD con tc raleo como referencia operativa)
+  var gastoFijoCrc = (S.cuid+S.elec+S.gasolina+S.aceite+S.agua)*12 + S.imp + S.otros;
+  var gastoFijoU = gastoFijoCrc/tcR;
+
+  // Eventos de raleo/cosecha desde la proyección
+  var proj = buildProjection();
+  var evByYear = {};
+  proj.forEach(function(r){
     if (!r.lbl || r.ex===0) return;
     var tot = r.ex*HA;
-    var yrs = r.y-5;
-    var iF = Math.pow(1+infl, yrs);
-    var ing=0, costo=0;
-    if (r.lbl==='CF') {
-      ing = tot*pcfCrc*iF;
-      if (S.mod==='rollo') costo = tot*S.ccf*tc;
-    } else {
-      ing = tot*pralCrc*iF;
-      var nA = Math.round(r.ex*HA/0.18);
-      costo = nA*S.cral;
-    }
-    var tcE = r.lbl==='CF' ? tc : tcN;
-    var netoU = (ing-costo)/tcE;
-    var vpnU = netoU/Math.pow(1+S.tasa/100, yrs);
-    events.push({y:r.y, lbl:r.lbl, vol:tot, vha:r.ex, ing:ing, costo:costo, netoU:netoU, vpnU:vpnU, tc:tcE});
+    var esCF = (r.lbl==='CF');
+    var tcE = esCF ? tcCF : tcR;
+    var pCrc = esCF ? pcfCrc : pralCrc;
+    var yrsInfl = r.y; // inflación desde año 0
+    var iF = Math.pow(1+infl, yrsInfl);
+    var ingCrc = tot*pCrc*iF;
+    var costoCrc = 0;
+    if (esCF) { if (S.mod==='rollo') costoCrc = tot*S.ccf*tcCF; }
+    else { var nA=Math.round(tot/0.18); costoCrc = nA*S.cral; }
+    evByYear[r.y] = {lbl:r.lbl, vol:tot, ingU:ingCrc/tcE, costoU:costoCrc/tcE, tc:tcE, pCrc:pCrc, esCF:esCF};
   });
-  return {events:events, tc:tc, tcN:tcN, pcfCrc:pcfCrc, pralCrc:pralCrc};
-}
 
-function calcGastos() {
-  var tc = S.mkt==='export' ? S.tc : S.tc2;
-  var anual = S.cuid*12 + S.elec*12 + S.imp + S.otros;
-  var tot=0, vpn=0;
-  for (var y=5; y<=15; y++) {
-    tot += anual;
-    vpn += anual/Math.pow(1+S.tasa/100, y-5);
+  // Construir filas año 0 → cosecha
+  var rows=[], vpnAcum=0, payback=null;
+  for (var y=0; y<=cosechaY; y++) {
+    var ingU=0, costoU=0, invU=0, lbl='';
+    if (y===0) { invU = inv0U; lbl='Siembra'; }
+    var gU = gastoFijoU;
+    var ev = evByYear[y];
+    if (ev && y<=cosechaY) {
+      ingU = ev.ingU; costoU = ev.costoU;
+      lbl = ev.esCF ? 'Cosecha' : (ev.lbl==='R1'?'Raleo 1':'Raleo 2');
+    }
+    // Si el año de cosecha del usuario difiere del 15 del modelo, la CF cae en cosechaY
+    if (y===cosechaY && !(ev && ev.esCF)) {
+      // Forzar cosecha en el año elegido usando el volumen final del modelo
+      var cfRow = proj.filter(function(r){ return r.lbl==='CF'; })[0];
+      if (cfRow) {
+        var tot=cfRow.ex*HA;
+        var iF=Math.pow(1+infl,y);
+        ingU = tot*pcfCrc*iF/tcCF;
+        costoU = (S.mod==='rollo'? tot*S.ccf*tcCF:0)/tcCF;
+        lbl='Cosecha';
+        ev={esCF:true, vol:tot};
+      }
+    }
+    var neto = ingU - costoU - gU - invU;
+    var df = Math.pow(1+tasa, y);
+    var vpnFlujo = neto/df;
+    vpnAcum += vpnFlujo;
+    if (payback===null && vpnAcum>0 && y>0) payback=y;
+    rows.push({y:y, lbl:lbl, ingU:ingU, costoU:costoU, gastoU:gU, invU:invU,
+               neto:neto, vpnFlujo:vpnFlujo, vpnAcum:vpnAcum,
+               vol: ev?ev.vol:0});
   }
-  return {anual:anual, tot:tot, vpn:vpn, totU:tot/tc, vpnU:vpn/tc};
+  return {rows:rows, inv0U:inv0U, invArbolesU:invArbolesU, invEquipoU:invEquipoU,
+          gastoFijoU:gastoFijoU, gastoFijoCrc:gastoFijoCrc, vpnNeto:vpnAcum,
+          payback:payback, tcCF:tcCF, tcR:tcR, cosechaY:cosechaY};
 }
 
 // ═══════════════════════════════════════════════════
@@ -1674,118 +1739,96 @@ function zoneProjection2(densViva, int1, int2) {
   return {densPre2:densPre2, vol2ExtHa:vol2ExtHa};
 }
 
-// ═══════════════════════════════════════════════════
-// TAB 2: FINANCIERO
-// ═══════════════════════════════════════════════════
 function renderFinTab() {
-  var rows = buildProjection();
-  var fin  = calcFin(rows);
-  var events = fin.events;
-  var tc = fin.tc, tcN = fin.tcN;
-  var gastos = calcGastos();
+  var cf = buildCashFlow();
+  var rows = cf.rows;
 
-  var brutoCrc = events.reduce(function(s,e){ return s+e.ing; }, 0);
-  var brutoUsd = events.reduce(function(s,e){ return s+e.ing/e.tc; }, 0);
-  var costoUsd = events.reduce(function(s,e){ return s+e.costo/e.tc; }, 0);
-  var vpnIngUsd = events.reduce(function(s,e){ return s+e.vpnU; }, 0);
-  var vpnNeto = vpnIngUsd - gastos.vpnU - costoUsd;
-  var cfRow = rows.filter(function(r){ return r.lbl==='CF'; })[0];
+  // Sub-textos informativos
+  var inv0=document.getElementById('inv0-sub');
+  if(inv0) inv0.innerHTML='Árboles: <b>'+fU(cf.invArbolesU)+'</b> + equipos: <b>'+fU(cf.invEquipoU)+'</b> = <b>'+fU(cf.inv0U)+'</b> en año 0.';
+  var gf=document.getElementById('gfijo-sub');
+  if(gf) gf.innerHTML='Total fijo: <b>'+fC(cf.gastoFijoCrc)+'/año</b> ≈ '+fU(cf.gastoFijoU)+'/año.';
 
-  var fkEl = document.getElementById('fin-kpis');
+  // Totales
+  var ingTot=rows.reduce(function(s,r){return s+r.ingU;},0);
+  var gastoTot=rows.reduce(function(s,r){return s+r.gastoU+r.invU;},0);
+  var costoTot=rows.reduce(function(s,r){return s+r.costoU;},0);
+  var netoTot=ingTot-gastoTot-costoTot;
+  var cfRow=rows.filter(function(r){return r.lbl==='Cosecha';})[0];
+
+  var fkEl=document.getElementById('fin-kpis');
   if (fkEl) fkEl.innerHTML =
-    '<div class="kpi"><div class="kl">Cosecha año 15</div><div class="kv">'+(cfRow?fN(cfRow.ex):0)+' m³/ha</div><div class="ks2">'+(cfRow?fN(cfRow.ex*HA,0):0)+' m³ total</div></div>' +
-    '<div class="kpi"><div class="kl">Ingreso bruto</div><div class="kv">'+fU(brutoUsd)+'</div><div class="ks2">'+fC(brutoCrc)+' CRC</div></div>' +
-    '<div class="kpi hi"><div class="kl">VPN neto</div><div class="kv">'+fU(vpnNeto)+'</div><div class="ks2">Tasa '+S.tasa+'% · '+S.infl+'% infl.</div></div>' +
-    '<div class="kpi"><div class="kl">Gastos 10 años</div><div class="kv">'+fC(gastos.tot)+'</div><div class="ks2">'+fU(gastos.totU)+' USD</div></div>';
+    '<div class="kpi"><div class="kl">Inversión inicial</div><div class="kv">'+fU(cf.inv0U)+'</div><div class="ks2">año 0 · árboles + equipos</div></div>' +
+    '<div class="kpi"><div class="kl">Ingreso total</div><div class="kv">'+fU(ingTot)+'</div><div class="ks2">raleos + cosecha año '+cf.cosechaY+'</div></div>' +
+    '<div class="kpi hi"><div class="kl">VPN neto ('+S.tasa+'%)</div><div class="kv">'+fU(cf.vpnNeto)+'</div><div class="ks2">'+(cf.vpnNeto>0?'proyecto rentable':'no recupera a esa tasa')+'</div></div>' +
+    '<div class="kpi"><div class="kl">Recuperación</div><div class="kv">'+(cf.payback?'Año '+cf.payback:'—')+'</div><div class="ks2">VPN acum. cruza cero</div></div>';
 
-  // Vol chart
-  var yrs = rows.map(function(r){ return r.y; });
-  var vbs = rows.map(function(r){ return r.vb; });
-  var evtY = {};
-  rows.filter(function(r){ return r.lbl; }).forEach(function(r){ evtY[r.y]=true; });
-  var ptC2 = rows.map(function(r){ return r.y===15?'#3B6D11':evtY[r.y]?'#D97706':'#2C5F2E'; });
-  var ptR2 = rows.map(function(r){ return r.y===15||evtY[r.y] ? 6 : 3; });
-  mkChart('ch-vol-f','line',{labels:yrs,datasets:[{data:vbs,borderColor:'#2C5F2E',backgroundColor:'#2C5F2E11',fill:true,tension:.35,borderWidth:2,pointRadius:ptR2,pointBackgroundColor:ptC2}]},
-    {x:{ticks:{autoSkip:false,maxRotation:0,font:{size:9}}},y:{ticks:{font:{size:9},callback:function(v){return v+' m³';}},min:50}},false);
+  // ── Tabla año a año ──
+  var vtEl=document.getElementById('vpn-tbl');
+  if (vtEl) {
+    var head='<div class="tw"><table style="width:100%;border-collapse:collapse;font-size:11px;min-width:560px"><thead><tr style="background:var(--teca-lt)">';
+    ['Año','Evento','Ingreso $','Costos $','Gastos $','Flujo neto $','VPN flujo','VPN acum.'].forEach(function(h){
+      head+='<th style="padding:5px 7px;font-weight:600;border-bottom:1px solid var(--border);text-align:'+(h==='Año'||h==='Evento'?'left':'right')+';font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em">'+h+'</th>';
+    });
+    head+='</tr></thead><tbody>';
+    var body='';
+    rows.forEach(function(r){
+      var hasEvent=r.lbl && r.lbl!=='';
+      var isBig=(r.lbl==='Cosecha');
+      var gastoTotRow=r.gastoU+r.invU;
+      body+='<tr style="'+(isBig?'background:#F0FDF4;font-weight:600;':(r.vpnAcum>0?'background:#FAFDF9;':''))+'border-bottom:1px solid #eee">' +
+        '<td style="padding:5px 7px;font-weight:'+(hasEvent?700:400)+'">'+r.y+(isBig?' ★':(r.lbl==='Siembra'?' ▼':(hasEvent?' ✂':'')))+'</td>' +
+        '<td style="padding:5px 7px;font-size:10px;color:var(--muted)">'+(r.lbl||'—')+'</td>' +
+        '<td style="padding:5px 7px;text-align:right;color:'+(r.ingU>0?'#2C5F2E':'#bbb')+'">'+(r.ingU>0?fU(r.ingU):'—')+'</td>' +
+        '<td style="padding:5px 7px;text-align:right;color:'+(r.costoU>0?'#B91C1C':'#bbb')+'">'+(r.costoU>0?'-'+fU(r.costoU):'—')+'</td>' +
+        '<td style="padding:5px 7px;text-align:right;color:#B91C1C">'+(gastoTotRow>0?'-'+fU(gastoTotRow):'—')+'</td>' +
+        '<td style="padding:5px 7px;text-align:right;font-weight:600;color:'+(r.neto>=0?'#2C5F2E':'#B91C1C')+'">'+fU(r.neto)+'</td>' +
+        '<td style="padding:5px 7px;text-align:right">'+fU(r.vpnFlujo)+'</td>' +
+        '<td style="padding:5px 7px;text-align:right;font-weight:600;color:'+(r.vpnAcum>=0?'#2C5F2E':'#B91C1C')+'">'+fU(r.vpnAcum)+'</td></tr>';
+    });
+    // fila total
+    body+='<tr style="background:var(--teca-lt);font-weight:700;border-top:2px solid var(--teca)">' +
+      '<td style="padding:6px 7px" colspan="2">TOTAL</td>' +
+      '<td style="padding:6px 7px;text-align:right;color:#2C5F2E">'+fU(ingTot)+'</td>' +
+      '<td style="padding:6px 7px;text-align:right;color:#B91C1C">-'+fU(costoTot)+'</td>' +
+      '<td style="padding:6px 7px;text-align:right;color:#B91C1C">-'+fU(gastoTot)+'</td>' +
+      '<td style="padding:6px 7px;text-align:right;color:'+(netoTot>=0?'#2C5F2E':'#B91C1C')+'">'+fU(netoTot)+'</td>' +
+      '<td style="padding:6px 7px;text-align:right">—</td>' +
+      '<td style="padding:6px 7px;text-align:right;color:'+(cf.vpnNeto>=0?'#2C5F2E':'#B91C1C')+'">'+fU(cf.vpnNeto)+'</td></tr>';
+    vtEl.innerHTML=head+body+'</tbody></table></div>';
+  }
 
-  // Fin bars
-  var cfC = S.mkt==='export' ? '#6B21A8' : '#C05020';
+  // ── Gráfico 1: flujo de caja anual ──
+  var yrs=rows.map(function(r){return r.y;});
+  mkChart('ch-flujo-f','bar',{labels:yrs,datasets:[{
+    data:rows.map(function(r){return Math.round(r.neto);}),
+    backgroundColor:rows.map(function(r){return r.neto>=0?'#2C5F2ECC':'#B91C1CAA';}),
+    borderRadius:3
+  }]},{x:{ticks:{font:{size:9}}},y:{ticks:{font:{size:9},callback:function(v){return '$'+(v/1000).toFixed(0)+'k';}}}},false);
+
+  // ── Gráfico 2: VPN acumulado ──
+  mkChart('ch-vpnacum-f','line',{labels:yrs,datasets:[
+    {data:rows.map(function(r){return Math.round(r.vpnAcum);}),borderColor:'#0C447C',backgroundColor:'#0C447C11',fill:true,tension:.2,borderWidth:2,pointRadius:rows.map(function(r){return r.lbl?5:2;}),pointBackgroundColor:rows.map(function(r){return r.vpnAcum>=0?'#16A34A':'#B91C1C';})},
+    {data:yrs.map(function(){return 0;}),borderColor:'#999',borderWidth:1,borderDash:[4,3],pointRadius:0,fill:false}
+  ]},{x:{ticks:{font:{size:9}}},y:{ticks:{font:{size:9},callback:function(v){return '$'+(v/1000).toFixed(0)+'k';}}}},false);
+
+  // ── Gráfico 3: ingreso por evento ──
+  var evs=rows.filter(function(r){return r.ingU>0;});
+  var cfC=S.mkt==='export'?'#6B21A8':'#C05020';
   mkChart('ch-fin-f','bar',{
-    labels:events.map(function(e){ return e.lbl==='CF'?'Cosecha ('+e.y+')':'Raleo '+e.lbl.slice(1)+' ('+e.y+')'; }),
-    datasets:[{data:events.map(function(e){ return e.ing/e.tc; }),
-      backgroundColor:events.map(function(e){ return e.lbl==='CF'?cfC+'BB':e.lbl==='R1'?'#D97706BB':'#6B4226BB'; }),
-      borderRadius:4}]
-  },{x:{ticks:{font:{size:9}}},y:{ticks:{font:{size:9},callback:function(v){ return '$'+(v/1000).toFixed(0)+'k'; }}}},false);
+    labels:evs.map(function(e){return e.lbl+' ('+e.y+')';}),
+    datasets:[{data:evs.map(function(e){return Math.round(e.ingU);}),
+      backgroundColor:evs.map(function(e){return e.lbl==='Cosecha'?cfC+'CC':'#D97706CC';}),borderRadius:4}]
+  },{x:{ticks:{font:{size:9}}},y:{ticks:{font:{size:9},callback:function(v){return '$'+(v/1000).toFixed(0)+'k';}}}},false);
 
-  // Fin cards
-  var fc = document.getElementById('fin-cards');
-  if (!fc) return;
-  fc.innerHTML = '';
-  events.forEach(function(ev) {
-    var usd = ev.ing/ev.tc;
-    var cosU = ev.costo/ev.tc;
-    var col = ev.lbl==='CF' ? cfC : ev.lbl==='R1' ? '#D97706' : '#6B4226';
-    var pDesc = ev.lbl==='CF' ? (S.mkt==='export'?'$'+S.pexp+'/m³':S.pnac+' ₡/PMT') : S.pral+' ₡/PMT';
-    var d = document.createElement('div');
-    d.className = 'card';
-    d.innerHTML = '<div style="display:flex;align-items:center;gap:6px;margin-bottom:7px"><span style="width:8px;height:8px;border-radius:50%;background:'+col+';display:inline-block"></span><span style="font-size:12px;font-weight:600">'+(ev.lbl==='CF'?'Cosecha final':'Raleo '+ev.lbl.slice(1))+' — año '+ev.y+'</span></div>' +
-      '<div class="frow"><span class="fk">Volumen 2.24 ha</span><span class="fv">'+fN(ev.vol,1)+' m³</span></div>' +
-      '<div class="frow"><span class="fk">Precio<span class="fksub">'+pDesc+'</span></span><span class="fv">—</span></div>' +
-      (cosU>0?'<div class="frow"><span class="fk">Costo operativo</span><span class="fv" style="color:#B91C1C">-'+fU(cosU)+'</span></div>':'') +
-      '<div class="frow"><span class="fk">Ingreso (CRC)</span><span class="fv">'+fC(ev.ing)+'</span></div>' +
-      '<div class="frow"><span class="fk">VPN descontado</span><span class="fv">'+fU(ev.vpnU)+'</span></div>' +
-      '<div class="ftot"><span style="font-size:12px;font-weight:600">Ingreso USD</span><span class="ftv" style="color:'+col+'">'+fU(usd)+'</span></div>';
-    fc.appendChild(d);
-  });
-  var dt = document.createElement('div');
-  dt.className = 'card hi';
-  dt.style.gridColumn = '1/-1';
-  dt.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px"><div><div style="font-size:11px;color:var(--muted)">Total bruto · '+HA+' ha</div><div style="font-size:12px;color:var(--muted)">'+fC(brutoCrc)+' · Costos: '+fU(costoUsd)+'</div></div><div style="font-size:26px;font-weight:700;font-family:var(--mono);color:var(--teca)">'+fU(brutoUsd)+'</div></div>';
-  fc.appendChild(dt);
-
-  // VPN table
-  var vtEl = document.getElementById('vpn-tbl');
-  if (!vtEl) return;
-  var gAnualUsd = gastos.anual/tc;
-  var vpnAc = 0;
-  var tHead = '<div class="tw"><table style="width:100%;border-collapse:collapse;font-size:11px;min-width:500px"><thead><tr style="background:var(--teca-lt)">';
-  ['Año','Ingreso $','Costos $','Gastos $','Flujo neto $','VPN flujo','VPN acum.'].forEach(function(h){
-    tHead += '<th style="padding:4px 6px;font-weight:600;border-bottom:1px solid var(--border);text-align:right;font-size:10px;color:var(--muted)">'+h+'</th>';
-  });
-  tHead += '</tr></thead><tbody>';
-  var tBody = '';
-  rows.forEach(function(r) {
-    var yF = r.y-5;
-    var df = Math.pow(1+S.tasa/100, yF);
-    var ev = events.filter(function(e){ return e.y===r.y; })[0];
-    var evTc = ev ? (ev.lbl==='CF'?tc:tcN) : tc;
-    var ing = ev ? ev.ing/evTc : 0;
-    var cst = ev ? ev.costo/evTc : 0;
-    var fl = ing-cst-gAnualUsd;
-    var fpvn = fl/df;
-    vpnAc += fpvn;
-    tBody += '<tr style="'+(vpnAc>0?'background:#F0FDF4;':'')+'border-bottom:1px solid var(--border)">' +
-      '<td style="padding:4px 6px;font-weight:'+(ing>0?600:400)+'">'+r.y+(ing>0?' ★':'')+'</td>' +
-      '<td style="padding:4px 6px;text-align:right;color:'+(ing>0?'#2C5F2E':'var(--muted)'+'">')+(ing>0?fU(ing):'—')+'</td>' +
-      '<td style="padding:4px 6px;text-align:right;color:#B91C1C">'+(cst>0?'-'+fU(cst):'—')+'</td>' +
-      '<td style="padding:4px 6px;text-align:right;color:#B91C1C">-'+fU(gAnualUsd)+'</td>' +
-      '<td style="padding:4px 6px;text-align:right;font-weight:600;color:'+(fl>0?'#2C5F2E':'#B91C1C')+'">'+fU(fl)+'</td>' +
-      '<td style="padding:4px 6px;text-align:right">'+fU(fpvn)+'</td>' +
-      '<td style="padding:4px 6px;text-align:right;font-weight:600;color:'+(vpnAc>0?'#2C5F2E':'#B91C1C')+'">'+fU(vpnAc)+'</td></tr>';
-  });
-  vtEl.innerHTML = tHead+tBody+'</tbody></table></div>';
-
-  // Gastos card
-  var gc = document.getElementById('gastos-card');
-  if (gc) gc.innerHTML =
-    '<div class="ctitle">Gastos operativos 10 años</div><div class="csub">Años 5–15</div>' +
-    '<div class="gasto-r"><span>Cuidador anual</span><span style="font-family:var(--mono);font-weight:600">'+fC(S.cuid*12)+'</span></div>' +
-    '<div class="gasto-r"><span>Electricidad + agua anual</span><span style="font-family:var(--mono);font-weight:600">'+fC(S.elec*12)+'</span></div>' +
-    '<div class="gasto-r"><span>Impuestos anual</span><span style="font-family:var(--mono);font-weight:600">'+fC(S.imp)+'</span></div>' +
-    '<div class="gasto-r"><span>Otros anual</span><span style="font-family:var(--mono);font-weight:600">'+fC(S.otros)+'</span></div>' +
-    '<div class="gasto-r" style="font-weight:600;padding-top:6px;border-top:2px solid var(--border);margin-top:4px"><span>Total anual</span><span style="font-family:var(--mono)">'+fC(gastos.anual)+'</span></div>' +
-    '<div class="gasto-r" style="font-weight:600"><span>Total 10 años (nominal)</span><span style="font-family:var(--mono)">'+fC(gastos.tot)+' · '+fU(gastos.totU)+'</span></div>' +
-    '<div class="gasto-r" style="font-weight:600;color:var(--teca)"><span>Total 10 años (VPN)</span><span style="font-family:var(--mono)">'+fC(gastos.vpn)+' · '+fU(gastos.vpnU)+'</span></div>';
+  // ── Gráfico 4: volumen en pie ──
+  var proj=buildProjection();
+  var pyrs=proj.map(function(r){return r.y;});
+  var pvbs=proj.map(function(r){return r.vb;});
+  var evtY={}; proj.filter(function(r){return r.lbl;}).forEach(function(r){evtY[r.y]=true;});
+  mkChart('ch-vol-f','line',{labels:pyrs,datasets:[{data:pvbs,borderColor:'#2C5F2E',backgroundColor:'#2C5F2E11',fill:true,tension:.35,borderWidth:2,
+    pointRadius:proj.map(function(r){return evtY[r.y]?5:2;}),pointBackgroundColor:proj.map(function(r){return r.lbl==='CF'?'#3B6D11':evtY[r.y]?'#D97706':'#2C5F2E';})}]},
+    {x:{ticks:{font:{size:9}}},y:{ticks:{font:{size:9},callback:function(v){return v+' m³';}},min:50}},false);
 }
 
 // ═══════════════════════════════════════════════════
@@ -2757,6 +2800,11 @@ function update() {
   S.cuid=get('cuid',300000); S.elec=get('elec',20000);
   S.imp=get('imp',150000); S.otros=get('otros',0); S.cral=get('cral',1000);
   S.mo=get('mo',80000); S.mat=get('mat',50000);
+  // Inversión inicial y gastos fijos nuevos
+  S.arboles=get('arboles',1687); S.nArboles=get('nArboles',1875);
+  S.eqMotoguadana=get('eqMotoguadana',461765); S.eqMotosierra=get('eqMotosierra',413288); S.eqProteccion=get('eqProteccion',50000);
+  S.gasolina=get('gasolina',0); S.aceite=get('aceite',0); S.agua=get('agua',0);
+  S.cosechaYear=get('cosechaYear',15);
 
   // Update labels
   L('tasa-l',S.tasa+'%'); L('infl-l',S.infl+'%');
@@ -2766,6 +2814,12 @@ function update() {
   L('imp-l','₡'+Math.round(S.imp/1000)+'k'); L('otros-l','₡'+Math.round(S.otros/1000)+'k');
   L('cral-l','₡'+S.cral.toLocaleString());
   L('mo-l','₡'+Math.round(S.mo/1000)+'k'); L('mat-l','₡'+Math.round(S.mat/1000)+'k');
+  L('arboles-l','$'+S.arboles.toLocaleString()); L('nArboles-l',S.nArboles.toLocaleString());
+  L('eqMotoguadana-l','₡'+Math.round(S.eqMotoguadana/1000)+'k');
+  L('eqMotosierra-l','₡'+Math.round(S.eqMotosierra/1000)+'k');
+  L('eqProteccion-l','₡'+Math.round(S.eqProteccion/1000)+'k');
+  L('gasolina-l','₡'+Math.round(S.gasolina/1000)+'k'); L('aceite-l','₡'+Math.round(S.aceite/1000)+'k'); L('agua-l','₡'+Math.round(S.agua/1000)+'k');
+  L('cosechaYear-l',S.cosechaYear);
 
   renderCurrentTab();
 }
