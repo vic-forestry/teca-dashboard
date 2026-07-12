@@ -63,9 +63,10 @@ input[type=range]::-moz-range-track{height:5px;background:#d8d2c4;border-radius:
 .ipt:focus{outline:none;border-color:var(--teca)}
 .sel{width:100%;background:#fff;border:1px solid var(--border);color:var(--text);border-radius:5px;padding:5px 8px;font-size:12px;font-family:var(--sans)}
 .sel option{background:#1e4620}
-.tog{display:flex;gap:3px}
-.tog button{flex:1;padding:5px 3px;font-size:11px;border-radius:4px;cursor:pointer;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);color:rgba(255,255,255,.55);font-family:var(--sans);transition:all .15s}
-.tog button.active{background:var(--gold);border-color:var(--gold);color:#fff;font-weight:600}
+.tog{display:flex;gap:4px}
+.tog button{flex:1;padding:7px 5px;font-size:12px;border-radius:5px;cursor:pointer;border:1px solid var(--border);background:#fff;color:var(--muted);font-family:var(--sans);transition:all .15s}
+.tog button:hover{border-color:var(--teca);color:var(--teca)}
+.tog button.active{background:var(--teca);border-color:var(--teca);color:#fff;font-weight:600}
 .chk-row{display:flex;align-items:center;gap:7px;margin-bottom:7px}
 .chk-row input[type=checkbox]{width:13px;height:13px;accent-color:var(--gold);flex-shrink:0}
 .chk-row label{font-size:11px;color:rgba(255,255,255,.7);cursor:pointer}
@@ -392,18 +393,16 @@ tbody tr:hover{background:var(--teca-lt)}
 
       <!-- ══ 1. ESTRUCTURA DE COSTOS ══ -->
       <div class="sl">1 · Estructura de costos</div>
-      <div class="g2">
-        <div class="card">
-          <div class="ctitle">Inversión inicial (año 0)</div>
-          <div class="ctrl"><div class="clbl">Compra de árboles (USD) <span class="cval" id="arboles-l">$1,687</span></div><input type="range" id="arboles" min="0" max="5000" step="1" value="1687" oninput="update()"></div>
-          <div class="ctrl"><div class="clbl">N° árboles plantados <span class="cval" id="nArboles-l">1,875</span></div><input type="range" id="nArboles" min="500" max="3000" step="25" value="1875" oninput="update()"></div>
-          <div class="ctrl"><div class="clbl">Motoguadaña (₡) <span class="cval" id="eqMotoguadana-l">₡462k</span></div><input type="range" id="eqMotoguadana" min="0" max="1000000" step="1000" value="461765" oninput="update()"></div>
-          <div class="ctrl"><div class="clbl">Motosierras ×2 (₡) <span class="cval" id="eqMotosierra-l">₡413k</span></div><input type="range" id="eqMotosierra" min="0" max="1000000" step="1000" value="413288" oninput="update()"></div>
-          <div class="ctrl"><div class="clbl">Equipo protección (₡) <span class="cval" id="eqProteccion-l">₡50k</span></div><input type="range" id="eqProteccion" min="0" max="300000" step="5000" value="50000" oninput="update()"></div>
-          <div class="csub" id="inv0-sub"></div>
-        </div>
-        <div class="card">
-          <div class="ctitle">Gastos fijos anuales</div>
+
+      <div class="card" style="margin-bottom:10px">
+        <div class="ctitle">Inversión inicial (año 0) — fija</div>
+        <div id="inv0-box" style="margin-top:8px"></div>
+      </div>
+
+      <div class="card">
+        <div class="ctitle">Gastos fijos anuales</div>
+        <div class="csub">Corren desde el año 0 hasta la cosecha. Ajustá los valores reales.</div>
+        <div style="margin-top:10px">
           <div class="ctrl"><div class="clbl">Cuidador (Hilario) ₡/mes <span class="cval" id="cuid-l">₡300k</span></div><input type="range" id="cuid" min="100000" max="700000" step="25000" value="300000" oninput="update()"></div>
           <div class="ctrl"><div class="clbl">Electricidad ₡/mes <span class="cval" id="elec-l">₡20k</span></div><input type="range" id="elec" min="0" max="100000" step="5000" value="20000" oninput="update()"></div>
           <div class="ctrl"><div class="clbl">Gasolina ₡/mes <span class="cval" id="gasolina-l">₡0</span></div><input type="range" id="gasolina" min="0" max="150000" step="5000" value="0" oninput="update()"></div>
@@ -412,8 +411,8 @@ tbody tr:hover{background:var(--teca-lt)}
           <div class="ctrl"><div class="clbl">Imp. municipales ₡/año <span class="cval" id="imp-l">₡150k</span></div><input type="range" id="imp" min="0" max="500000" step="25000" value="150000" oninput="update()"></div>
           <div class="ctrl"><div class="clbl">Otros ₡/año <span class="cval" id="otros-l">₡0</span></div><input type="range" id="otros" min="0" max="1000000" step="50000" value="0" oninput="update()"></div>
           <div class="ctrl"><div class="clbl">Costo por raleo ₡/árbol <span class="cval" id="cral-l">₡1,000</span></div><input type="range" id="cral" min="500" max="2500" step="100" value="1000" oninput="update()"></div>
-          <div class="csub" id="gfijo-sub"></div>
         </div>
+        <div class="csub" id="gfijo-sub" style="margin-top:6px"></div>
       </div>
 
       <!-- ══ 2. ESTRUCTURA DE INGRESOS ══ -->
@@ -446,13 +445,15 @@ tbody tr:hover{background:var(--teca-lt)}
       <!-- ══ 3. TABLA AÑO A AÑO ══ -->
       <div class="sl">3 · Flujo de caja — vida completa de la plantación</div>
       <div class="card" style="margin-bottom:10px">
-        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-          <span style="font-size:12px;color:var(--muted)">Tasa de descuento:</span>
-          <input type="range" id="tasa" min="3" max="20" step="0.5" value="8" oninput="update()" style="flex:1;max-width:240px">
-          <span class="cval" id="tasa-l" style="font-size:14px">8%</span>
-          <span style="font-size:12px;color:var(--muted);margin-left:16px">Inflación USD/año:</span>
-          <input type="range" id="infl" min="0" max="8" step="0.5" value="2" oninput="update()" style="flex:1;max-width:160px">
-          <span class="cval" id="infl-l">2%</span>
+        <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+          <label style="font-size:13px;color:var(--text);display:flex;align-items:center;gap:8px">
+            Tasa de descuento (%):
+            <input type="number" id="tasa" min="0" max="30" step="0.5" value="8" oninput="update()" class="ipt" style="width:80px">
+          </label>
+          <label style="font-size:13px;color:var(--text);display:flex;align-items:center;gap:8px">
+            Inflación USD/año (%):
+            <input type="number" id="infl" min="0" max="15" step="0.5" value="2" oninput="update()" class="ipt" style="width:80px">
+          </label>
         </div>
       </div>
       <div class="ks" id="fin-kpis"></div>
@@ -1744,8 +1745,17 @@ function renderFinTab() {
   var rows = cf.rows;
 
   // Sub-textos informativos
-  var inv0=document.getElementById('inv0-sub');
-  if(inv0) inv0.innerHTML='Árboles: <b>'+fU(cf.invArbolesU)+'</b> + equipos: <b>'+fU(cf.invEquipoU)+'</b> = <b>'+fU(cf.inv0U)+'</b> en año 0.';
+  var inv0=document.getElementById('inv0-box');
+  if(inv0){
+    var eqCrc=S.eqMotoguadana+S.eqMotosierra+S.eqProteccion;
+    inv0.innerHTML=
+      '<div class="frow"><span class="fk">Compra de árboles ('+S.nArboles.toLocaleString()+' árb)</span><span class="fv">'+fU(cf.invArbolesU)+'</span></div>' +
+      '<div class="frow"><span class="fk">Motoguadaña</span><span class="fv">'+fC(S.eqMotoguadana)+'</span></div>' +
+      '<div class="frow"><span class="fk">Motosierras ×2</span><span class="fv">'+fC(S.eqMotosierra)+'</span></div>' +
+      '<div class="frow"><span class="fk">Equipo de protección</span><span class="fv">'+fC(S.eqProteccion)+'</span></div>' +
+      '<div class="frow"><span class="fk">Subtotal equipos</span><span class="fv">'+fC(eqCrc)+' ≈ '+fU(cf.invEquipoU)+'</span></div>' +
+      '<div class="ftot"><span style="font-size:12px;font-weight:600">Total inversión inicial</span><span class="ftv" style="color:var(--teca)">'+fU(cf.inv0U)+'</span></div>';
+  }
   var gf=document.getElementById('gfijo-sub');
   if(gf) gf.innerHTML='Total fijo: <b>'+fC(cf.gastoFijoCrc)+'/año</b> ≈ '+fU(cf.gastoFijoU)+'/año.';
 
@@ -2800,24 +2810,17 @@ function update() {
   S.cuid=get('cuid',300000); S.elec=get('elec',20000);
   S.imp=get('imp',150000); S.otros=get('otros',0); S.cral=get('cral',1000);
   S.mo=get('mo',80000); S.mat=get('mat',50000);
-  // Inversión inicial y gastos fijos nuevos
-  S.arboles=get('arboles',1687); S.nArboles=get('nArboles',1875);
-  S.eqMotoguadana=get('eqMotoguadana',461765); S.eqMotosierra=get('eqMotosierra',413288); S.eqProteccion=get('eqProteccion',50000);
+  // Gastos fijos nuevos (los de inversión inicial son fijos, no se leen de inputs)
   S.gasolina=get('gasolina',0); S.aceite=get('aceite',0); S.agua=get('agua',0);
   S.cosechaYear=get('cosechaYear',15);
 
-  // Update labels
-  L('tasa-l',S.tasa+'%'); L('infl-l',S.infl+'%');
+  // Update labels (tasa e inflación ahora son inputs numéricos, no llevan label aparte)
   L('pexp-l','$'+S.pexp+'/m³'); L('tc-l',S.tc+' ₡/$'); L('pnac-l',S.pnac+' ₡/PMT');
   L('pral-l',S.pral+' ₡/PMT'); L('tc2-l',S.tc2+' ₡/$'); L('ccf-l','$'+S.ccf+'/m³');
   L('cuid-l','₡'+Math.round(S.cuid/1000)+'k'); L('elec-l','₡'+Math.round(S.elec/1000)+'k');
   L('imp-l','₡'+Math.round(S.imp/1000)+'k'); L('otros-l','₡'+Math.round(S.otros/1000)+'k');
   L('cral-l','₡'+S.cral.toLocaleString());
   L('mo-l','₡'+Math.round(S.mo/1000)+'k'); L('mat-l','₡'+Math.round(S.mat/1000)+'k');
-  L('arboles-l','$'+S.arboles.toLocaleString()); L('nArboles-l',S.nArboles.toLocaleString());
-  L('eqMotoguadana-l','₡'+Math.round(S.eqMotoguadana/1000)+'k');
-  L('eqMotosierra-l','₡'+Math.round(S.eqMotosierra/1000)+'k');
-  L('eqProteccion-l','₡'+Math.round(S.eqProteccion/1000)+'k');
   L('gasolina-l','₡'+Math.round(S.gasolina/1000)+'k'); L('aceite-l','₡'+Math.round(S.aceite/1000)+'k'); L('agua-l','₡'+Math.round(S.agua/1000)+'k');
   L('cosechaYear-l',S.cosechaYear);
 
