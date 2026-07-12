@@ -859,6 +859,18 @@ let sortCol = 3, sortDir = 1;
 let treeRows = [];
 let currentTab = 0;
 // Factory de casa con parámetros de diseño completos (metros)
+// Catálogo de tipos de ambiente
+var AMB_TIPOS = {
+  sala:    {label:'Sala',    color:'#DCE7D8', techo:true,  pared:true},
+  cuarto:  {label:'Cuarto',  color:'#E8DFC8', techo:true,  pared:true},
+  bano:    {label:'Baño',    color:'#CFE0EC', techo:true,  pared:true},
+  cocina:  {label:'Cocina',  color:'#F0E0D0', techo:true,  pared:true},
+  comedor: {label:'Comedor', color:'#E4E0CE', techo:true,  pared:true},
+  pasillo: {label:'Pasillo', color:'#C8A87A', techo:true,  pared:false},
+  deck:    {label:'Deck',    color:'#8FB43E', techo:false, pared:false},
+  closet:  {label:'Closet',  color:'#DED6E0', techo:true,  pared:true}
+};
+
 function nuevaCasa() {
   return {
     nombre:'Casa',
@@ -868,15 +880,17 @@ function nuevaCasa() {
     postSize:15,                                      // cm poste
     artesonados:9,                                    // pares de vigas de artesonado
     aleroFrente:0.6, aleroAtras:0.6, aleroIzq:0.6, aleroDer:0.6, // m
-    // Ambientes: rect en coords relativas de la planta (0..1 de largo/ancho)
+    mostrarEstructura:true,                            // ver postes/vigas en planta
+    // Elementos en coordenadas absolutas (metros). Pueden salirse del rect base (deck/pasillo)
     ambientes:[
-      {tipo:'sala',   x:0.0, y:0.0, w:0.55, h:1.0, color:'#DCE7D8'},
-      {tipo:'cuarto', x:0.55,y:0.0, w:0.45, h:0.55,color:'#E8DFC8'},
-      {tipo:'baño',   x:0.55,y:0.55,w:0.45, h:0.45,color:'#CFE0EC'}
+      {tipo:'sala',   mx:0,   my:0,   mw:4.4, mh:5},
+      {tipo:'cuarto', mx:4.4, my:0,   mw:3.6, mh:2.75},
+      {tipo:'bano',   mx:4.4, my:2.75,mw:3.6, mh:2.25},
+      {tipo:'deck',   mx:0,   my:-2.5,mw:8,   mh:2.5},
+      {tipo:'pasillo',mx:8,   my:0,   mw:1.2, mh:5}
     ],
-    // Deck y pasillo: lado ('frente','atras','izq','der','none') y profundidad m
-    deckLado:'frente', deckProf:2.5,
-    pasilloLado:'der', pasilloProf:1.2
+    // Postes: posiciones en metros (editables). Si null, se autogeneran en esquinas + grilla
+    postes:null
   };
 }
 
@@ -1873,39 +1887,49 @@ var PMT_M3 = 0.002360;
 
 function casaAct() { return S.casas[S.casaActiva] || S.casas[0]; }
 
+// Genera posiciones de postes (metros) — esquinas + grilla según artesonados
+function postesCasa(c) {
+  if (c.postes && c.postes.length) return c.postes;
+  var pts=[];
+  var nx = Math.max(2, Math.round(c.largo/2.5));  // columnas a lo largo
+  var ny = Math.max(2, Math.round(c.ancho/2.5));  // filas a lo ancho
+  for (var i=0;i<=nx;i++) for (var j=0;j<=ny;j++){
+    // solo perímetro + una fila central si el ancho es grande
+    var borde = (i===0||i===nx||j===0||j===ny);
+    var central = (ny>=2 && j===Math.round(ny/2) && (i%2===0));
+    if (borde||central) pts.push({mx:(c.largo/nx)*i, my:(c.ancho/ny)*j});
+  }
+  return pts;
+}
+
 // ── Cálculo de madera por componente (m³ aserrada) ──
 function maderaCasa(c) {
   var largo=c.largo, ancho=c.ancho, alto=c.altoPared, pend=c.pendiente/100;
   var gPared=c.grosorPared/100, gPiso=c.grosorPiso/100;
   var vW=c.vigaW/100, vH=c.vigaH/100, pS=c.postSize/100;
-  // Postes: 4 esquinas + fila central (según artesonados/2, mínimo 2)
-  var nPostes = 4 + Math.max(2, Math.round(c.artesonados/3));
+
+  var postes = postesCasa(c);
+  var nPostes = postes.length;
   var volPostes = nPostes*pS*pS*alto;
-  // Solera perimetral
   var perim = 2*(largo+ancho);
   var volSolera = perim*vW*vH;
-  // Vigas de techo / artesonado (pares sobre la vertiente)
   var vertiente = Math.sqrt(Math.pow(ancho/2,2)+Math.pow((ancho/2)*pend,2));
   var volArtes = c.artesonados*2*vertiente*vW*vH;
-  // Piso (tabla)
   var areaBase = largo*ancho;
   var volPiso = areaBase*gPiso;
-  // Paredes (tabla) — descuenta ~15% por aberturas
+
+  // Áreas de deck/pasillo/otros desde los elementos
+  var deckArea=0, pasArea=0, extraPisoArea=0;
+  (c.ambientes||[]).forEach(function(a){
+    var area=a.mw*a.mh;
+    if (a.tipo==='deck') deckArea+=area;
+    else if (a.tipo==='pasillo') pasArea+=area;
+  });
+  // Paredes: perímetro de la casa base (los ambientes con pared no suman perímetro exterior extra aquí)
   var volPared = perim*alto*gPared*0.85;
-  // Deck
-  var deckArea = 0, volDeck = 0;
-  if (c.deckLado!=='none') {
-    var lado = (c.deckLado==='frente'||c.deckLado==='atras') ? largo : ancho;
-    deckArea = lado*c.deckProf;
-    volDeck = deckArea*gPiso;
-  }
-  // Pasillo
-  var pasArea = 0, volPas = 0;
-  if (c.pasilloLado!=='none') {
-    var ladoP = (c.pasilloLado==='frente'||c.pasilloLado==='atras') ? largo : ancho;
-    pasArea = ladoP*c.pasilloProf;
-    volPas = pasArea*gPiso;
-  }
+  var volDeck = deckArea*gPiso;
+  var volPas = pasArea*gPiso;
+
   var comps = [
     {n:'Postes ('+nPostes+')', v:volPostes},
     {n:'Solera perimetral', v:volSolera},
@@ -1958,89 +1982,134 @@ function renderCasaParams(c) {
     return '<div class="cx-ctrl"><label>'+label+'</label><select onchange="setCasa(\''+key+'\',this.value)" style="width:100%">'+
       opts.map(function(o){ return '<option value="'+o[0]+'"'+(c[key]===o[0]?' selected':'')+'>'+o[1]+'</option>'; }).join('')+'</select></div>';
   }
+  // Lista de ambientes con tipo y botón quitar
+  var tiposOpts=Object.keys(AMB_TIPOS);
+  var ambList=(c.ambientes||[]).map(function(a,i){
+    var selOpts=tiposOpts.map(function(t){ return '<option value="'+t+'"'+(a.tipo===t?' selected':'')+'>'+AMB_TIPOS[t].label+'</option>'; }).join('');
+    return '<div style="display:flex;gap:4px;align-items:center;margin-bottom:4px">'+
+      '<select onchange="setAmbTipo('+i+',this.value)" style="flex:1;font-size:11px;padding:3px">'+selOpts+'</select>'+
+      '<span style="font-size:10px;color:var(--muted);min-width:44px;text-align:right">'+fN(a.mw*a.mh,1)+' m²</span>'+
+      '<button onclick="rmAmb('+i+')" style="border:1px solid var(--border);background:#fff;color:#B91C1C;border-radius:4px;padding:2px 7px;cursor:pointer;font-size:11px">✕</button>'+
+      '</div>';
+  }).join('');
+  var addOpts=tiposOpts.map(function(t){ return '<option value="'+t+'">'+AMB_TIPOS[t].label+'</option>'; }).join('');
+
   el.innerHTML =
     '<div class="cx-ctrl"><label>Nombre</label><input type="text" value="'+(c.nombre||'')+'" oninput="setCasa(\'nombre\',this.value)" style="width:100%"></div>' +
     '<div class="cx-sec">Dimensiones</div>' +
     sld('largo','Largo',4,16,0.5,' m') + sld('ancho','Ancho',3,10,0.5,' m') +
     sld('altoPared','Alto pared',2,4,0.1,' m') + sld('pendiente','Pendiente techo',10,60,5,'%') +
+    '<div class="cx-sec">Ambientes</div>' +
+    '<div style="margin-bottom:6px">'+ambList+'</div>' +
+    '<div style="display:flex;gap:4px"><select id="add-amb-tipo" style="flex:1;font-size:11px;padding:3px">'+addOpts+'</select>'+
+    '<button onclick="addAmb()" style="border:1px solid var(--teca);background:var(--teca);color:#fff;border-radius:4px;padding:3px 10px;cursor:pointer;font-size:11px">+ Agregar</button></div>' +
     '<div class="cx-sec">Estructura (cm)</div>' +
+    '<label style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);margin-bottom:8px"><input type="checkbox" '+(c.mostrarEstructura?'checked':'')+' onchange="setCasa(\'mostrarEstructura\',this.checked)"> Ver postes y vigas en la planta</label>' +
     sld('postSize','Poste (□)',10,25,1,'') + sld('vigaW','Viga ancho',5,20,1,'') + sld('vigaH','Viga alto',10,30,1,'') +
     sld('artesonados','Artesonado (pares)',3,20,1,'') +
+    (c.postes?'<button onclick="resetPostes()" style="border:1px solid var(--border);background:#fff;color:var(--muted);border-radius:4px;padding:3px 8px;cursor:pointer;font-size:10px;margin-top:4px">↺ Reponer postes automáticos</button>':'') +
     '<div class="cx-sec">Tablas (cm)</div>' +
     sld('grosorPared','Grosor pared',1.5,5,0.1,'') + sld('grosorPiso','Grosor piso',2.5,6,0.1,'') +
-    '<div class="cx-sec">Deck</div>' +
-    sel('deckLado','Lado',[['none','Ninguno'],['frente','Frente'],['atras','Atrás'],['izq','Izquierda'],['der','Derecha']]) +
-    (c.deckLado!=='none'?sld('deckProf','Profundidad',1,5,0.5,' m'):'') +
-    '<div class="cx-sec">Pasillo</div>' +
-    sel('pasilloLado','Lado',[['none','Ninguno'],['frente','Frente'],['atras','Atrás'],['izq','Izquierda'],['der','Derecha']]) +
-    (c.pasilloLado!=='none'?sld('pasilloProf','Ancho',0.8,3,0.1,' m'):'') +
     '<div class="cx-sec">Aleros (m)</div>' +
     sld('aleroFrente','Frente',0,2,0.1,'') + sld('aleroAtras','Atrás',0,2,0.1,'') +
     sld('aleroIzq','Izquierda',0,2,0.1,'') + sld('aleroDer','Derecha',0,2,0.1,'');
 }
 
-function setCasa(key,val){ casaAct()[key]=val; renderCasaTab(); if(key==='deckLado'||key==='pasilloLado'){} update0Fin(); }
-function update0Fin(){ /* refrescar financiero por cambios de madera */ }
+function setAmbTipo(i,tipo){ casaAct().ambientes[i].tipo=tipo; renderCasaTab(); }
+function rmAmb(i){ var c=casaAct(); if(c.ambientes.length>1){ c.ambientes.splice(i,1); renderCasaTab(); } }
+function addAmb(){
+  var c=casaAct();
+  var sel=document.getElementById('add-amb-tipo');
+  var tipo=sel?sel.value:'cuarto';
+  // colocar el nuevo ambiente dentro de la casa, tamaño por defecto
+  c.ambientes.push({tipo:tipo, mx:Math.max(0,c.largo/2-1.5), my:Math.max(0,c.ancho/2-1.5), mw:3, mh:3});
+  renderCasaTab();
+}
+function resetPostes(){ casaAct().postes=null; renderCasaTab(); }
 
-// ── PLANTA (SVG con arrastre de ambientes) ──
-var PX = 42; // px por metro base
+function setCasa(key,val){ casaAct()[key]=val; renderCasaTab(); }
+
+// ── PLANTA (SVG con arrastre de todos los elementos + estructura) ──
 function drawPlan(c) {
   var el = document.getElementById('view-plan');
   if (!el) return;
-  var scale = Math.min(PX, 520/Math.max(c.largo,c.ancho));
-  var W=c.largo*scale, H=c.ancho*scale, pad=40;
-  var svgW=W+pad*2, svgH=H+pad*2;
-  var s='<svg viewBox="0 0 '+svgW+' '+svgH+'" style="max-width:100%;height:auto;font-family:sans-serif;touch-action:none;user-select:none" id="plan-svg">';
-  // Deck / pasillo (fondo)
-  s += planExtra(c, scale, pad, W, H);
-  // Contorno casa
-  s += '<rect x="'+pad+'" y="'+pad+'" width="'+W+'" height="'+H+'" fill="#fff" stroke="#2C5F2E" stroke-width="2"/>';
-  // Ambientes (con IDs estables para actualización en vivo)
-  c.ambientes.forEach(function(a,i){
-    var ax=pad+a.x*W, ay=pad+a.y*H, aw=a.w*W, ah=a.h*H;
-    s += '<g class="amb-rect" data-i="'+i+'">'+
-      '<rect id="amb-r-'+i+'" x="'+ax+'" y="'+ay+'" width="'+aw+'" height="'+ah+'" fill="'+a.color+'" stroke="#8a7a5a" stroke-width="1.5" opacity="0.9"/>'+
-      '<text id="amb-t1-'+i+'" x="'+(ax+aw/2)+'" y="'+(ay+ah/2)+'" text-anchor="middle" font-size="11" fill="#3a3a3a" pointer-events="none">'+a.tipo+'</text>'+
-      '<text id="amb-t2-'+i+'" x="'+(ax+aw/2)+'" y="'+(ay+ah/2+13)+'" text-anchor="middle" font-size="9" fill="#777" pointer-events="none">'+fN(a.w*c.largo*a.h*c.ancho,1)+' m²</text>'+
-      '<rect class="amb-handle" data-i="'+i+'" id="amb-h-'+i+'" x="'+(ax+aw-9)+'" y="'+(ay+ah-9)+'" width="11" height="11" fill="#2C5F2E" stroke="#fff" stroke-width="1"/></g>';
+
+  // Bounding box en metros (casa + todos los elementos)
+  var minX=0, minY=0, maxX=c.largo, maxY=c.ancho;
+  (c.ambientes||[]).forEach(function(a){
+    minX=Math.min(minX,a.mx); minY=Math.min(minY,a.my);
+    maxX=Math.max(maxX,a.mx+a.mw); maxY=Math.max(maxY,a.my+a.mh);
   });
+  var spanX=maxX-minX, spanY=maxY-minY;
+  var pad=34;
+  var scale=Math.min(540/spanX, 420/spanY, 46);
+  var svgW=spanX*scale+pad*2, svgH=spanY*scale+pad*2;
+  // Función metros→px
+  function PXx(mx){ return pad+(mx-minX)*scale; }
+  function PXy(my){ return pad+(my-minY)*scale; }
+
+  var s='<svg viewBox="0 0 '+svgW+' '+svgH+'" style="max-width:100%;height:auto;font-family:sans-serif;touch-action:none;user-select:none" id="plan-svg">';
+
+  // Elementos (deck/pasillo detrás, luego ambientes con techo)
+  var orden=(c.ambientes||[]).map(function(a,i){return {a:a,i:i};});
+  orden.sort(function(p,q){ var r=function(t){return (t==='deck'||t==='pasillo')?0:1;}; return r(p.a.tipo)-r(q.a.tipo); });
+  orden.forEach(function(o){
+    var a=o.a, i=o.i, def=AMB_TIPOS[a.tipo]||{label:a.tipo,color:'#ddd'};
+    var ax=PXx(a.mx), ay=PXy(a.my), aw=a.mw*scale, ah=a.mh*scale;
+    s+='<g class="amb-rect" data-i="'+i+'">'+
+      '<rect id="amb-r-'+i+'" x="'+ax+'" y="'+ay+'" width="'+aw+'" height="'+ah+'" fill="'+def.color+'" stroke="#8a7a5a" stroke-width="1.2" opacity="0.9" rx="2"/>'+
+      '<text id="amb-t1-'+i+'" x="'+(ax+aw/2)+'" y="'+(ay+ah/2-2)+'" text-anchor="middle" font-size="11" fill="#3a3a3a" pointer-events="none">'+def.label+'</text>'+
+      '<text id="amb-t2-'+i+'" x="'+(ax+aw/2)+'" y="'+(ay+ah/2+11)+'" text-anchor="middle" font-size="9" fill="#777" pointer-events="none">'+fN(a.mw*a.mh,1)+' m²</text>'+
+      '<rect class="amb-handle" data-i="'+i+'" id="amb-h-'+i+'" x="'+(ax+aw-9)+'" y="'+(ay+ah-9)+'" width="11" height="11" fill="#2C5F2E" stroke="#fff" stroke-width="1" rx="1"/></g>';
+  });
+
+  // Contorno de la casa base
+  s+='<rect x="'+PXx(0)+'" y="'+PXy(0)+'" width="'+(c.largo*scale)+'" height="'+(c.ancho*scale)+'" fill="none" stroke="#2C5F2E" stroke-width="2.5"/>';
+
+  // Estructura: postes y solera (si mostrarEstructura)
+  if (c.mostrarEstructura) {
+    var postes=postesCasa(c);
+    postes.forEach(function(p,pi){
+      var px=PXx(p.mx), py=PXy(p.my);
+      s+='<rect class="post-h" data-p="'+pi+'" id="post-'+pi+'" x="'+(px-5)+'" y="'+(py-5)+'" width="10" height="10" fill="#5a3a1a" stroke="#fff" stroke-width="1"/>';
+    });
+    // vigas de artesonado (líneas a lo ancho, indicativas)
+    var nA=c.artesonados;
+    for (var k=1;k<nA;k++){
+      var vx=PXx((c.largo/nA)*k);
+      s+='<line x1="'+vx+'" y1="'+PXy(0)+'" x2="'+vx+'" y2="'+PXy(c.ancho)+'" stroke="#B45309" stroke-width="1" stroke-dasharray="3,3" opacity="0.55" pointer-events="none"/>';
+    }
+  }
+
   // Cotas
-  s += '<text x="'+(pad+W/2)+'" y="'+(pad-12)+'" text-anchor="middle" font-size="11" fill="#555" pointer-events="none">'+c.largo+' m</text>';
-  s += '<text x="'+(pad-14)+'" y="'+(pad+H/2)+'" text-anchor="middle" font-size="11" fill="#555" pointer-events="none" transform="rotate(-90 '+(pad-14)+' '+(pad+H/2)+')">'+c.ancho+' m</text>';
-  s += '</svg>';
-  el.innerHTML = s;
-  // Guardar geometría para el manejador de arrastre global
-  planGeo = {scale:scale, W:W, H:H, pad:pad, c:c};
+  s+='<text x="'+PXx(c.largo/2)+'" y="'+(PXy(0)-8)+'" text-anchor="middle" font-size="11" fill="#555" pointer-events="none">'+c.largo+' m</text>';
+  s+='<text x="'+(PXx(0)-10)+'" y="'+PXy(c.ancho/2)+'" text-anchor="middle" font-size="11" fill="#555" pointer-events="none" transform="rotate(-90 '+(PXx(0)-10)+' '+PXy(c.ancho/2)+')">'+c.ancho+' m</text>';
+  s+='</svg>';
+  el.innerHTML=s;
+
+  planGeo={scale:scale, minX:minX, minY:minY, pad:pad, c:c, PXx:PXx, PXy:PXy};
 }
 
-// Actualiza en vivo las posiciones SVG del ambiente i sin redibujar todo
+// Actualiza en vivo un elemento sin redibujar
 function updateAmbSvg(i) {
   var g=planGeo; if(!g) return;
   var a=g.c.ambientes[i];
-  var ax=g.pad+a.x*g.W, ay=g.pad+a.y*g.H, aw=a.w*g.W, ah=a.h*g.H;
+  var ax=g.PXx(a.mx), ay=g.PXy(a.my), aw=a.mw*g.scale, ah=a.mh*g.scale;
   var r=document.getElementById('amb-r-'+i);
   var t1=document.getElementById('amb-t1-'+i), t2=document.getElementById('amb-t2-'+i);
   var h=document.getElementById('amb-h-'+i);
   if(r){ r.setAttribute('x',ax); r.setAttribute('y',ay); r.setAttribute('width',aw); r.setAttribute('height',ah); }
-  if(t1){ t1.setAttribute('x',ax+aw/2); t1.setAttribute('y',ay+ah/2); }
-  if(t2){ t2.setAttribute('x',ax+aw/2); t2.setAttribute('y',ay+ah/2+13); t2.textContent=fN(a.w*g.c.largo*a.h*g.c.ancho,1)+' m²'; }
+  if(t1){ t1.setAttribute('x',ax+aw/2); t1.setAttribute('y',ay+ah/2-2); }
+  if(t2){ t2.setAttribute('x',ax+aw/2); t2.setAttribute('y',ay+ah/2+11); t2.textContent=fN(a.mw*a.mh,1)+' m²'; }
   if(h){ h.setAttribute('x',ax+aw-9); h.setAttribute('y',ay+ah-9); }
 }
 
-function planExtra(c, scale, pad, W, H) {
-  var s='';
-  function band(lado, prof, color, label){
-    if (lado==='none'||!prof) return '';
-    var p=prof*scale;
-    if (lado==='frente') return '<rect x="'+pad+'" y="'+(pad-p)+'" width="'+W+'" height="'+p+'" fill="'+color+'" opacity="0.5"/><text x="'+(pad+W/2)+'" y="'+(pad-p/2)+'" text-anchor="middle" font-size="9" fill="#555">'+label+'</text>';
-    if (lado==='atras') return '<rect x="'+pad+'" y="'+(pad+H)+'" width="'+W+'" height="'+p+'" fill="'+color+'" opacity="0.5"/><text x="'+(pad+W/2)+'" y="'+(pad+H+p/2)+'" text-anchor="middle" font-size="9" fill="#555">'+label+'</text>';
-    if (lado==='izq') return '<rect x="'+(pad-p)+'" y="'+pad+'" width="'+p+'" height="'+H+'" fill="'+color+'" opacity="0.5"/>';
-    if (lado==='der') return '<rect x="'+(pad+W)+'" y="'+pad+'" width="'+p+'" height="'+H+'" fill="'+color+'" opacity="0.5"/>';
-    return '';
-  }
-  s += band(c.deckLado, c.deckProf, '#8FB43E', 'deck');
-  s += band(c.pasilloLado, c.pasilloProf, '#C8A87A', 'pasillo');
-  return s;
+// Actualiza en vivo un poste
+function updatePostSvg(pi) {
+  var g=planGeo; if(!g) return;
+  var p=postesCasa(g.c)[pi];
+  var el=document.getElementById('post-'+pi);
+  if(el){ el.setAttribute('x',g.PXx(p.mx)-5); el.setAttribute('y',g.PXy(p.my)-5); }
 }
 
 // Estado y geometría del arrastre en la planta (a nivel de módulo)
@@ -2063,37 +2132,60 @@ function initPlanDrag() {
   function down(e){
     var svg=document.getElementById('plan-svg'); if(!svg) return;
     if (!svg.contains(e.target)) return;
+    if (!planGeo) return;
+    // ¿Poste?
+    var postEl=e.target.closest('.post-h');
+    if(postEl){
+      var pi=+postEl.getAttribute('data-p');
+      var posts=postesCasa(planGeo.c);
+      // materializar postes si estaban auto (para poder moverlos)
+      if(!planGeo.c.postes) planGeo.c.postes=posts.map(function(p){return {mx:p.mx,my:p.my};});
+      planDrag={kind:'post', pi:pi, start:svgPoint(svg,e), o:{mx:planGeo.c.postes[pi].mx,my:planGeo.c.postes[pi].my}};
+      e.preventDefault(); return;
+    }
     var handleEl=e.target.closest('.amb-handle');
     var rectG=e.target.closest('.amb-rect');
     if(!handleEl && !rectG) return;
-    var isHandle = !!handleEl;
-    var i = +(isHandle?handleEl:rectG).getAttribute('data-i');
-    if (isNaN(i) || !planGeo) return;
+    var isHandle=!!handleEl;
+    var i=+(isHandle?handleEl:rectG).getAttribute('data-i');
+    if(isNaN(i)) return;
     var a=planGeo.c.ambientes[i];
-    planDrag={i:i, handle:isHandle, start:svgPoint(svg,e), amb:{x:a.x,y:a.y,w:a.w,h:a.h}};
+    planDrag={kind:'amb', i:i, handle:isHandle, start:svgPoint(svg,e), o:{mx:a.mx,my:a.my,mw:a.mw,mh:a.mh}};
     e.preventDefault();
   }
   function move(e){
     if(!planDrag || !planGeo) return;
     var svg=document.getElementById('plan-svg'); if(!svg) return;
     var p=svgPoint(svg,e);
-    var a=planGeo.c.ambientes[planDrag.i];
-    var dx=(p.x-planDrag.start.x)/planGeo.W, dy=(p.y-planDrag.start.y)/planGeo.H;
-    if(planDrag.handle){
-      a.w=Math.max(0.12,Math.min(1-planDrag.amb.x, planDrag.amb.w+dx));
-      a.h=Math.max(0.12,Math.min(1-planDrag.amb.y, planDrag.amb.h+dy));
+    var dxm=(p.x-planDrag.start.x)/planGeo.scale;   // delta en metros
+    var dym=(p.y-planDrag.start.y)/planGeo.scale;
+    if(planDrag.kind==='post'){
+      var pt=planGeo.c.postes[planDrag.pi];
+      pt.mx=Math.round((planDrag.o.mx+dxm)*20)/20;
+      pt.my=Math.round((planDrag.o.my+dym)*20)/20;
+      updatePostSvg(planDrag.pi);
     } else {
-      a.x=Math.max(0,Math.min(1-planDrag.amb.w, planDrag.amb.x+dx));
-      a.y=Math.max(0,Math.min(1-planDrag.amb.h, planDrag.amb.y+dy));
+      var a=planGeo.c.ambientes[planDrag.i];
+      if(planDrag.handle){
+        a.mw=Math.max(0.5, Math.round((planDrag.o.mw+dxm)*10)/10);
+        a.mh=Math.max(0.5, Math.round((planDrag.o.mh+dym)*10)/10);
+      } else {
+        a.mx=Math.round((planDrag.o.mx+dxm)*10)/10;
+        a.my=Math.round((planDrag.o.my+dym)*10)/10;
+      }
+      updateAmbSvg(planDrag.i);
     }
-    updateAmbSvg(planDrag.i);
     e.preventDefault();
   }
   function up(){
     if(planDrag){
+      var wasPost=(planDrag.kind==='post');
       planDrag=null;
-      // Redibujar tabla de madera y KPIs una vez al soltar
-      if(planGeo){ renderMaderaTable(planGeo.c); renderCasaKpis(planGeo.c); }
+      if(planGeo){
+        renderMaderaTable(planGeo.c); renderCasaKpis(planGeo.c);
+        // Si se movió un elemento fuera del bounding box, redibujar para reajustar escala
+        if(!wasPost) drawPlan(planGeo.c);
+      }
     }
   }
   document.addEventListener('mousedown',down);
