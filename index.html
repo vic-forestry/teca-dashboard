@@ -399,20 +399,28 @@ tbody tr:hover{background:var(--teca-lt)}
         <div id="inv0-box" style="margin-top:8px"></div>
       </div>
 
-      <div class="card">
-        <div class="ctitle">Gastos fijos anuales</div>
-        <div class="csub">Corren desde el año 0 hasta la cosecha. Ajustá los valores reales.</div>
+      <div class="card" style="margin-bottom:10px">
+        <div class="ctitle">Costos fijos anuales</div>
+        <div class="csub">Corren todos los años, desde el año 0 hasta la cosecha.</div>
         <div style="margin-top:10px">
           <div class="ctrl"><div class="clbl">Cuidador (Hilario) ₡/mes <span class="cval" id="cuid-l">₡300k</span></div><input type="range" id="cuid" min="100000" max="700000" step="25000" value="300000" oninput="update()"></div>
           <div class="ctrl"><div class="clbl">Electricidad ₡/mes <span class="cval" id="elec-l">₡20k</span></div><input type="range" id="elec" min="0" max="100000" step="5000" value="20000" oninput="update()"></div>
-          <div class="ctrl"><div class="clbl">Gasolina ₡/mes <span class="cval" id="gasolina-l">₡0</span></div><input type="range" id="gasolina" min="0" max="150000" step="5000" value="0" oninput="update()"></div>
-          <div class="ctrl"><div class="clbl">Aceite ₡/mes <span class="cval" id="aceite-l">₡0</span></div><input type="range" id="aceite" min="0" max="60000" step="2500" value="0" oninput="update()"></div>
           <div class="ctrl"><div class="clbl">Agua ₡/mes <span class="cval" id="agua-l">₡0</span></div><input type="range" id="agua" min="0" max="60000" step="2500" value="0" oninput="update()"></div>
           <div class="ctrl"><div class="clbl">Imp. municipales ₡/año <span class="cval" id="imp-l">₡150k</span></div><input type="range" id="imp" min="0" max="500000" step="25000" value="150000" oninput="update()"></div>
           <div class="ctrl"><div class="clbl">Otros ₡/año <span class="cval" id="otros-l">₡0</span></div><input type="range" id="otros" min="0" max="1000000" step="50000" value="0" oninput="update()"></div>
-          <div class="ctrl"><div class="clbl">Costo por raleo ₡/árbol <span class="cval" id="cral-l">₡1,000</span></div><input type="range" id="cral" min="500" max="2500" step="100" value="1000" oninput="update()"></div>
         </div>
         <div class="csub" id="gfijo-sub" style="margin-top:6px"></div>
+      </div>
+
+      <div class="card">
+        <div class="ctitle">Costos de silvicultura (por evento)</div>
+        <div class="csub">Solo se aplican en los años de raleo y cosecha. Gasolina, aceite y mano de obra de corta se calculan por árbol o por m³ procesado.</div>
+        <div style="margin-top:10px">
+          <div class="ctrl"><div class="clbl">Gasolina + aceite ₡/árbol <span class="cval" id="silvGasolinaArb-l">₡200</span></div><input type="range" id="silvGasolinaArb" min="0" max="1000" step="25" value="200" oninput="update()"></div>
+          <div class="ctrl"><div class="clbl">Mano de obra corta ₡/árbol <span class="cval" id="silvMOArb-l">₡800</span></div><input type="range" id="silvMOArb" min="0" max="3000" step="50" value="800" oninput="update()"></div>
+          <div class="ctrl"><div class="clbl">Procesamiento cosecha ₡/m³ <span class="cval" id="silvCosechaM3-l">₡8,000</span></div><input type="range" id="silvCosechaM3" min="0" max="30000" step="500" value="8000" oninput="update()"></div>
+        </div>
+        <div class="csub" id="silv-sub" style="margin-top:6px"></div>
       </div>
 
       <!-- ══ 2. ESTRUCTURA DE INGRESOS ══ -->
@@ -885,12 +893,15 @@ let S = {
   boost:20, boost2:20, tasa:8, infl:2,
   pexp:300, tc:520, pnac:200,
   pral:150, tc2:520, ccf:20,
-  cuid:300000, elec:20000, imp:150000, otros:0, cral:1000,
+  cuid:300000, elec:20000, imp:150000, otros:0, agua:0,
+  cral:1000,  // alias compat (silvGasolinaArb+silvMOArb)
   // Inversión inicial (año 0)
   arboles:1687, tcArb:520, nArboles:1875,   // compra árboles en USD, tc para equipos
   eqMotoguadana:461765, eqMotosierra:413288, eqProteccion:50000,
-  // Gastos fijos anuales adicionales (₡)
-  gasolina:0, aceite:0, agua:0,
+  // Costos de silvicultura (por evento de raleo/cosecha, calculados)
+  silvGasolinaArb:200,   // ₡/árbol (gasolina + aceite por árbol)
+  silvMOArb:800,         // ₡/árbol (mano de obra de corta)
+  silvCosechaM3:8000,    // ₡/m³ procesado en cosecha final
   cosechaYear:15,
   mo:80000, mat:50000,
   casas:[ nuevaCasa() ],
@@ -1108,8 +1119,8 @@ function buildCashFlow() {
   var invEquipoU  = (S.eqMotoguadana+S.eqMotosierra+S.eqProteccion)/tcR;
   var inv0U = invArbolesU + invEquipoU;
 
-  // Gasto fijo anual (₡ → USD con tc raleo como referencia operativa)
-  var gastoFijoCrc = (S.cuid+S.elec+S.gasolina+S.aceite+S.agua)*12 + S.imp + S.otros;
+  // Gasto fijo anual (₡ → USD) — ya NO incluye gasolina/aceite (van en silvicultura)
+  var gastoFijoCrc = (S.cuid+S.elec+S.agua)*12 + S.imp + S.otros;
   var gastoFijoU = gastoFijoCrc/tcR;
 
   // Eventos de raleo/cosecha desde la proyección
@@ -1124,9 +1135,14 @@ function buildCashFlow() {
     var yrsInfl = r.y; // inflación desde año 0
     var iF = Math.pow(1+infl, yrsInfl);
     var ingCrc = tot*pCrc*iF;
-    var costoCrc = 0;
-    if (esCF) { if (S.mod==='rollo') costoCrc = tot*S.ccf*tcCF; }
-    else { var nA=Math.round(tot/0.18); costoCrc = nA*S.cral; }
+    // Costos de silvicultura por evento
+    var nA = Math.round(tot/0.18);  // n° árboles del evento (vol/árbol promedio ~0.18 m³)
+    var costoSilvCrc = nA*(S.silvGasolinaArb + S.silvMOArb);   // gasolina+aceite+MO por árbol
+    var costoCrc = costoSilvCrc;
+    if (esCF) {
+      costoCrc += tot*S.silvCosechaM3;                          // procesamiento cosecha ₡/m³
+      if (S.mod==='rollo') costoCrc += tot*S.ccf*tcCF;          // extracción si es rollo en patio
+    }
     evByYear[r.y] = {lbl:r.lbl, vol:tot, ingU:ingCrc/tcE, costoU:costoCrc/tcE, tc:tcE, pCrc:pCrc, esCF:esCF};
   });
 
@@ -1148,8 +1164,11 @@ function buildCashFlow() {
       if (cfRow) {
         var tot=cfRow.ex*HA;
         var iF=Math.pow(1+infl,y);
+        var nAcf=Math.round(tot/0.18);
+        var costoCf = nAcf*(S.silvGasolinaArb+S.silvMOArb) + tot*S.silvCosechaM3;
+        if (S.mod==='rollo') costoCf += tot*S.ccf*tcCF;
         ingU = tot*pcfCrc*iF/tcCF;
-        costoU = (S.mod==='rollo'? tot*S.ccf*tcCF:0)/tcCF;
+        costoU = costoCf/tcCF;
         lbl='Cosecha';
         ev={esCF:true, vol:tot};
       }
@@ -1758,6 +1777,8 @@ function renderFinTab() {
   }
   var gf=document.getElementById('gfijo-sub');
   if(gf) gf.innerHTML='Total fijo: <b>'+fC(cf.gastoFijoCrc)+'/año</b> ≈ '+fU(cf.gastoFijoU)+'/año.';
+  var silv=document.getElementById('silv-sub');
+  if(silv) silv.innerHTML='Por árbol cortado: <b>₡'+(S.silvGasolinaArb+S.silvMOArb).toLocaleString()+'</b> (gasolina+aceite+MO). En cosecha se suma <b>₡'+S.silvCosechaM3.toLocaleString()+'/m³</b> de procesamiento.';
 
   // Totales
   var ingTot=rows.reduce(function(s,r){return s+r.ingU;},0);
@@ -2808,10 +2829,11 @@ function update() {
   S.pexp=get('pexp',300); S.tc=get('tc',520); S.pnac=get('pnac',200);
   S.pral=get('pral',150); S.tc2=get('tc2',520); S.ccf=get('ccf',20);
   S.cuid=get('cuid',300000); S.elec=get('elec',20000);
-  S.imp=get('imp',150000); S.otros=get('otros',0); S.cral=get('cral',1000);
+  S.imp=get('imp',150000); S.otros=get('otros',0); S.agua=get('agua',0);
   S.mo=get('mo',80000); S.mat=get('mat',50000);
-  // Gastos fijos nuevos (los de inversión inicial son fijos, no se leen de inputs)
-  S.gasolina=get('gasolina',0); S.aceite=get('aceite',0); S.agua=get('agua',0);
+  // Costos de silvicultura
+  S.silvGasolinaArb=get('silvGasolinaArb',200); S.silvMOArb=get('silvMOArb',800); S.silvCosechaM3=get('silvCosechaM3',8000);
+  S.cral=S.silvGasolinaArb+S.silvMOArb;  // alias compat
   S.cosechaYear=get('cosechaYear',15);
 
   // Update labels (tasa e inflación ahora son inputs numéricos, no llevan label aparte)
@@ -2819,9 +2841,10 @@ function update() {
   L('pral-l',S.pral+' ₡/PMT'); L('tc2-l',S.tc2+' ₡/$'); L('ccf-l','$'+S.ccf+'/m³');
   L('cuid-l','₡'+Math.round(S.cuid/1000)+'k'); L('elec-l','₡'+Math.round(S.elec/1000)+'k');
   L('imp-l','₡'+Math.round(S.imp/1000)+'k'); L('otros-l','₡'+Math.round(S.otros/1000)+'k');
-  L('cral-l','₡'+S.cral.toLocaleString());
+  L('agua-l','₡'+Math.round(S.agua/1000)+'k');
+  L('silvGasolinaArb-l','₡'+S.silvGasolinaArb.toLocaleString()); L('silvMOArb-l','₡'+S.silvMOArb.toLocaleString());
+  L('silvCosechaM3-l','₡'+S.silvCosechaM3.toLocaleString());
   L('mo-l','₡'+Math.round(S.mo/1000)+'k'); L('mat-l','₡'+Math.round(S.mat/1000)+'k');
-  L('gasolina-l','₡'+Math.round(S.gasolina/1000)+'k'); L('aceite-l','₡'+Math.round(S.aceite/1000)+'k'); L('agua-l','₡'+Math.round(S.agua/1000)+'k');
   L('cosechaYear-l',S.cosechaYear);
 
   renderCurrentTab();
