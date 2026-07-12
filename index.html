@@ -1072,15 +1072,20 @@ function buildProjection() {
   var rvol = raleoVolPerHa();
 
   var rows=[];
-  var cfY = Math.min(S.cosechaYear||15, 15);  // el modelo de crecimiento llega a 15
-  for (var y=5; y<=15; y++) {
-    // volumen en pie/ha finca según proyección (para y>=7); para y<7 usar interpolación simple hacia atrás
+  var cfY = Math.max(S.cosechaYear||15, S.ralYear+1);  // cosecha en el año elegido
+  var endYr = Math.max(15, cfY);
+  for (var y=5; y<=endYr; y++) {
+    // volumen en pie/ha finca según proyección (para y>=7); años 5-6 aproximados
     var idx = y-7;
     var volHa;
     if (idx>=0 && idx<pg.length) {
       volHa = (pg[idx].vol*G.areaHa + pv[idx].vol*V.areaHa)/wTot;
+    } else if (idx<0) {
+      volHa = 91.1 + (y-5)*13; // años 5-6 pre-inv2
     } else {
-      volHa = 91.1 + (y-5)*13; // años 5-6 aproximados (pre-inv2)
+      // más allá del rango calculado: usar el último valor disponible
+      var last=pg.length-1;
+      volHa = (pg[last].vol*G.areaHa + pv[last].vol*V.areaHa)/wTot;
     }
     var ex=0, lbl='';
     if (y===S.ralYear && rvol.r1>0) { ex=Math.round(rvol.r1*10)/10; lbl='R1'; }
@@ -1167,25 +1172,9 @@ function buildCashFlow() {
     if (y===0) { invU = inv0U; lbl='Siembra'; }
     var gU = gastoFijoU;
     var ev = evByYear[y];
-    if (ev && y<=cosechaY) {
+    if (ev) {
       ingU = ev.ingU; costoU = ev.costoU;
       lbl = ev.esCF ? 'Cosecha' : (ev.lbl==='R1'?'Raleo 1':'Raleo 2');
-    }
-    // Si el año de cosecha del usuario difiere del 15 del modelo, la CF cae en cosechaY
-    if (y===cosechaY && !(ev && ev.esCF)) {
-      // Forzar cosecha en el año elegido usando el volumen final del modelo
-      var cfRow = proj.filter(function(r){ return r.lbl==='CF'; })[0];
-      if (cfRow) {
-        var tot=cfRow.ex*HA;
-        var iF=Math.pow(1+infl,y);
-        var nAcf=Math.round(tot/0.18);
-        var costoCf = nAcf*(S.silvGasolinaArb+S.silvMOArb) + tot*S.silvCosechaM3;
-        if (S.mod==='rollo') costoCf += tot*S.ccf*tcCF;
-        ingU = tot*pcfCrc*iF/tcCF;
-        costoU = costoCf/tcCF;
-        lbl='Cosecha';
-        ev={esCF:true, vol:tot};
-      }
     }
     var neto = ingU - costoU - gU - invU;
     var df = Math.pow(1+tasa, y);
@@ -1350,9 +1339,10 @@ function mortAt(edad, decline, mortFixed) {
 function zoneProjectionFull(densViva, intensidad, int2, decline, mortFixed) {
   var bf = 1+S.boost/100, bf2 = 1+S.boost2/100;
   var startYr = Math.round(OBS.edad2);
+  var endYr = Math.max(15, S.cosechaYear||15);
   var dens=densViva, dap=OBS.dap2, br=0, curBoost=1;
   var arr=[];
-  for (var y=startYr; y<=15; y++) {
+  for (var y=startYr; y<=endYr; y++) {
     var edad = OBS.edad2 + (y-startYr);
     if (y>startYr) {
       var icaBase = OBS.icaRef * Math.pow(OBS.edadRef/(y-0.5), OBS.kDecay);
